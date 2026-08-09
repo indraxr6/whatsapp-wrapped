@@ -1,0 +1,101 @@
+@import '@fontsource/space-grotesk/400.css';
+@import '@fontsource/space-grotesk/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/600.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Space Grotesk', sans-serif;
+    background-color: #FAF8F5;
+    color: #000000;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: #FAF8F5;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  /* Reduce motion globally */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Neo-Brutalist card */
+  .nb-card {
+    @apply border-2 border-black shadow-nb bg-white p-6;
+  }
+
+  /* Neo-Brutalist button */
+  .nb-btn {
+    @apply border-2 border-black shadow-nb bg-white px-4 py-2 font-bold uppercase tracking-wider text-sm
+           cursor-pointer transition-all duration-[150ms] ease-linear
+           hover:-translate-y-px
+           active:translate-x-[3px] active:translate-y-[3px] active:shadow-none;
+  }
+
+  .nb-btn-primary {
+    @apply nb-btn bg-black text-white;
+  }
+
+  .nb-btn-accent-blue {
+    @apply nb-btn bg-accent-blue text-white;
+  }
+
+  .nb-btn-accent-lime {
+    @apply nb-btn bg-accent-lime text-black;
+  }
+
+  /* Label/badge — monospace uppercase style */
+  .nb-label {
+    @apply font-mono text-xs font-semibold uppercase tracking-widest border-2 border-black px-2 py-0.5;
+  }
+
+  /* Input */
+  .nb-input {
+    @apply border-2 border-black bg-white px-3 py-2 font-mono text-sm w-full
+           focus:outline-none focus:ring-0 focus:border-accent-blue;
+  }
+
+  /* Section divider */
+  .nb-divider {
+    @apply border-t-2 border-black my-8;
+  }
+
+  /* Stat number — large display */
+  .nb-stat {
+    @apply font-sans font-extrabold text-5xl leading-none tracking-tight;
+  }
+
+  .nb-stat-sm {
+    @apply font-sans font-extrabold text-3xl leading-none tracking-tight;
+  }
+
+  /* Content wrapper for main flow */
+  .content-wrapper {
+    @apply max-w-7xl mx-auto w-full px-6;
+  }
+}

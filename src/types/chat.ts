@@ -1,0 +1,99 @@
+export type MediaType = 'image' | 'video' | 'audio' | 'sticker' | 'gif' | 'document' | 'contactCard' | 'link';
+
+export interface ChatMessage {
+  timestamp: Date;
+  sender: string;
+  content: string;
+  isMedia: boolean;
+  mediaType?: MediaType;
+  isSystem: boolean;
+  isCall?: boolean;
+  callType?: 'voice' | 'video';
+  callDurationSeconds?: number;
+  callOutcome?: 'missed' | 'answered' | 'no-answer';
+  callJoinedCount?: number;
+  isEdited?: boolean;
+}
+
+export interface EmojiCount {
+  emoji: string;
+  count: number;
+}
+
+export interface MonthlyCount {
+  month: string; // e.g. "2025-03"
+  count: number;
+}
+
+export interface EraMetrics {
+  avgResponseTimeMinutes: number;
+  avgMessageLength: number;
+  topEmoji: string | null;
+}
+
+export interface ParsedChatMetrics {
+  totalMessages: number;
+  dateRange: { start: Date; end: Date };
+  participants: string[];
+  messagesPerSender: Record<string, number>;
+  avgResponseTimeMinutes: Record<string, number>;
+  avgMessagesPerBurst: Record<string, number>;
+  doubleTextCounts: Record<string, number>;
+  ghostingInstances: Record<string, number>;
+
+  // Media
+  mediaCounts: Record<string, number>;
+  viewOnceCount: Record<string, number>;
+  editedMessageCount: Record<string, number>;
+  deletedMessageCount: Record<string, number>;
+
+  // Calls
+  callsInitiated: Record<string, number>;
+  callsMissed: Record<string, number>;
+  totalCallDurationSeconds: Record<string, number>;
+  longestCallSeconds: number;
+
+  // Emoji — top 10 per sender (not merged)
+  topEmojisPerSender: Record<string, EmojiCount[]>;
+  emojiLeaderboardPerSender: Record<string, EmojiCount[]>;
+  emojiSpamOutliers: { sender: string; emoji: string; count: number }[];
+
+  // Activity patterns
+  hourlyHeatmap: number[]; // 24-hour distribution
+  longestStreakByDay: number;
+
+  // V2 AI Era Sampling & Keywords
+  sampleExcerpts: {
+    early: string[];
+    median: string[];
+    late: string[];
+  };
+  eraMetrics: {
+    early: EraMetrics;
+    median: EraMetrics;
+    late: EraMetrics;
+  };
+  topKeywords: { word: string; count: number }[];
+
+  // Chat span & pace
+  chatDurationDays: number;
+  avgMessagesPerDay: number;
+
+  // Monthly trend
+  monthlyMessageCounts: MonthlyCount[];
+  peakMonth: MonthlyCount;
+
+  // Media per type
+  mediaLeaderboard: Record<MediaType, number>;
+  mediaLeaderboardPerSender: Record<string, Record<MediaType, number>>;
+}
+
+// V2 Gemini schema — simplified single-paragraph approach
+export interface GeminiInsights {
+  personality_summary: string; // 4-5 sentences merged: archetype + vibe + power balance
+  roast: string;               // 1-2 sentences
+  topics: string[];            // 3-6 topics detected
+  evolution_note: string;      // 1 sentence on how the dynamic changed over time
+}
+
+export type AppView = 'upload' | 'analyzing' | 'results' | 'loading';

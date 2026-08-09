@@ -1,0 +1,447 @@
+import type { ChatMessage, EmojiCount, MediaType, MonthlyCount, ParsedChatMetrics, EraMetrics } from '../types/chat';
+
+const STOP_WORDS = new Set([
+  'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at', 'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she', 'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what', 'so', 'up', 'out', 'if', 'about', 'who', 'get', 'which', 'go', 'me', 'when', 'make', 'can', 'like', 'time', 'no', 'just', 'him', 'know', 'take', 'people', 'into', 'year', 'your', 'good', 'some', 'could', 'them', 'see', 'other', 'than', 'then', 'now', 'look', 'only', 'come', 'its', 'over', 'think', 'also', 'back', 'after', 'use', 'two', 'how', 'our', 'work', 'first', 'well', 'way', 'even', 'new', 'want', 'because', 'any', 'these', 'give', 'day', 'most', 'us',
+  'yang', 'di', 'ke', 'dari', 'dan', 'dengan', 'itu', 'ini', 'untuk', 'pada', 'dalam', 'aku', 'saya', 'kamu', 'dia', 'kita', 'kami', 'mereka', 'bisa', 'ada', 'tidak', 'ya', 'gak', 'ga', 'gk', 'aja', 'sih', 'deh', 'udah', 'dah', 'belum', 'lagi', 'kok', 'banget', 'bgt', 'juga', 'jg', 'kalau', 'kalo', 'kl', 'kayak', 'kyk', 'kan', 'dong', 'punya', 'buat', 'sama', 'sm', 'terus', 'trs', 'nanti', 'ntar', 'sekarang', 'skrg', 'tapi', 'tp', 'atau', 'tau', 'tahu', 'mau', 'enggak', 'nggak', 'ngga', 'biar', 'jadi', 'jd', 'pas', 'lah', 'loh', 'lho', 'tuh', 'nih', 'mah',
+  'wae', 'ae', 'iki', 'iku', 'kuwi', 'kui', 'sing', 'wis', 'wes', 'durung', 'ora', 'ra', 'iso', 'isa', 'arep', 'meh', 'neng', 'ning', 'karo', 'lan', 'nang', 'kanggo', 'kang', 'dadi', 'kowe', 'koe', 'awakmu', 'kulo', 'dalem', 'njenengan', 'panjenengan', 'menyang', 'saka', 'saking',
+  'omitted', 'media', 'https'
+]);
+
+const OVERNIGHT_GAP_MINUTES = 360; // 6 hours — gaps larger than this are excluded from avg latency
+
+// ──────────────────────────────────────────────
+// Emoji extraction using Unicode property escapes
+// ──────────────────────────────────────────────
+const EMOJI_REGEX = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
+
+function extractEmojisFromText(text: string): string[] {
+  return text.match(EMOJI_REGEX) ?? [];
+}
+
+function topN<T extends { count: number }>(arr: T[], n = 10): T[] {
+  return arr.sort((a, b) => b.count - a.count).slice(0, n);
+}
+
+// ──────────────────────────────────────────────
+// Core metrics calculations
+// ──────────────────────────────────────────────
+
+export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
+  const realMessages = messages.filter((m) => m.sender !== 'System' && m.sender !== 'WhatsApp' && m.sender !== 'Meta AI');
+  const contentMessages = realMessages.filter((m) => !m.isMedia && !m.isSystem);
+
+  if (realMessages.length === 0) {
+    throw new Error('No parseable messages found in the export.');
+  }
+
+  const participants = Array.from(
+    new Set(realMessages.map((m) => m.sender))
+  ).filter(Boolean);
+
+  const dateRange = {
+    start: realMessages[0].timestamp,
+    end: realMessages[realMessages.length - 1].timestamp,
+  };
+
+  // ── Chat span & pace ──
+  const chatDurationDays = Math.max(
+    1,
+    Math.ceil(
+      (dateRange.end.getTime() - dateRange.start.getTime()) / 86400000
+    )
+  );
+  const avgMessagesPerDay = parseFloat((realMessages.length / chatDurationDays).toFixed(1));
+
+  // ── Message counts per sender ──
+  const messagesPerSender: Record<string, number> = {};
+  const editedMessageCount: Record<string, number> = {};
+  const deletedMessageCount: Record<string, number> = {};
+  for (const m of realMessages) {
+    if (!m.isCall && !m.isSystem) {
+      messagesPerSender[m.sender] = (messagesPerSender[m.sender] ?? 0) + 1;
+    }
+    // Note: deleted messages are system messages, so they won't count in messagesPerSender.
+    // If you want them to count in messagesPerSender, remove the && !m.isSystem above.
+    if (m.isEdited) {
+      editedMessageCount[m.sender] = (editedMessageCount[m.sender] ?? 0) + 1;
+    }
+    if (m.isSystem && (m.content.toLowerCase().includes('deleted') || m.content.toLowerCase().includes('dihapus'))) {
+      deletedMessageCount[m.sender] = (deletedMessageCount[m.sender] ?? 0) + 1;
+    }
+  }
+
+  // ── Call metrics ──
+  const callsInitiated: Record<string, number> = {};
+  const callsMissed: Record<string, number> = {};
+  const totalCallDurationSeconds: Record<string, number> = {};
+  let longestCallSeconds = 0;
+
+  for (const m of realMessages) {
+    if (m.isCall) {
+      callsInitiated[m.sender] = (callsInitiated[m.sender] ?? 0) + 1;
+      
+      if (m.callOutcome === 'missed' || m.callOutcome === 'no-answer') {
+        callsMissed[m.sender] = (callsMissed[m.sender] ?? 0) + 1;
+      }
+      
+      if (m.callDurationSeconds) {
+        totalCallDurationSeconds[m.sender] = (totalCallDurationSeconds[m.sender] ?? 0) + m.callDurationSeconds;
+        if (m.callDurationSeconds > longestCallSeconds) {
+          longestCallSeconds = m.callDurationSeconds;
+        }
+      }
+    }
+  }
+
+  // ── Media counts per sender (total) and per-type ──
+  const mediaCounts: Record<string, number> = {};
+  const viewOnceCount: Record<string, number> = {};
+  const MEDIA_TYPES: MediaType[] = ['image', 'video', 'audio', 'sticker', 'gif', 'document', 'contactCard', 'link'];
+  const mediaLeaderboard: Record<MediaType, number> = Object.fromEntries(
+    MEDIA_TYPES.map((t) => [t, 0])
+  ) as Record<MediaType, number>;
+  const mediaLeaderboardPerSender: Record<string, Record<MediaType, number>> = {};
+
+  for (const p of participants) {
+    mediaLeaderboardPerSender[p] = Object.fromEntries(
+      MEDIA_TYPES.map((t) => [t, 0])
+    ) as Record<MediaType, number>;
+  }
+
+  for (const m of realMessages.filter((m) => m.isMedia)) {
+    mediaCounts[m.sender] = (mediaCounts[m.sender] ?? 0) + 1;
+    
+    if (m.content.toLowerCase().includes('view once')) {
+      viewOnceCount[m.sender] = (viewOnceCount[m.sender] ?? 0) + 1;
+    }
+
+    const type = m.mediaType ?? 'image';
+    mediaLeaderboard[type] = (mediaLeaderboard[type] ?? 0) + 1;
+    if (mediaLeaderboardPerSender[m.sender]) {
+      mediaLeaderboardPerSender[m.sender][type] = (mediaLeaderboardPerSender[m.sender][type] ?? 0) + 1;
+    }
+  }
+
+  // ── Response latency ──
+  const responseTimes: Record<string, number[]> = {};
+  for (let i = 0; i < realMessages.length - 1; i++) {
+    const current = realMessages[i];
+    const next = realMessages[i + 1];
+    if (current.isCall || next.isCall) continue;
+
+    if (next.sender !== current.sender) {
+      const diffMinutes =
+        (next.timestamp.getTime() - current.timestamp.getTime()) / 60000;
+      if (diffMinutes > 0 && diffMinutes <= OVERNIGHT_GAP_MINUTES) {
+        if (!responseTimes[next.sender]) responseTimes[next.sender] = [];
+        responseTimes[next.sender].push(diffMinutes);
+      }
+    }
+  }
+
+  const avgResponseTimeMinutes: Record<string, number> = {};
+  for (const [sender, times] of Object.entries(responseTimes)) {
+    avgResponseTimeMinutes[sender] =
+      times.reduce((a, b) => a + b, 0) / times.length;
+  }
+
+  // ── Double-text & Burst counts ──
+  const doubleTextCounts: Record<string, number> = {};
+  const burstCounts: Record<string, number> = {};
+
+  if (realMessages.length > 0) {
+    burstCounts[realMessages[0].sender] = 1;
+  }
+
+  for (let i = 1; i < realMessages.length; i++) {
+    const current = realMessages[i];
+    const prev = realMessages[i - 1];
+
+    if (current.isCall || prev.isCall) continue;
+
+    if (current.sender !== prev.sender) {
+      burstCounts[current.sender] = (burstCounts[current.sender] ?? 0) + 1;
+    } else {
+      const diffSeconds = (current.timestamp.getTime() - prev.timestamp.getTime()) / 1000;
+      if (diffSeconds >= 60) {
+        burstCounts[current.sender] = (burstCounts[current.sender] ?? 0) + 1;
+        doubleTextCounts[current.sender] = (doubleTextCounts[current.sender] ?? 0) + 1;
+      }
+    }
+  }
+
+  const avgMessagesPerBurst: Record<string, number> = {};
+  for (const p of participants) {
+    const totalMsg = messagesPerSender[p] ?? 0;
+    const bursts = burstCounts[p] ?? 1;
+    avgMessagesPerBurst[p] = parseFloat((totalMsg / bursts).toFixed(1));
+  }
+
+  // ── Ghosting instances ──
+  const ghostingInstances: Record<string, number> = {};
+  for (let i = 0; i < realMessages.length - 1; i++) {
+    const current = realMessages[i];
+    const next = realMessages[i + 1];
+
+    if (current.isCall || next.isCall) continue;
+
+    if (next.sender !== current.sender) {
+      const diffMinutes =
+        (next.timestamp.getTime() - current.timestamp.getTime()) / 60000;
+      if (diffMinutes >= 720) {
+        ghostingInstances[next.sender] =
+          (ghostingInstances[next.sender] ?? 0) + 1;
+      }
+    }
+  }
+
+  // ── Top emojis per sender (top 10) ──
+  const emojiFrequency: Record<string, Record<string, number>> = {};
+  const emojiSpamOutliers: { sender: string; emoji: string; count: number }[] = [];
+
+  for (const m of contentMessages) {
+    const emojis = extractEmojisFromText(m.content);
+    if (emojis.length === 0) continue;
+
+    if (!emojiFrequency[m.sender]) emojiFrequency[m.sender] = {};
+    
+    // Count occurrences in this specific message
+    const msgEmojiCount: Record<string, number> = {};
+    for (const emoji of emojis) {
+      msgEmojiCount[emoji] = (msgEmojiCount[emoji] ?? 0) + 1;
+    }
+
+    // Add to global frequency, capping at 15 per message
+    for (const [emoji, count] of Object.entries(msgEmojiCount)) {
+      if (count > 15) {
+        emojiSpamOutliers.push({ sender: m.sender, emoji, count });
+      }
+      const cappedCount = Math.min(count, 15);
+      emojiFrequency[m.sender][emoji] = (emojiFrequency[m.sender][emoji] ?? 0) + cappedCount;
+    }
+  }
+
+  // Sort outliers by most extreme
+  emojiSpamOutliers.sort((a, b) => b.count - a.count);
+
+  const topEmojisPerSender: Record<string, EmojiCount[]> = {};
+  const emojiLeaderboardPerSender: Record<string, EmojiCount[]> = {};
+  for (const [sender, freq] of Object.entries(emojiFrequency)) {
+    const sorted: EmojiCount[] = Object.entries(freq).map(([emoji, count]) => ({
+      emoji,
+      count,
+    }));
+    topEmojisPerSender[sender] = topN(sorted, 5);
+    emojiLeaderboardPerSender[sender] = topN([...sorted], 10);
+  }
+
+  // ── Hourly heatmap ──
+  const hourlyHeatmap = new Array(24).fill(0);
+  for (const m of realMessages) {
+    const hour = m.timestamp.getHours();
+    hourlyHeatmap[hour]++;
+  }
+
+  // ── Monthly message counts ──
+  const monthlyMap: Record<string, number> = {};
+  for (const m of realMessages) {
+    const d = m.timestamp;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    monthlyMap[key] = (monthlyMap[key] ?? 0) + 1;
+  }
+  const monthlyMessageCounts: MonthlyCount[] = Object.entries(monthlyMap)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, count]) => ({ month, count }));
+  const peakMonth = monthlyMessageCounts.reduce(
+    (best, curr) => (curr.count > best.count ? curr : best),
+    monthlyMessageCounts[0]
+  );
+
+  // ── Era Sampling & Keywords ──
+  const third = Math.floor(realMessages.length / 3);
+  const earlyMessages = realMessages.slice(0, third);
+  const medianMessages = realMessages.slice(third, third * 2);
+  const lateMessages = realMessages.slice(third * 2);
+
+  const eraMetrics = {
+    early: computeEraMetrics(earlyMessages),
+    median: computeEraMetrics(medianMessages),
+    late: computeEraMetrics(lateMessages),
+  };
+
+  const sampleExcerpts = {
+    early: selectSampleExcerpts(earlyMessages.filter(m => !m.isMedia), 6),
+    median: selectSampleExcerpts(medianMessages.filter(m => !m.isMedia), 6),
+    late: selectSampleExcerpts(lateMessages.filter(m => !m.isMedia), 6),
+  };
+  
+  const topKeywords = computeTopKeywords(contentMessages);
+
+  // ── Longest streak by day ──
+  const longestStreakByDay = calculateLongestStreak(realMessages);
+
+  return {
+    totalMessages: realMessages.length,
+    dateRange,
+    participants,
+    messagesPerSender,
+    avgResponseTimeMinutes,
+    avgMessagesPerBurst,
+    doubleTextCounts,
+    mediaCounts,
+    topEmojisPerSender,
+    emojiLeaderboardPerSender,
+    hourlyHeatmap,
+    sampleExcerpts,
+    eraMetrics,
+    topKeywords,
+    longestStreakByDay,
+    ghostingInstances,
+    chatDurationDays,
+    avgMessagesPerDay,
+    monthlyMessageCounts,
+    peakMonth,
+    mediaLeaderboard,
+    mediaLeaderboardPerSender,
+    emojiSpamOutliers,
+    callsInitiated,
+    callsMissed,
+    totalCallDurationSeconds,
+    longestCallSeconds,
+    viewOnceCount,
+    editedMessageCount,
+    deletedMessageCount,
+  };
+}
+
+function computeEraMetrics(messages: ChatMessage[]): EraMetrics {
+  if (messages.length === 0) return { avgResponseTimeMinutes: 0, avgMessageLength: 0, topEmoji: null };
+  
+  let totalDiff = 0;
+  let responseCount = 0;
+  for (let i = 0; i < messages.length - 1; i++) {
+    const current = messages[i];
+    const next = messages[i + 1];
+    if (next.sender !== current.sender) {
+      const diffMinutes = (next.timestamp.getTime() - current.timestamp.getTime()) / 60000;
+      if (diffMinutes > 0 && diffMinutes <= OVERNIGHT_GAP_MINUTES) {
+        totalDiff += diffMinutes;
+        responseCount++;
+      }
+    }
+  }
+  const avgResponseTimeMinutes = responseCount > 0 ? totalDiff / responseCount : 0;
+
+  const contentMsgs = messages.filter(m => !m.isSystem && !m.isMedia);
+  const totalLength = contentMsgs.reduce((sum, m) => sum + m.content.length, 0);
+  const avgMessageLength = contentMsgs.length > 0 ? Math.round(totalLength / contentMsgs.length) : 0;
+
+  const emojiCount: Record<string, number> = {};
+  for (const m of contentMsgs) {
+    const emojis = extractEmojisFromText(m.content);
+    for (const e of emojis) {
+      emojiCount[e] = (emojiCount[e] ?? 0) + 1;
+    }
+  }
+  const topEmoji = Object.entries(emojiCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+
+  return { avgResponseTimeMinutes, avgMessageLength, topEmoji };
+}
+
+function computeTopKeywords(messages: ChatMessage[]): { word: string; count: number }[] {
+  const wordCount: Record<string, number> = {};
+  const bigramCount: Record<string, number> = {};
+
+  for (const m of messages) {
+    const words = m.content.toLowerCase().match(/\b[a-z]{3,}\b/g) ?? [];
+    
+    // Count single words
+    for (const w of words) {
+      if (!STOP_WORDS.has(w)) {
+        wordCount[w] = (wordCount[w] ?? 0) + 1;
+      }
+    }
+
+    // Count bigrams
+    for (let i = 0; i < words.length - 1; i++) {
+      const w1 = words[i];
+      const w2 = words[i + 1];
+      if (!STOP_WORDS.has(w1) && !STOP_WORDS.has(w2)) {
+        const bigram = `${w1} ${w2}`;
+        bigramCount[bigram] = (bigramCount[bigram] ?? 0) + 1;
+      }
+    }
+  }
+
+  // Filter bigrams with frequency > 8
+  const validBigrams = Object.entries(bigramCount)
+    .filter(([_, count]) => count > 8);
+
+  const combined = [
+    ...Object.entries(wordCount),
+    ...validBigrams
+  ].sort((a, b) => b[1] - a[1]);
+
+  return combined.slice(0, 80).map(([word, count]) => ({ word, count }));
+}
+
+function selectSampleExcerpts(messages: ChatMessage[], count: number): string[] {
+  if (messages.length <= count) {
+    return messages.map((m) => `${m.sender}: ${m.content.slice(0, 120)}`);
+  }
+
+  const step = Math.floor(messages.length / count);
+  const excerpts: string[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const idx = Math.min(i * step + Math.floor(Math.random() * step), messages.length - 1);
+    const m = messages[idx];
+    const content = m.content.trim();
+    if (content.length > 3) {
+      excerpts.push(`${m.sender}: ${content.slice(0, 120)}`);
+    }
+  }
+
+  return excerpts;
+}
+
+function calculateLongestStreak(messages: ChatMessage[]): number {
+  if (messages.length === 0) return 0;
+
+  const uniqueDays = new Set(
+    messages.map((m) => {
+      const d = m.timestamp;
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    })
+  );
+
+  const sortedDays = Array.from(uniqueDays)
+    .map((d) => new Date(d))
+    .sort((a, b) => a.getTime() - b.getTime());
+
+  let longest = 1;
+  let current = 1;
+
+  for (let i = 1; i < sortedDays.length; i++) {
+    const diff =
+      (sortedDays[i].getTime() - sortedDays[i - 1].getTime()) / 86400000;
+    if (diff === 1) {
+      current++;
+      longest = Math.max(longest, current);
+    } else {
+      current = 1;
+    }
+  }
+
+  return longest;
+}
+
+export function formatDuration(minutes: number): string {
+  if (minutes < 1) return 'under a minute';
+  if (minutes < 60) return `${Math.round(minutes)}m`;
+  const hours = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
+  if (hours < 24) return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ${hours % 24}h`;
+}
