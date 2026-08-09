@@ -8,7 +8,10 @@
 @tailwind utilities;
 
 @layer base {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
   }
 
@@ -26,7 +29,12 @@
     background-color: #FAF8F5;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 800;
     line-height: 1.1;
@@ -35,7 +43,10 @@
 
   /* Reduce motion globally */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
@@ -44,6 +55,7 @@
 }
 
 @layer components {
+
   /* Neo-Brutalist card */
   .nb-card {
     @apply border-2 border-black shadow-nb bg-white p-6;
@@ -51,10 +63,7 @@
 
   /* Neo-Brutalist button */
   .nb-btn {
-    @apply border-2 border-black shadow-nb bg-white px-4 py-2 font-bold uppercase tracking-wider text-sm
-           cursor-pointer transition-all duration-[150ms] ease-linear
-           hover:-translate-y-px
-           active:translate-x-[3px] active:translate-y-[3px] active:shadow-none;
+    @apply border-2 border-black shadow-nb bg-white px-4 py-2 font-bold uppercase tracking-wider text-sm cursor-pointer transition-all duration-[150ms] ease-linear hover:-translate-y-px active:translate-x-[3px] active:translate-y-[3px] active:shadow-none;
   }
 
   .nb-btn-primary {
@@ -76,8 +85,7 @@
 
   /* Input */
   .nb-input {
-    @apply border-2 border-black bg-white px-3 py-2 font-mono text-sm w-full
-           focus:outline-none focus:ring-0 focus:border-accent-blue;
+    @apply border-2 border-black bg-white px-3 py-2 font-mono text-sm w-full focus:outline-none focus:ring-0 focus:border-accent-blue;
   }
 
   /* Section divider */
@@ -97,5 +105,11 @@
   /* Content wrapper for main flow */
   .content-wrapper {
     @apply max-w-7xl mx-auto w-full px-6;
+  }
+}
+
+@layer utilities {
+  .text-shadow-nb {
+    text-shadow: 3px 3px 0px #000000;
   }
 }

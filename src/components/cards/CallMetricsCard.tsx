@@ -21,12 +21,12 @@ import { useLanguage } from '../../i18n/LanguageContext';
 export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
   const { t } = useLanguage();
   const { participants, callsInitiated, callsMissed, totalCallDurationSeconds, longestCallSeconds, viewOnceCount, editedMessageCount, deletedMessageCount } = metrics;
-  
+
   const totalCalls = Object.values(callsInitiated).reduce((a, b) => a + b, 0);
   const totalViewOnce = Object.values(viewOnceCount).reduce((a, b) => a + b, 0);
   const totalEdited = Object.values(editedMessageCount).reduce((a, b) => a + b, 0);
   const totalDeleted = Object.values(deletedMessageCount).reduce((a, b) => a + b, 0);
-  
+
   if (totalCalls === 0 && totalViewOnce === 0 && totalEdited === 0 && totalDeleted === 0) {
     return null;
   }
@@ -35,15 +35,13 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
   const displayParticipants = chatMode === 'group' ? sortedParticipants.slice(0, 5) : sortedParticipants;
 
   return (
-    <div className="p-6 h-full flex flex-col bg-accent-blue/10 border-black border-b-2 md:border-b-0 md:border-r-2">
-      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-6">{t('calls.title')}</p>
-
+    <div className="p-6 h-full flex flex-col bg-white">
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-white border-2 border-black p-3 flex flex-col items-center text-center">
           <Phone className="mb-2 text-accent-blue" size={24} strokeWidth={2.5} />
           <p className="font-mono text-xs uppercase text-gray-500">{t('calls.duration')}</p>
           <p className="font-black text-2xl">
-            {Object.values(totalCallDurationSeconds).reduce((a, b) => a + b, 0) === 0 
+            {Object.values(totalCallDurationSeconds).reduce((a, b) => a + b, 0) === 0
               ? t('calls.guess')
               : formatDuration(Object.values(totalCallDurationSeconds).reduce((a, b) => a + b, 0))}
           </p>
@@ -91,15 +89,15 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
             const initiated = callsInitiated[p] ?? 0;
             const missed = callsMissed[p] ?? 0;
             const duration = totalCallDurationSeconds[p] ?? 0;
-            
+
             if (initiated === 0 && missed === 0 && duration === 0) return null;
 
             return (
               <div key={p} className="flex items-center justify-between">
                 <span className="font-semibold text-sm truncate max-w-[120px]">{p}</span>
                 <div className="flex items-center gap-4 text-xs font-mono">
-                  <span className="flex items-center gap-1"><Phone size={12}/> {initiated}</span>
-                  <span className="flex items-center gap-1 text-accent-orange"><PhoneMissed size={12}/> {missed}</span>
+                  <span className="flex items-center gap-1"><Phone size={12} /> {initiated}</span>
+                  <span className="flex items-center gap-1 text-accent-orange"><PhoneMissed size={12} /> {missed}</span>
                 </div>
               </div>
             );

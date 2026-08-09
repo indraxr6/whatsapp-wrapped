@@ -9,6 +9,7 @@ import LatencyCard from './cards/LatencyCard';
 import GhostingCard from './cards/GhostingCard';
 import EmojiCard from './cards/EmojiCard';
 import MonthlyCard from './cards/MonthlyCard';
+import SharedLinksCard from './cards/SharedLinksCard';
 import PersonalityCard from './cards/PersonalityCard';
 import TopicsCard from './cards/TopicsCard';
 import RoastCard from './cards/RoastCard';
@@ -35,11 +36,14 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
       {/* Sticky header */}
       <header className="sticky top-0 z-10 bg-canvas border-b-2 border-black px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-black bg-black flex items-center justify-center">
-            <span className="font-mono text-white text-xs font-bold">WA</span>
-          </div>
+          <button 
+            onClick={onReset}
+            className="w-8 h-8 border-2 border-black bg-black flex items-center justify-center hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer"
+            title="Start Over"
+          >
+            <span className="font-mono text-white text-xs font-bold">_WA</span>
+          </button>
           <span className="font-sans font-extrabold tracking-tight">{t('header.title')}</span>
-          <span className="nb-label text-xs hidden sm:inline-block">{metrics.participants.join(' × ')}</span>
         </div>
         <div className="flex items-center gap-2">
           <LanguageToggle />
@@ -55,9 +59,19 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
       <div className="border-b-2 border-black px-6 py-12 bg-white">
         <div className="content-wrapper">
           <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-3">{t('dashboard.hero.kicker', { count: metrics.totalMessages.toLocaleString() })}</p>
-          <h1 className="text-5xl sm:text-6xl font-extrabold leading-none tracking-tight mb-4">
-            {t('dashboard.hero.title1')}<br />{t('dashboard.hero.title2')}
-          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 gap-6">
+            <h1 className="text-5xl sm:text-6xl font-extrabold leading-none tracking-tight">
+              {t('dashboard.hero.title1')}<br />{t('dashboard.hero.title2')}
+            </h1>
+            <div className="text-left sm:text-right">
+              <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">
+                {metrics.groupName ? 'Group Name:' : 'Chat With:'}
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                {metrics.groupName ?? metrics.participants.join(' & ')}
+              </h2>
+            </div>
+          </div>
           <p className="text-sm text-gray-600 font-mono">
             {metrics.dateRange.start.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')} → {metrics.dateRange.end.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')} · {metrics.chatDurationDays} {t('dashboard.hero.days')}
           </p>
@@ -70,15 +84,18 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
         {/* Section: The Numbers */}
         <div>
           <h2 className="font-mono text-sm uppercase tracking-widest mb-4">_ {t('section.numbers')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-2 border-black">
-            <div className="border-b-2 md:border-b-0 md:border-r-2 border-black">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border-2 border-black">
+            <div className="border-b-2 lg:border-b-0 md:border-r-2 lg:border-r-2 border-black">
               <OverviewCard metrics={metrics} />
             </div>
-            <div className="border-b-2 md:border-b-0 md:border-r-2 border-black">
+            <div className="border-b-2 lg:border-b-0 md:border-r-0 lg:border-r-2 border-black">
               <MessageShareCard metrics={metrics} chatMode={chatMode} />
             </div>
-            <div>
+            <div className="border-b-2 md:border-b-0 md:border-r-2 lg:border-r-2 border-black">
               <MediaCard metrics={metrics} chatMode={chatMode} />
+            </div>
+            <div>
+              <SharedLinksCard metrics={metrics} />
             </div>
           </div>
         </div>
@@ -140,7 +157,7 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
               />
             </div>
             <div>
-              <RoastCard 
+              <RoastCard
                 insights={insights}
                 metrics={metrics}
                 insightStatus={insightStatus}
