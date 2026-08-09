@@ -82,7 +82,7 @@ export default function App() {
   const handleChatModeContinue = (mode: 'dm' | 'group') => {
     setChatMode(mode);
     setShowChatModeModal(false);
-    
+
     if (mode === 'dm' && metrics && metrics.participants.length > 2) {
       const sorted = [...metrics.participants].sort((a, b) => (metrics.messagesPerSender[b] ?? 0) - (metrics.messagesPerSender[a] ?? 0));
       setMetrics({
@@ -254,7 +254,7 @@ function UploadPage({ onFileUpload, onDemoMode, onOpenApiKey, onOpenPrivacy, has
       <header className="border-b-2 border-black px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-black bg-black flex items-center justify-center">
-            <span className="font-mono text-white text-xs font-bold">WA</span>
+            <span className="font-mono text-white text-xs font-bold">_WA</span>
           </div>
           <span className="font-sans font-extrabold text-lg tracking-tight">{t('header.title')}</span>
         </div>
