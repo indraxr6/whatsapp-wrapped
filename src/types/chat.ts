@@ -40,6 +40,8 @@ export interface ParsedChatMetrics {
   avgMessagesPerBurst: Record<string, number>;
   doubleTextCounts: Record<string, number>;
   ghostingInstances: Record<string, number>;
+  groupName: string | null;
+  sharedLinks: Record<string, number>;
 
   // Media
   mediaCounts: Record<string, number>;

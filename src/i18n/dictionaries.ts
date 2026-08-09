@@ -17,7 +17,7 @@ export const dictionaries = {
     "upload.title": "Upload your chat export",
     "upload.subtitle": "Make sure to export WITHOUT media. Must be a .txt file.",
     "upload.or": "or",
-    "upload.skipAI": "SKIP AI — USE DEMO INSIGHTS",
+    "upload.skipAI": "SKIP AI — USE GENERIC INSIGHTS",
     "upload.error_invalid_file": "Please upload a WhatsApp exported chat (.txt file).",
     "upload.drag_drop": "Drop your WhatsApp export here",
     "upload.drag_active": "Drop to analyze",
@@ -136,9 +136,12 @@ export const dictionaries = {
     "media.document": "Documents",
     "media.contactCard": "Contacts",
     "media.link": "Links",
-    
+
+    "links.title": "_ SHARED LINKS",
+    "links.total": "categorized links",
+
     "emoji.title": "_ TOP EMOJIS",
-    
+
     "calls.title": "_ CALLS & EXTRAS",
     "calls.duration": "Total Duration",
     "calls.longest": "Longest Call",
@@ -156,7 +159,7 @@ export const dictionaries = {
     "topics.change": "How it changed over time:",
 
     "roast.title": "_ AI ROAST",
-    
+
     // AI Failure & Group state
     "ai.genericInsight": "Showing generic insight",
     "ai.retry": "Retry AI",
@@ -164,13 +167,13 @@ export const dictionaries = {
     "group.others": "Others",
     "group.showingTop": "Showing top 10 most active senders",
     "group.showingTop10": "Showing top 10",
-    
+
     // Footer CTA
     "footer.cta.kicker": "_ DONE?",
     "footer.cta.title": "Analyze another chat.",
     "footer.cta.desc": "Upload a different export to compare conversations.",
     "footer.cta.btn": "START OVER",
-    
+
     "loading.title": "Processing your chat",
     "loading.reading": "Reading your chat...",
     "loading.parsing": "Parsing messages...",
@@ -326,6 +329,9 @@ export const dictionaries = {
     "media.contactCard": "Kontak",
     "media.link": "Tautan",
 
+    "links.title": "_ TAUTAN DIBAGIKAN",
+    "links.total": "tautan terkategori",
+
     "emoji.title": "_ EMOJI TERBANYAK",
 
     "calls.title": "_ PANGGILAN & LAINNYA",
@@ -345,7 +351,7 @@ export const dictionaries = {
     "topics.change": "Perubahannya seiring waktu:",
 
     "roast.title": "_ AI ROAST",
-    
+
     // AI Failure & Group state
     "ai.genericInsight": "Menampilkan insight demo",
     "ai.retry": "Coba Lagi AI",
