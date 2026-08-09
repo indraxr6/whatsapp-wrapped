@@ -12,7 +12,7 @@ const MEDIA_ORDER: MediaType[] = ['image', 'video', 'sticker', 'audio', 'gif', '
 
 export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
   const { t } = useLanguage();
-  const { mediaLeaderboard, mediaCounts, participants, messagesPerSender } = metrics;
+  const { mediaLeaderboard, mediaCounts, participants } = metrics;
   const totalMedia = Object.values(mediaCounts).reduce((a, b) => a + b, 0);
   const maxType = Math.max(...Object.values(mediaLeaderboard), 1);
   

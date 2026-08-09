@@ -57,7 +57,7 @@ export default function MonthlyCard({ metrics }: Props) {
                 fontSize: 12,
                 background: '#fff',
               }}
-              formatter={(value: number) => [value.toLocaleString(), 'messages']}
+              formatter={(value: any) => [Number(value).toLocaleString(), 'messages']}
             />
             <ReferenceLine
               x={formatMonth(peakMonth.month)}
