@@ -43,6 +43,39 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
     end: realMessages[realMessages.length - 1].timestamp,
   };
 
+  // ── Group Name Detection ──
+  let groupName: string | null = null;
+  const renameRegex = /(?:changed the group name to|changed this group's name to|changed the subject to|mengubah nama grup menjadi|mengubah subjek menjadi|mengubah subjek grup menjadi)\s*(["“”])(.*?)\1/i;
+  const creationRegex = /(?:created group|membuat grup|telah membuat grup) (["“”]?)(.+?)\1?$/i;
+
+  let latestRenameMatch: string | null = null;
+  let creationMatch: string | null = null;
+
+  for (const m of messages) {
+    if (m.isSystem) {
+      const rename = m.content.match(renameRegex);
+      if (rename && rename[2]) {
+        latestRenameMatch = rename[2];
+      }
+      if (!creationMatch) {
+        const creation = m.content.match(creationRegex);
+        if (creation && creation[2]) {
+          creationMatch = creation[2];
+        }
+      }
+    }
+  }
+
+  if (latestRenameMatch) {
+    groupName = latestRenameMatch;
+  } else if (creationMatch) {
+    groupName = creationMatch.replace(/^["“”]|["“”]$/g, '').trim();
+  } else if (participants.length > 2) {
+    groupName = 'Group Chat';
+  } else {
+    groupName = null;
+  }
+
   // ── Chat span & pace ──
   const chatDurationDays = Math.max(
     1,
@@ -79,11 +112,11 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
   for (const m of realMessages) {
     if (m.isCall) {
       callsInitiated[m.sender] = (callsInitiated[m.sender] ?? 0) + 1;
-      
+
       if (m.callOutcome === 'missed' || m.callOutcome === 'no-answer') {
         callsMissed[m.sender] = (callsMissed[m.sender] ?? 0) + 1;
       }
-      
+
       if (m.callDurationSeconds) {
         totalCallDurationSeconds[m.sender] = (totalCallDurationSeconds[m.sender] ?? 0) + m.callDurationSeconds;
         if (m.callDurationSeconds > longestCallSeconds) {
@@ -108,9 +141,31 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
     ) as Record<MediaType, number>;
   }
 
+  const sharedLinks: Record<string, number> = {
+    Spotify: 0,
+    'Apple Music': 0,
+    YouTube: 0,
+    'Instagram Reels': 0,
+    'Instagram Stories': 0,
+    'Instagram Profile': 0,
+    TikTok: 0,
+    X: 0,
+    'Google Maps': 0,
+    'Google Forms': 0,
+    'Google Sheets': 0,
+    'Google Docs': 0,
+    'Google Slides': 0,
+    'Google Drive': 0,
+    'Google Meet': 0,
+    'GitHub': 0,
+    'Facebook': 0,
+    'Tokopedia': 0,
+    'Other Links': 0,
+  };
+
   for (const m of realMessages.filter((m) => m.isMedia)) {
     mediaCounts[m.sender] = (mediaCounts[m.sender] ?? 0) + 1;
-    
+
     if (m.content.toLowerCase().includes('view once')) {
       viewOnceCount[m.sender] = (viewOnceCount[m.sender] ?? 0) + 1;
     }
@@ -119,6 +174,32 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
     mediaLeaderboard[type] = (mediaLeaderboard[type] ?? 0) + 1;
     if (mediaLeaderboardPerSender[m.sender]) {
       mediaLeaderboardPerSender[m.sender][type] = (mediaLeaderboardPerSender[m.sender][type] ?? 0) + 1;
+    }
+
+    if (type === 'link') {
+      const c = m.content.toLowerCase();
+      if (c.includes('open.spotify.com') || c.includes('spotify.link')) sharedLinks['Spotify']++;
+      else if (c.includes('music.apple.com')) sharedLinks['Apple Music']++;
+      else if (c.includes('youtu.be/') || c.includes('youtube.com/')) sharedLinks['YouTube']++;
+      else if (c.includes('instagram.com/reel/')) sharedLinks['Instagram Reels']++;
+      else if (c.includes('instagram.com/stories/')) sharedLinks['Instagram Stories']++;
+      else if (c.includes('instagram.com/')) sharedLinks['Instagram Profile']++;
+      else if (c.includes('vt.tiktok.com') || c.includes('tiktok.com/')) sharedLinks['TikTok']++;
+      else if (c.includes('twitter.com/') || c.includes('x.com/')) sharedLinks['X']++;
+      else if (c.includes('maps.google.com') || c.includes('google.com/maps') || c.includes('maps.app.goo.gl')) sharedLinks['Google Maps']++;
+      else if (c.includes('docs.google.com/forms')) sharedLinks['Google Forms']++;
+      else if (c.includes('docs.google.com/spreadsheets')) sharedLinks['Google Sheets']++;
+      else if (c.includes('docs.google.com/document')) sharedLinks['Google Docs']++;
+      else if (c.includes('docs.google.com/presentation')) sharedLinks['Google Slides']++;
+      else if (c.includes('drive.google.com')) sharedLinks['Google Drive']++;
+      else if (c.includes('meet.google.com')) sharedLinks['Google Meet']++;
+      else if (c.includes('github.com')) sharedLinks['GitHub']++;
+      else if (c.includes('facebook.com')) sharedLinks['Facebook']++;
+      else if (c.includes('tokopedia.com') || c.includes('tokopedia.link')) sharedLinks['Tokopedia']++;
+      else {
+        sharedLinks['Other Links']++;
+        console.log('Other link:', m.content);
+      }
     }
   }
 
@@ -204,7 +285,7 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
     if (emojis.length === 0) continue;
 
     if (!emojiFrequency[m.sender]) emojiFrequency[m.sender] = {};
-    
+
     // Count occurrences in this specific message
     const msgEmojiCount: Record<string, number> = {};
     for (const emoji of emojis) {
@@ -274,7 +355,7 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
     median: selectSampleExcerpts(medianMessages.filter(m => !m.isMedia), 6),
     late: selectSampleExcerpts(lateMessages.filter(m => !m.isMedia), 6),
   };
-  
+
   const topKeywords = computeTopKeywords(contentMessages);
 
   // ── Longest streak by day ──
@@ -288,6 +369,9 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
     avgResponseTimeMinutes,
     avgMessagesPerBurst,
     doubleTextCounts,
+    ghostingInstances,
+    groupName,
+    sharedLinks,
     mediaCounts,
     topEmojisPerSender,
     emojiLeaderboardPerSender,
@@ -296,7 +380,6 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
     eraMetrics,
     topKeywords,
     longestStreakByDay,
-    ghostingInstances,
     chatDurationDays,
     avgMessagesPerDay,
     monthlyMessageCounts,
@@ -316,7 +399,7 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
 
 function computeEraMetrics(messages: ChatMessage[]): EraMetrics {
   if (messages.length === 0) return { avgResponseTimeMinutes: 0, avgMessageLength: 0, topEmoji: null };
-  
+
   let totalDiff = 0;
   let responseCount = 0;
   for (let i = 0; i < messages.length - 1; i++) {
@@ -354,7 +437,7 @@ function computeTopKeywords(messages: ChatMessage[]): { word: string; count: num
 
   for (const m of messages) {
     const words = m.content.toLowerCase().match(/\b[a-z]{3,}\b/g) ?? [];
-    
+
     // Count single words
     for (const w of words) {
       if (!STOP_WORDS.has(w)) {
@@ -382,7 +465,7 @@ function computeTopKeywords(messages: ChatMessage[]): { word: string; count: num
     ...validBigrams
   ].sort((a, b) => b[1] - a[1]);
 
-  return combined.slice(0, 80).map(([word, count]) => ({ word, count }));
+  return combined.slice(0, 150).map(([word, count]) => ({ word, count }));
 }
 
 function selectSampleExcerpts(messages: ChatMessage[], count: number): string[] {

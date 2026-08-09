@@ -33,6 +33,9 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'you deleted this message',
       'missed voice call',
       'missed video call',
+      "you're now an admin",
+      'now an admin',
+      'meta ai',
       'null'
     ],
     mediaPlaceholders: [
@@ -63,11 +66,15 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'menghapus anda',
       'membuat grup',
       'mengubah nama grup',
+      'mengubah subjek',
       'keluar',
       'pesan ini telah dihapus',
       'anda menghapus pesan ini',
       'panggilan suara tak terjawab',
-      'panggilan video tak terjawab'
+      'panggilan video tak terjawab',
+      'mengubah ikon grup',
+      'sekarang menjadi admin',
+      'meta ai'
     ],
     mediaPlaceholders: [
       { pattern: '<media dihilangkan>', type: 'image' },

@@ -10,7 +10,7 @@ import { getMediaType, isSystemLine, getCallInfo } from './localeTable';
  *  - Time separators can be `:` (most locales) or `.` (e.g. Indonesian exports)
  */
 const MESSAGE_REGEX =
-  /^(?:\[(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}),?\s(\d{1,2}[:.\uFF0E]\d{2}(?:[:.\uFF0E]\d{2})?(?:\s?[AP]M)?)\]|(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}),?\s(\d{1,2}[:.\uFF0E]\d{2}(?:[:.\uFF0E]\d{2})?(?:\s?[AP]M)?)\s[-–])\s([^:]+):\s([\s\S]*)$/i;
+  /^(?:\[(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}),?\s(\d{1,2}[:.\uFF0E]\d{2}(?:[:.\uFF0E]\d{2})?(?:\s?[AP]M)?)\]|(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}),?\s(\d{1,2}[:.\uFF0E]\d{2}(?:[:.\uFF0E]\d{2})?(?:\s?[AP]M)?)\s[-–])\s([\s\S]*)$/i;
 
 function parseTimestamp(dateStr: string, timeStr: string): Date {
   // Normalize separators
@@ -103,8 +103,32 @@ export function parseWhatsAppExport(rawText: string): ParseResult {
       const isIOS = Boolean(match[1]);
       const dateStr = match[1] || match[3];
       const timeStr = match[2] || match[4];
-      const sender = match[5].trim();
-      const content = match[6];
+      const rawRest = match[5].trim();
+
+      let sender = 'System';
+      let content = rawRest;
+      let isSystem = false;
+
+      const colonIndex = rawRest.indexOf(':');
+      if (colonIndex !== -1) {
+        const pSender = rawRest.substring(0, colonIndex).trim();
+        const pContent = rawRest.substring(colonIndex + 1).trim();
+
+        if (isSystemLine(pContent)) {
+          sender = pSender;
+          content = pContent;
+          isSystem = true;
+        } else if (isSystemLine(rawRest)) {
+          sender = 'System';
+          content = rawRest;
+          isSystem = true;
+        } else {
+          sender = pSender;
+          content = pContent;
+        }
+      } else {
+        isSystem = isSystemLine(rawRest) || true; // If no colon, we safely assume it's a system message.
+      }
 
       if (detectedFormat === 'unknown') {
         detectedFormat = isIOS ? 'ios' : 'android';
@@ -117,7 +141,7 @@ export function parseWhatsAppExport(rawText: string): ParseResult {
       // Check if it's a call
       const callInfo = getCallInfo(content);
       const isCall = callInfo !== null;
-      const isSystem = isSystemLine(content);
+      if (isCall) isSystem = true;
 
       // Check if message was edited (appended text)
       const editedRegex = /<this message was edited>|<pesan ini telah diedit>|<telah diedit>|this message was edited|telah diedit/i;
