@@ -11,16 +11,20 @@ const HOUR_LABELS_AXIS = [
   '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
 ];
 
-function getHourCallout(hour: number): string {
-  if (hour === 0) return '12 midnight';
-  if (hour === 12) return '12 noon';
-  if (hour < 12) return `${hour} in the morning`;
-  if (hour < 17) return `${hour - 12} in the afternoon`;
-  if (hour < 20) return `${hour - 12} in the evening`;
-  return `${hour - 12} at night`;
-}
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function HeatmapCard({ metrics }: Props) {
+  const { t } = useLanguage();
+
+  function getHourCallout(hour: number): string {
+    if (hour === 0) return t('time.midnight');
+    if (hour === 12) return t('time.noon');
+    if (hour < 12) return `${hour} ${t('time.morning')}`;
+    if (hour < 17) return `${hour - 12} ${t('time.afternoon')}`;
+    if (hour < 20) return `${hour - 12} ${t('time.evening')}`;
+    return `${hour - 12} ${t('time.night')}`;
+  }
+
   const { hourlyHeatmap } = metrics;
   const max = Math.max(...hourlyHeatmap, 1);
   const peakHour = hourlyHeatmap.indexOf(max);
@@ -29,11 +33,11 @@ export default function HeatmapCard({ metrics }: Props) {
 
   return (
     <div className="p-6 h-full">
-      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">_ ACTIVE HOURS</p>
+      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">{t('heatmap.title')}</p>
 
       <div className="mb-4">
         <p className="nb-stat-sm">{getHourCallout(peakHour)}</p>
-        <p className="text-xs text-gray-500 mt-1">peak activity time</p>
+        <p className="text-xs text-gray-500 mt-1">{t('heatmap.peak')}</p>
       </div>
 
       <div className="h-28 border-b-2 border-black mb-3">

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import WordCloud from 'wordcloud';
 import type { ParsedChatMetrics } from '../../types/chat';
 import { RefreshCw } from 'lucide-react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface Props {
   metrics: ParsedChatMetrics;
@@ -10,6 +11,7 @@ interface Props {
 const ACCENT_COLORS = ['#FF5500', '#0000FF', '#00FF00', '#FFD700'];
 
 export default function WordCloudCard({ metrics }: Props) {
+  const { t } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [key, setKey] = useState(0);
@@ -62,11 +64,11 @@ export default function WordCloudCard({ metrics }: Props) {
   return (
     <div className="p-6 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <p className="font-mono text-xs uppercase tracking-widest text-gray-500">_ WORD CLOUD</p>
+        <p className="font-mono text-xs uppercase tracking-widest text-gray-500">{t('wordcloud.title')}</p>
         <button 
           onClick={() => setKey(k => k + 1)}
           className="border-2 border-black p-1 hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] transition-all duration-[150ms] ease-linear bg-white"
-          title="Reroll Layout"
+          title={t('wordcloud.reroll')}
         >
           <RefreshCw size={14} strokeWidth={2.5} />
         </button>

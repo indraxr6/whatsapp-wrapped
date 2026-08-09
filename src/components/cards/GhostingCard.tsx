@@ -17,20 +17,20 @@ export default function GhostingCard({ metrics, chatMode = 'dm' }: Props) {
 
   return (
     <div className="p-6 h-full">
-      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">_ GHOSTING INDEX</p>
-      <p className="text-xs text-gray-400 mb-4">(12h+ gap before replying)</p>
+      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">{t('ghosting.title')}</p>
+      <p className="text-xs text-gray-400 mb-4">{t('ghosting.subtitle')}</p>
 
       {totalGhosts === 0 ? (
         <div>
           <p className="nb-stat-sm">0</p>
-          <p className="text-sm text-gray-600 mt-2">No major ghosting detected.</p>
-          <p className="text-xs text-gray-500 mt-1">Both parties respond within 12 hours consistently.</p>
+          <p className="text-sm text-gray-600 mt-2">{t('ghosting.none')}</p>
+          <p className="text-xs text-gray-500 mt-1">{t('ghosting.consistent')}</p>
         </div>
       ) : (
         <div className="space-y-4">
           <div>
             <p className="nb-stat">{totalGhosts}</p>
-            <p className="text-sm text-gray-600 mt-1">total ghosting instances</p>
+            <p className="text-sm text-gray-600 mt-1">{t('ghosting.total')}</p>
           </div>
 
           <div className={`border-t-2 border-black pt-4 space-y-2 ${chatMode === 'group' ? 'max-h-[150px] overflow-y-auto pr-2 custom-scrollbar' : ''}`}>
@@ -42,7 +42,7 @@ export default function GhostingCard({ metrics, chatMode = 'dm' }: Props) {
                   <span className="truncate max-w-[60%]">{p}</span>
                   <div className="flex items-center gap-2">
                     <span className="font-mono">{count}x</span>
-                    {isWorst && <span className="nb-label text-xs bg-accent-orange text-white border-accent-orange">WORST</span>}
+                    {isWorst && <span className="nb-label text-xs bg-accent-orange text-white border-accent-orange">{t('ghosting.worst')}</span>}
                   </div>
                 </div>
               );
@@ -53,7 +53,7 @@ export default function GhostingCard({ metrics, chatMode = 'dm' }: Props) {
           </div>
 
           <p className="text-xs text-gray-500 border-t-2 border-black pt-3">
-            Note: gaps &gt;6h at night excluded from response time averages.
+            {t('ghosting.note')}
           </p>
         </div>
       )}

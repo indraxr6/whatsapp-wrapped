@@ -86,7 +86,7 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
         {/* Section: Calls (Conditional) */}
         {Object.values(metrics.callsInitiated).some(v => v > 0) && (
           <div>
-            <h2 className="font-mono text-sm uppercase tracking-widest mb-4">_ CALLS</h2>
+            <h2 className="font-mono text-sm uppercase tracking-widest mb-4">{t('calls.title')}</h2>
             <div className="border-2 border-black">
               <CallMetricsCard metrics={metrics} chatMode={chatMode} />
             </div>

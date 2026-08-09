@@ -6,16 +6,7 @@ interface Props {
   chatMode?: 'dm' | 'group';
 }
 
-const MEDIA_LABELS: Record<MediaType, string> = {
-  image: 'Images',
-  video: 'Videos',
-  audio: 'Audio',
-  sticker: 'Stickers',
-  gif: 'GIFs',
-  document: 'Documents',
-  contactCard: 'Contacts',
-  link: 'Links',
-};
+// We'll translate these inline using t() based on MediaType
 
 const MEDIA_ORDER: MediaType[] = ['image', 'video', 'sticker', 'audio', 'gif', 'document', 'contactCard', 'link'];
 
@@ -30,11 +21,11 @@ export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
 
   return (
     <div className="p-6 h-full">
-      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">_ MEDIA SENT</p>
+      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">{t('media.title')}</p>
 
       <div className="mb-4">
         <p className="nb-stat">{totalMedia.toLocaleString()}</p>
-        <p className="text-sm text-gray-600 mt-1">total media files</p>
+        <p className="text-sm text-gray-600 mt-1">{t('media.total')}</p>
       </div>
 
       <div className="space-y-2 border-t-2 border-black pt-4">
@@ -44,7 +35,7 @@ export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
           return (
             <div key={type}>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-mono uppercase tracking-wide">{MEDIA_LABELS[type]}</span>
+                <span className="font-mono uppercase tracking-wide">{t(`media.${type}` as any)}</span>
                 <span className="font-bold">{count}</span>
               </div>
               <div className="border border-black h-2 bg-canvas">

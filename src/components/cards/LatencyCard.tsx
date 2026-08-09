@@ -6,9 +6,12 @@ interface Props {
   chatMode?: 'dm' | 'group';
 }
 
+import { useLanguage } from '../../i18n/LanguageContext';
+
 const ACCENTS = ['#0000FF', '#FF5500'];
 
 export default function LatencyCard({ metrics, chatMode = 'dm' }: Props) {
+  const { t } = useLanguage();
   const { participants, avgResponseTimeMinutes, messagesPerSender } = metrics;
   
   const sortedParticipants = [...participants].sort((a, b) => (messagesPerSender[b] ?? 0) - (messagesPerSender[a] ?? 0));
@@ -21,8 +24,8 @@ export default function LatencyCard({ metrics, chatMode = 'dm' }: Props) {
 
   return (
     <div className="p-6 h-full">
-      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">_ RESPONSE TIME</p>
-      <p className="text-xs text-gray-400 mb-4">(turn-taking approximation, 6h gap excluded)</p>
+      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">{t('latency.title')}</p>
+      <p className="text-xs text-gray-400 mb-4">{t('latency.subtitle')}</p>
 
       <div className={`space-y-6 ${chatMode === 'group' ? 'max-h-[300px] overflow-y-auto pr-2 custom-scrollbar' : ''}`}>
         {displayParticipants.map((p, i) => {
@@ -54,12 +57,12 @@ export default function LatencyCard({ metrics, chatMode = 'dm' }: Props) {
                   ))}
                 </div>
                 <div className="flex justify-between font-mono text-xs text-gray-400 mt-1">
-                  <span>faster</span>
-                  <span>slower</span>
+                  <span>{t('latency.faster')}</span>
+                  <span>{t('latency.slower')}</span>
                 </div>
               </div>
 
-              <p className="text-xs text-gray-500 mt-1">avg reply latency</p>
+              <p className="text-xs text-gray-500 mt-1">{t('latency.avgReply')}</p>
             </div>
           );
         })}

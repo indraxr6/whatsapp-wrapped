@@ -5,14 +5,17 @@ interface Props {
   metrics: ParsedChatMetrics;
 }
 
-function formatMonth(monthStr: string): string {
-  const [year, month] = monthStr.split('-');
-  const date = new Date(parseInt(year), parseInt(month) - 1);
-  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-}
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function MonthlyCard({ metrics }: Props) {
+  const { t, language } = useLanguage();
   const { monthlyMessageCounts, peakMonth } = metrics;
+
+  function formatMonth(monthStr: string): string {
+    const [year, month] = monthStr.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short', year: 'numeric' });
+  }
 
   const data = monthlyMessageCounts.map((m) => ({
     month: formatMonth(m.month),
@@ -24,13 +27,13 @@ export default function MonthlyCard({ metrics }: Props) {
     <div className="p-6">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">_ ACTIVITY OVER TIME</p>
-          <p className="text-sm text-gray-600">{monthlyMessageCounts.length} months of data</p>
+          <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">{t('monthly.title')}</p>
+          <p className="text-sm text-gray-600">{monthlyMessageCounts.length} {t('monthly.monthsOfData')}</p>
         </div>
         <div className="text-right border-2 border-black p-3">
-          <p className="font-mono text-xs uppercase tracking-widest text-gray-500">PEAK MONTH</p>
+          <p className="font-mono text-xs uppercase tracking-widest text-gray-500">{t('monthly.peak')}</p>
           <p className="font-extrabold text-lg">{formatMonth(peakMonth.month)}</p>
-          <p className="font-mono text-xs">{peakMonth.count.toLocaleString()} msgs</p>
+          <p className="font-mono text-xs">{peakMonth.count.toLocaleString()} {t('monthly.messages')}</p>
         </div>
       </div>
 

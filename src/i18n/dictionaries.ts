@@ -86,6 +86,7 @@ export const dictionaries = {
     "section.ai": "PERSONALITY ANALYSIS",
     "section.monthly": "ACTIVITY OVER TIME",
     "section.emoji": "EMOJI DNA",
+    "section.vibe": "CHAT VIBE",
 
     // Cards
     "overview.glance": "_ AT A GLANCE",
@@ -104,18 +105,51 @@ export const dictionaries = {
 
     "heatmap.peak": "peak activity time",
     "heatmap.messages": "messages around",
+    "heatmap.title": "_ ACTIVE HOURS",
 
+    "monthly.title": "_ ACTIVITY OVER TIME",
+    "monthly.monthsOfData": "months of data",
     "monthly.peak": "PEAK MONTH",
     "monthly.messages": "messages",
 
-    "latency.title": "AVERAGE RESPONSE TIME",
-    "latency.desc": "lower is faster",
+    "latency.title": "_ RESPONSE TIME",
+    "latency.subtitle": "(turn-taking approximation, 6h gap excluded)",
+    "latency.faster": "faster",
+    "latency.slower": "slower",
+    "latency.avgReply": "avg reply latency",
 
-    "ghosting.title": "GHOSTING INSTANCES",
-    "ghosting.desc": "times someone took 12+ hours to reply",
+    "ghosting.title": "_ GHOSTING INDEX",
+    "ghosting.subtitle": "(12h+ gap before replying)",
+    "ghosting.none": "No major ghosting detected.",
+    "ghosting.consistent": "Both parties respond within 12 hours consistently.",
+    "ghosting.total": "total ghosting instances",
+    "ghosting.worst": "WORST",
+    "ghosting.note": "Note: gaps >6h at night excluded from response time averages.",
 
-    "media.title": "MEDIA SENT",
-    "emoji.title": "TOP EMOJIS",
+    "media.title": "_ MEDIA SENT",
+    "media.total": "total media files",
+    "media.image": "Images",
+    "media.video": "Videos",
+    "media.audio": "Audio",
+    "media.sticker": "Stickers",
+    "media.gif": "GIFs",
+    "media.document": "Documents",
+    "media.contactCard": "Contacts",
+    "media.link": "Links",
+    
+    "emoji.title": "_ TOP EMOJIS",
+    
+    "calls.title": "_ CALLS & EXTRAS",
+    "calls.duration": "Total Duration",
+    "calls.longest": "Longest Call",
+    "calls.guess": "Guess this one??",
+    "calls.viewOnce": "View Once",
+    "calls.edited": "Edited Msgs",
+    "calls.deleted": "Deleted Msgs",
+    "calls.topCallers": "Top Callers",
+
+    "wordcloud.title": "_ WORD CLOUD",
+    "wordcloud.reroll": "Reroll Layout",
 
     "topics.title": "_ TOPICS & EVOLUTION",
     "topics.most": "What you talked about most:",
@@ -241,6 +275,7 @@ export const dictionaries = {
     "section.ai": "ANALISIS KEPRIBADIAN",
     "section.monthly": "AKTIVITAS BULANAN",
     "section.emoji": "DNA EMOJI",
+    "section.vibe": "SUASANA CHAT",
 
     // Cards
     "overview.glance": "_ SEKILAS",
@@ -259,18 +294,51 @@ export const dictionaries = {
 
     "heatmap.peak": "waktu paling aktif",
     "heatmap.messages": "pesan di sekitar pukul",
+    "heatmap.title": "_ JAM AKTIF",
 
+    "monthly.title": "_ AKTIVITAS BULANAN",
+    "monthly.monthsOfData": "bulan data",
     "monthly.peak": "BULAN TERAMAI",
     "monthly.messages": "pesan",
 
-    "latency.title": "RATA-RATA WAKTU BALAS",
-    "latency.desc": "lebih rendah lebih cepat",
+    "latency.title": "_ WAKTU BALAS",
+    "latency.subtitle": "(estimasi balas-balasan, jeda >6 jam diabaikan)",
+    "latency.faster": "lebih cepat",
+    "latency.slower": "lebih lambat",
+    "latency.avgReply": "rata-rata waktu balas",
 
-    "ghosting.title": "KASUS GHOSTING",
-    "ghosting.desc": "kali seseorang butuh 12+ jam untuk membalas",
+    "ghosting.title": "_ INDEKS GHOSTING",
+    "ghosting.subtitle": "(jeda 12+ jam sebelum membalas)",
+    "ghosting.none": "Tidak ada ghosting besar yang terdeteksi.",
+    "ghosting.consistent": "Semua pihak membalas dalam waktu 12 jam secara konsisten.",
+    "ghosting.total": "total kejadian ghosting",
+    "ghosting.worst": "TERPARAH",
+    "ghosting.note": "Catatan: jeda >6 jam di malam hari diabaikan dari rata-rata waktu balas.",
 
-    "media.title": "MEDIA TERKIRIM",
-    "emoji.title": "EMOJI TERBANYAK",
+    "media.title": "_ MEDIA TERKIRIM",
+    "media.total": "total file media",
+    "media.image": "Gambar",
+    "media.video": "Video",
+    "media.audio": "Audio",
+    "media.sticker": "Stiker",
+    "media.gif": "GIF",
+    "media.document": "Dokumen",
+    "media.contactCard": "Kontak",
+    "media.link": "Tautan",
+
+    "emoji.title": "_ EMOJI TERBANYAK",
+
+    "calls.title": "_ PANGGILAN & LAINNYA",
+    "calls.duration": "Total Durasi",
+    "calls.longest": "Panggilan Terlama",
+    "calls.guess": "Coba tebak??",
+    "calls.viewOnce": "Sekali Lihat",
+    "calls.edited": "Pesan Diedit",
+    "calls.deleted": "Pesan Dihapus",
+    "calls.topCallers": "Penelepon Teratas",
+
+    "wordcloud.title": "_ WORD CLOUD",
+    "wordcloud.reroll": "Acak Layout",
 
     "topics.title": "_ TOPIK & EVOLUSI",
     "topics.most": "Yang paling sering dibahas:",
