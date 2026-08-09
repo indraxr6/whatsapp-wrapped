@@ -8,7 +8,17 @@ interface Props {
   metrics: ParsedChatMetrics;
 }
 
-const ACCENT_COLORS = ['#FF5500', '#0000FF', '#00FF00', '#FFD700'];
+const ACCENT_COLORS = [
+  '#C1653F', // terracotta
+  '#8B4A2B', // rust
+  '#D8A93A', // mustard
+  '#8FA37E', // sage
+  '#4C7A73', // teal
+  '#5A7A96', // slate
+  '#B4707A', // mauve
+  '#A0937D', // taupe
+  // omitted charcoal to ensure contrast on charcoal background
+];
 
 export default function WordCloudCard({ metrics }: Props) {
   const { t } = useLanguage();
@@ -56,6 +66,7 @@ export default function WordCloudCard({ metrics }: Props) {
       rotationSteps: 2, // 0 and 90 degrees only
       backgroundColor: 'transparent',
       gridSize: 8 * dpr,
+      shape: 'square',
       shrinkToFit: true,
       drawOutOfBound: false,
     });
@@ -64,16 +75,16 @@ export default function WordCloudCard({ metrics }: Props) {
   return (
     <div className="p-6 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <p className="font-mono text-xs uppercase tracking-widest text-gray-500">{t('wordcloud.title')}</p>
+        <p className="font-mono text-xs uppercase tracking-widest text-white/70">{t('wordcloud.title')}</p>
         <button 
           onClick={() => setKey(k => k + 1)}
-          className="border-2 border-black p-1 hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] transition-all duration-[150ms] ease-linear bg-white"
+          className="border-2 border-black p-1 hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] transition-all duration-[150ms] ease-linear bg-white text-black"
           title={t('wordcloud.reroll')}
         >
           <RefreshCw size={14} strokeWidth={2.5} />
         </button>
       </div>
-      <div ref={containerRef} className="flex-1 w-full bg-white border-2 border-black overflow-hidden relative" style={{ minHeight: '400px' }}>
+      <div ref={containerRef} className="flex-1 w-full overflow-hidden relative" style={{ minHeight: '400px' }}>
         <canvas ref={canvasRef} className="absolute inset-0" />
       </div>
     </div>
