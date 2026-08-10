@@ -7,7 +7,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 interface Props {
   insights: GeminiInsights;
   metrics: ParsedChatMetrics;
-  insightStatus?: 'success' | 'opt_out' | 'failed';
+  insightStatus?: 'success' | 'opt_out' | 'failed' | 'failed_429' | 'failed_503';
   onRetry?: () => void;
 }
 
@@ -51,8 +51,10 @@ export default function RoastCard({ insights, metrics, insightStatus = 'success'
   return (
     <div className="p-6 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <p className="font-mono text-xs uppercase tracking-widest text-gray-500">{t('roast.title')}</p>
-        {insightStatus === 'failed' && (
+        <p className="font-mono text-xs uppercase tracking-widest text-gray-500">
+          {insightStatus !== 'success' ? 'Roast' : t('roast.title')}
+        </p>
+        {insightStatus.startsWith('failed') && (
           <span className="font-mono text-[10px] uppercase tracking-widest bg-accent-orange text-white px-2 py-0.5 font-bold">
             {t('ai.genericInsight')}
           </span>

@@ -22,8 +22,8 @@ export default function EmojiCard({ metrics, chatMode = 'dm' }: Props) {
       {topSpam && (
         <div className="mb-6 bg-accent-orange/10 border border-accent-orange p-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
           <div>
-            <p className="font-bold text-sm">Most extreme emoji burst</p>
-            <p className="text-xs text-gray-700"><strong>{topSpam.sender}</strong> sent {topSpam.emoji} {topSpam.count} times in a single message</p>
+            <p className="font-bold text-sm">{t('emoji.burstTitle')}</p>
+            <p className="text-xs text-gray-700"><strong>{topSpam.sender}</strong> {t('emoji.burstSent')} {topSpam.emoji} {topSpam.count} {t('emoji.burstTimes')}</p>
           </div>
           <div className="text-2xl" style={{ overflowWrap: 'break-word', wordBreak: 'break-all' }}>
             {topSpam.emoji.repeat(Math.min(topSpam.count, 10))}{topSpam.count > 10 ? '...' : ''}
@@ -58,7 +58,7 @@ export default function EmojiCard({ metrics, chatMode = 'dm' }: Props) {
                   );
                 })}
                 {emojis.length === 0 && (
-                  <p className="text-xs text-gray-400 italic">No emojis used</p>
+                  <p className="text-xs text-gray-400 italic">{t('emoji.none')}</p>
                 )}
               </div>
             </div>

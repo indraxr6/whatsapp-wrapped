@@ -35,9 +35,9 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
   const displayParticipants = chatMode === 'group' ? sortedParticipants.slice(0, 5) : sortedParticipants;
 
   return (
-    <div className="p-6 h-full flex flex-col bg-white">
+    <div className="p-6 h-full flex flex-col bg-accent-blue/10">
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-white border-2 border-black p-3 flex flex-col items-center text-center">
+        <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
           <Phone className="mb-2 text-accent-blue" size={24} strokeWidth={2.5} />
           <p className="font-mono text-xs uppercase text-gray-500">{t('calls.duration')}</p>
           <p className="font-black text-2xl">
@@ -46,7 +46,7 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
               : formatDuration(Object.values(totalCallDurationSeconds).reduce((a, b) => a + b, 0))}
           </p>
         </div>
-        <div className="bg-white border-2 border-black p-3 flex flex-col items-center text-center">
+        <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
           <Clock className="mb-2 text-accent-lime" size={24} strokeWidth={2.5} />
           <p className="font-mono text-xs uppercase text-gray-500">{t('calls.longest')}</p>
           <p className="font-black text-2xl">
@@ -54,7 +54,7 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
           </p>
         </div>
         {totalViewOnce > 0 && (
-          <div className="bg-white border-2 border-black p-3 flex flex-col items-center text-center">
+          <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
             <Eye className="mb-2 text-accent-orange" size={24} strokeWidth={2.5} />
             <p className="font-mono text-xs uppercase text-gray-500">{t('calls.viewOnce')}</p>
             <p className="font-black text-2xl">
@@ -63,7 +63,7 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
           </div>
         )}
         {totalEdited > 0 && (
-          <div className="bg-white border-2 border-black p-3 flex flex-col items-center text-center">
+          <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
             <Edit3 className="mb-2 text-accent-yellow" size={24} strokeWidth={2.5} />
             <p className="font-mono text-xs uppercase text-gray-500">{t('calls.edited')}</p>
             <p className="font-black text-2xl">
@@ -72,7 +72,7 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
           </div>
         )}
         {totalDeleted > 0 && (
-          <div className="bg-white border-2 border-black p-3 flex flex-col items-center text-center">
+          <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
             <Trash2 className="mb-2 text-red-500" size={24} strokeWidth={2.5} />
             <p className="font-mono text-xs uppercase text-gray-500">{t('calls.deleted')}</p>
             <p className="font-black text-2xl">
@@ -96,8 +96,18 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
               <div key={p} className="flex items-center justify-between">
                 <span className="font-semibold text-sm truncate max-w-[120px]">{p}</span>
                 <div className="flex items-center gap-4 text-xs font-mono">
-                  <span className="flex items-center gap-1"><Phone size={12} /> {initiated}</span>
-                  <span className="flex items-center gap-1 text-accent-orange"><PhoneMissed size={12} /> {missed}</span>
+                  <div className="relative group flex items-center gap-1 cursor-help">
+                    <Phone size={12} /> {initiated}
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-white text-black text-[10px] font-bold uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10 shadow-[2px_2px_0_0_#000] border border-black">
+                      {t('calls.initiated')}
+                    </div>
+                  </div>
+                  <div className="relative group flex items-center gap-1 text-accent-orange cursor-help">
+                    <PhoneMissed size={12} /> {missed}
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-accent-orange text-white text-[10px] font-bold uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10 shadow-[2px_2px_0_0_#000] border border-black">
+                      {t('calls.missed')}
+                    </div>
+                  </div>
                 </div>
               </div>
             );

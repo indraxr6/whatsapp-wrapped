@@ -31,13 +31,24 @@ export default function HeatmapCard({ metrics }: Props) {
 
   const data = hourlyHeatmap.map((count, hour) => ({ hour: HOUR_LABELS_AXIS[hour], count }));
 
+  let segment = 'night';
+  if (peakHour >= 5 && peakHour < 12) segment = 'morning';
+  else if (peakHour >= 12 && peakHour < 17) segment = 'afternoon';
+  
+  const segmentText = t(`time.segment.${segment}`);
+  const timeText = getHourCallout(peakHour);
+  const sentence = t('heatmap.sentence')
+    .replace('{segment}', segmentText)
+    .replace('{time}', timeText);
+
   return (
-    <div className="p-6 h-full">
+    <div className="p-6 h-full flex flex-col">
       <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">{t('heatmap.title')}</p>
 
-      <div className="mb-4">
-        <p className="nb-stat-sm">{getHourCallout(peakHour)}</p>
-        <p className="text-xs text-gray-500 mt-1">{t('heatmap.peak')}</p>
+      <div className="mb-6 flex-1 flex flex-col justify-center">
+        <p className="text-xl sm:text-2xl font-bold leading-tight">
+          {sentence}
+        </p>
       </div>
 
       <div className="h-28 border-b-2 border-black mb-3">

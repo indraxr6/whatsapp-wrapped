@@ -9,6 +9,8 @@ export default function TopicsCard({ insights }: Props) {
   const { t } = useLanguage();
   const { topics, evolution_note } = insights;
 
+  if (!topics?.length && !evolution_note) return null;
+
   return (
     <div className="p-6 h-full border-t-2 md:border-t-0 md:b0 border-black">
       <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">{t('topics.title')}</p>

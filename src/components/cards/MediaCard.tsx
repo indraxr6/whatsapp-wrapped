@@ -12,8 +12,9 @@ const MEDIA_ORDER: MediaType[] = ['image', 'video', 'sticker', 'audio', 'gif', '
 
 export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
   const { t } = useLanguage();
-  const { mediaLeaderboard, mediaCounts, participants } = metrics;
+  const { mediaLeaderboard, mediaCounts, stickerCount, participants } = metrics;
   const totalMedia = Object.values(mediaCounts).reduce((a, b) => a + b, 0);
+  const totalStickers = Object.values(stickerCount).reduce((a, b) => a + b, 0);
   const maxType = Math.max(...Object.values(mediaLeaderboard), 1);
   
   const sortedParticipants = [...participants].sort((a, b) => (mediaCounts[b] ?? 0) - (mediaCounts[a] ?? 0));
@@ -29,7 +30,7 @@ export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
       </div>
 
       <div className="space-y-2 border-t-2 border-black pt-4">
-        {MEDIA_ORDER.filter((t) => (mediaLeaderboard[t] ?? 0) > 0).map((type) => {
+        {MEDIA_ORDER.filter((t) => t !== 'sticker' && (mediaLeaderboard[t] ?? 0) > 0).map((type) => {
           const count = mediaLeaderboard[type] ?? 0;
           const barPct = Math.round((count / maxType) * 100);
           return (
@@ -44,6 +45,14 @@ export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
             </div>
           );
         })}
+        {totalStickers > 0 && (
+          <div className="pt-2 mt-2 border-t-2 border-black border-dashed">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="font-mono uppercase tracking-wide text-gray-500">{t('media.sticker')}</span>
+              <span className="font-bold">{totalStickers.toLocaleString()}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={`mt-4 border-t-2 border-black pt-3 space-y-1 ${chatMode === 'group' ? 'max-h-[150px] overflow-y-auto pr-2 custom-scrollbar' : ''}`}>

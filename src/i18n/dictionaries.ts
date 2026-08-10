@@ -11,7 +11,7 @@ export const dictionaries = {
     "hero.title1": "WhatsApp",
     "hero.title2": "Chat",
     "hero.title3": "Wrapped.",
-    "hero.subtitle": "Parses your exported chat log locally. Counts everything. Gets Gemini to roast you. Keeps your data in your browser.",
+    "hero.subtitle": "Parses your exported chat log locally. Counts everything. Gets AI to roast you. Keeps your data in your browser.",
 
     // Upload Zone
     "upload.title": "Upload your chat export",
@@ -32,6 +32,8 @@ export const dictionaries = {
     "how.step2.desc": "Parsed entirely in your browser — nothing leaves your device",
     "how.step3.title": "Get Wrapped",
     "how.step3.desc": "Stats, charts, and an AI roast using your own Gemini key",
+
+
 
     // Modals
     "error.title": "_ ERROR",
@@ -93,6 +95,8 @@ export const dictionaries = {
     "overview.volume": "TOTAL VOLUME",
     "overview.messages": "total messages",
     "overview.daysOfChat": "days of chat",
+    "overview.activeDays": "active chat days",
+    "overview.span": "span: {count} days",
     "overview.msgsPerDay": "msg/day avg",
     "overview.streak": "day streak",
     "overview.streakDesc": "longest consecutive daily activity",
@@ -106,6 +110,7 @@ export const dictionaries = {
     "heatmap.peak": "peak activity time",
     "heatmap.messages": "messages around",
     "heatmap.title": "_ ACTIVE HOURS",
+    "heatmap.sentence": "You chat most in the {segment}, particularly around {time}.",
 
     "monthly.title": "_ ACTIVITY OVER TIME",
     "monthly.monthsOfData": "months of data",
@@ -141,10 +146,16 @@ export const dictionaries = {
     "links.total": "categorized links",
 
     "emoji.title": "_ TOP EMOJIS",
+    "emoji.none": "No emojis used",
+    "emoji.burstTitle": "Most extreme emoji burst",
+    "emoji.burstSent": "sent",
+    "emoji.burstTimes": "times in a single message",
 
     "calls.title": "_ CALLS & EXTRAS",
     "calls.duration": "Total Duration",
     "calls.longest": "Longest Call",
+    "calls.initiated": "Calls",
+    "calls.missed": "Missed/Unanswered",
     "calls.guess": "Guess this one??",
     "calls.viewOnce": "View Once",
     "calls.edited": "Edited Msgs",
@@ -158,12 +169,32 @@ export const dictionaries = {
     "topics.most": "What you talked about most:",
     "topics.change": "How it changed over time:",
 
+    "mirrored.title": "_ MIRRORED PHRASES",
+    "mirrored.desc": "Phrases you both use a lot.",
+
+    "excerpts.title": "_ TIMECODE EXCERPTS",
+    "excerpts.early": "Early Days",
+    "excerpts.median": "The Middle",
+    "excerpts.late": "Recently",
+
     "roast.title": "_ AI ROAST",
 
     // AI Failure & Group state
-    "ai.genericInsight": "Showing generic insight",
+    "ai.genericInsight": "Generic Insight",
     "ai.retry": "Retry AI",
+    "ai.retry_soft": "Try Real AI again",
     "ai.retryRoast": "Retry AI for real roast",
+
+    "time.morning": "AM",
+    "time.afternoon": "PM",
+    "time.evening": "PM",
+    "time.night": "PM",
+    "time.midnight": "12 AM",
+    "time.noon": "12 PM",
+    "time.segment.morning": "morning",
+    "time.segment.afternoon": "afternoon",
+    "time.segment.night": "night",
+
     "group.others": "Others",
     "group.showingTop": "Showing top 10 most active senders",
     "group.showingTop10": "Showing top 10",
@@ -184,14 +215,7 @@ export const dictionaries = {
     "loading.fact2": "Over 100 billion messages are sent on WhatsApp every day.",
     "loading.fact3": "WhatsApp was founded in 2009 by two former Yahoo employees.",
     "loading.fact4": "Emojis were invented in Japan in 1999 by Shigetaka Kurita.",
-    "loading.fact5": "The blue double-tick 'read receipt' launched in 2014 and immediately caused relationship drama worldwide.",
-
-    "time.morning": "in the morning",
-    "time.afternoon": "in the afternoon",
-    "time.evening": "in the evening",
-    "time.night": "at night",
-    "time.noon": "12 noon",
-    "time.midnight": "12 midnight"
+    "loading.fact5": "The blue double-tick 'read receipt' launched in 2014 and immediately caused relationship drama worldwide."
   },
   id: {
     // App Header
@@ -203,7 +227,7 @@ export const dictionaries = {
     "hero.title1": "WhatsApp",
     "hero.title2": "Chat",
     "hero.title3": "Wrapped.",
-    "hero.subtitle": "Baca data chat secara lokal. Hitung semua metrik. Minta Gemini untuk meroasting. Data tetap aman di browser Anda.",
+    "hero.subtitle": "Baca data chat secara lokal. Hitung semua metrik. Minta AI untuk meroasting. Data tetap aman di browser Anda.",
 
     // Upload Zone
     "upload.title": "Unggah export chat Anda",
@@ -281,23 +305,26 @@ export const dictionaries = {
     "section.vibe": "SUASANA CHAT",
 
     // Cards
-    "overview.glance": "_ SEKILAS",
+    "overview.glance": "_ RINGKASAN",
     "overview.volume": "TOTAL VOLUME",
     "overview.messages": "total pesan",
-    "overview.daysOfChat": "hari chat",
+    "overview.daysOfChat": "hari obrolan",
+    "overview.activeDays": "hari aktif chat",
+    "overview.span": "rentang: {count} hari",
     "overview.msgsPerDay": "pesan/hari rata-rata",
-    "overview.streak": "hari berturut-turut",
-    "overview.streakDesc": "aktivitas harian terpanjang",
+    "overview.streak": "hari beruntun",
+    "overview.streakDesc": "aktivitas harian berturut-turut terlama",
     "overview.from": "DARI",
-    "overview.to": "HINGGA",
+    "overview.to": "SAMPAI",
 
     "msgshare.title": "_ JUMLAH PESAN",
     "msgshare.doubleTexts": "double-text",
     "msgshare.bursts": "pesan / burst",
 
     "heatmap.peak": "waktu paling aktif",
-    "heatmap.messages": "pesan di sekitar pukul",
+    "heatmap.messages": "pesan sekitar",
     "heatmap.title": "_ JAM AKTIF",
+    "heatmap.sentence": "Kalian paling sering ngobrol di {segment}, terutama sekitar jam {time}.",
 
     "monthly.title": "_ AKTIVITAS BULANAN",
     "monthly.monthsOfData": "bulan data",
@@ -333,10 +360,16 @@ export const dictionaries = {
     "links.total": "tautan terkategori",
 
     "emoji.title": "_ EMOJI TERBANYAK",
+    "emoji.none": "Tidak ada emoji",
+    "emoji.burstTitle": "Ledakan emoji paling ekstrem",
+    "emoji.burstSent": "mengirim",
+    "emoji.burstTimes": "kali dalam satu pesan",
 
     "calls.title": "_ PANGGILAN & LAINNYA",
     "calls.duration": "Total Durasi",
     "calls.longest": "Panggilan Terlama",
+    "calls.initiated": "Panggilan",
+    "calls.missed": "Tak Terjawab/Ditolak",
     "calls.guess": "Coba tebak??",
     "calls.viewOnce": "Sekali Lihat",
     "calls.edited": "Pesan Diedit",
@@ -350,12 +383,32 @@ export const dictionaries = {
     "topics.most": "Yang paling sering dibahas:",
     "topics.change": "Perubahannya seiring waktu:",
 
+    "mirrored.title": "_ FRASA SAMA",
+    "mirrored.desc": "Kata-kata yang sering kalian pakai berdua.",
+
+    "excerpts.title": "_ CUPLIKAN WAKTU",
+    "excerpts.early": "Awal Mula",
+    "excerpts.median": "Pertengahan",
+    "excerpts.late": "Baru-baru Ini",
+
     "roast.title": "_ AI ROAST",
 
     // AI Failure & Group state
-    "ai.genericInsight": "Menampilkan insight demo",
+    "ai.genericInsight": "Analisis Biasa",
     "ai.retry": "Coba Lagi AI",
+    "ai.retry_soft": "Coba AI Asli",
     "ai.retryRoast": "Coba AI untuk roast asli",
+
+    "time.morning": "Pagi",
+    "time.afternoon": "Siang",
+    "time.evening": "Sore",
+    "time.night": "Malam",
+    "time.midnight": "Tengah Malam",
+    "time.noon": "Tengah Hari",
+    "time.segment.morning": "pagi hari",
+    "time.segment.afternoon": "siang hari",
+    "time.segment.night": "malam hari",
+
     "group.others": "Lainnya",
     "group.showingTop": "Menampilkan 10 pengirim paling aktif",
     "group.showingTop10": "Menampilkan 10 teratas",
@@ -376,13 +429,6 @@ export const dictionaries = {
     "loading.fact2": "Lebih dari 100 miliar pesan dikirim di WhatsApp setiap hari.",
     "loading.fact3": "WhatsApp didirikan pada 2009 oleh dua mantan karyawan Yahoo.",
     "loading.fact4": "Emoji ditemukan di Jepang pada 1999 oleh Shigetaka Kurita.",
-    "loading.fact5": "Centang biru 'dibaca' diluncurkan pada 2014 dan langsung menyebabkan drama hubungan di seluruh dunia.",
-
-    "time.morning": "di pagi hari",
-    "time.afternoon": "di sore hari",
-    "time.evening": "di malam hari",
-    "time.night": "di larut malam",
-    "time.noon": "jam 12 siang",
-    "time.midnight": "tengah malam"
+    "loading.fact5": "Centang biru 'dibaca' diluncurkan pada 2014 dan langsung menyebabkan drama hubungan di seluruh dunia."
   }
 };
