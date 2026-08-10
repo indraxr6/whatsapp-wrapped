@@ -13,6 +13,8 @@ import SharedLinksCard from './cards/SharedLinksCard';
 import PersonalityCard from './cards/PersonalityCard';
 import TopicsCard from './cards/TopicsCard';
 import RoastCard from './cards/RoastCard';
+import MirroredPhrasesCard from './cards/MirroredPhrasesCard';
+import ExcerptsCard from './cards/ExcerptsCard';
 import Footer from './Footer';
 import { useLanguage } from '../i18n/LanguageContext';
 import LanguageToggle from './LanguageToggle';
@@ -21,7 +23,7 @@ interface Props {
   metrics: ParsedChatMetrics;
   insights: GeminiInsights;
   chatMode: 'dm' | 'group';
-  insightStatus: 'success' | 'opt_out' | 'failed';
+  insightStatus: 'success' | 'opt_out' | 'failed' | 'failed_429' | 'failed_503';
   onRetryAI: () => void;
   onReset: () => void;
   onOpenApiKey: () => void;
@@ -34,7 +36,7 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
   return (
     <div className="min-h-screen bg-canvas">
       {/* Sticky header */}
-      <header className="sticky top-0 z-10 bg-canvas border-b-2 border-black px-6 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-10 bg-canvas border-b-2 border-black px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
         <div className="flex items-center gap-3">
           <button 
             onClick={onReset}
@@ -45,11 +47,11 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
           </button>
           <span className="font-sans font-extrabold tracking-tight">{t('header.title')}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <LanguageToggle />
-          <button onClick={onOpenPrivacy} className="nb-btn text-xs py-1.5 ml-2">{t('header.privacy')}</button>
-          <button onClick={onOpenApiKey} className="nb-btn text-xs py-1.5">[ KEY ]</button>
-          <button id="analyze-again-btn" onClick={onReset} className="nb-btn-primary text-xs py-1.5">
+          <button onClick={onOpenPrivacy} className="nb-btn text-xs py-1.5 whitespace-nowrap flex-shrink-0">{t('header.privacy')}</button>
+          <button onClick={onOpenApiKey} className="nb-btn text-xs py-1.5 whitespace-nowrap flex-shrink-0">[ KEY ]</button>
+          <button id="analyze-again-btn" onClick={onReset} className="nb-btn-primary text-xs py-1.5 whitespace-nowrap flex-shrink-0">
             {t('footer.cta.btn')}
           </button>
         </div>
@@ -121,8 +123,15 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
         {/* Section: Patterns */}
         <div>
           <h2 className="font-mono text-sm uppercase tracking-widest mb-4">_ {t('section.patterns')}</h2>
-          <div className="border-2 border-black">
-            <WordCloudCard metrics={metrics} />
+          <div className={`grid grid-cols-1 ${metrics.mirroredPhrases.length > 0 ? 'lg:grid-cols-3' : ''} gap-0 border-2 border-black`}>
+            <div className={`${metrics.mirroredPhrases.length > 0 ? 'lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2' : ''} border-black`}>
+              <WordCloudCard metrics={metrics} />
+            </div>
+            {metrics.mirroredPhrases.length > 0 && (
+              <div>
+                <MirroredPhrasesCard metrics={metrics} />
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-2 border-black border-t-0">
             <div className="border-b-2 md:border-b-0 md:border-r-2 border-black">
@@ -165,8 +174,13 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
               />
             </div>
           </div>
+          {(insights.topics?.length || insights.evolution_note) ? (
+            <div className="border-2 border-t-0 border-black">
+              <TopicsCard insights={insights} />
+            </div>
+          ) : null}
           <div className="border-2 border-t-0 border-black">
-            <TopicsCard insights={insights} />
+            <ExcerptsCard metrics={metrics} />
           </div>
         </section>
 

@@ -15,6 +15,14 @@ const OVERNIGHT_GAP_MINUTES = 360; // 6 hours — gaps larger than this are excl
 const EMOJI_REGEX = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
 
 function extractEmojisFromText(text: string): string[] {
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+    const segments = Array.from(segmenter.segment(text)).map(s => s.segment);
+    return segments.filter(s => {
+      const regex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
+      return regex.test(s);
+    });
+  }
   return text.match(EMOJI_REGEX) ?? [];
 }
 
@@ -26,7 +34,7 @@ function topN<T extends { count: number }>(arr: T[], n = 10): T[] {
 // Core metrics calculations
 // ──────────────────────────────────────────────
 
-export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
+export function calculateMetrics(messages: ChatMessage[], fileName?: string): ParsedChatMetrics {
   const realMessages = messages.filter((m) => m.sender !== 'System' && m.sender !== 'WhatsApp' && m.sender !== 'Meta AI');
   const contentMessages = realMessages.filter((m) => !m.isMedia && !m.isSystem);
 
@@ -70,6 +78,15 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
     groupName = latestRenameMatch;
   } else if (creationMatch) {
     groupName = creationMatch.replace(/^["“”]|["“”]$/g, '').trim();
+  } else if (fileName) {
+    // Attempt to extract group name from "WhatsApp Chat with My Group.txt"
+    // Or "WhatsApp Chat - My Group.txt"
+    const fnMatch = fileName.match(/WhatsApp Chat (?:with|-)?\s*(.+)\.txt/i);
+    if (fnMatch && fnMatch[1] && fnMatch[1].trim() !== '') {
+      groupName = fnMatch[1].trim();
+    } else if (participants.length > 2) {
+      groupName = 'Group Chat';
+    }
   } else if (participants.length > 2) {
     groupName = 'Group Chat';
   } else {
@@ -77,13 +94,21 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
   }
 
   // ── Chat span & pace ──
+  const uniqueDatesSet = new Set(
+    realMessages.map((m) => {
+      const d = m.timestamp;
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    })
+  );
+  const activeChatDays = uniqueDatesSet.size;
+
   const chatDurationDays = Math.max(
     1,
     Math.ceil(
       (dateRange.end.getTime() - dateRange.start.getTime()) / 86400000
     )
   );
-  const avgMessagesPerDay = parseFloat((realMessages.length / chatDurationDays).toFixed(1));
+  const avgMessagesPerDay = parseFloat((realMessages.length / activeChatDays).toFixed(1));
 
   // ── Message counts per sender ──
   const messagesPerSender: Record<string, number> = {};
@@ -128,6 +153,7 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
 
   // ── Media counts per sender (total) and per-type ──
   const mediaCounts: Record<string, number> = {};
+  const stickerCount: Record<string, number> = {};
   const viewOnceCount: Record<string, number> = {};
   const MEDIA_TYPES: MediaType[] = ['image', 'video', 'audio', 'sticker', 'gif', 'document', 'contactCard', 'link'];
   const mediaLeaderboard: Record<MediaType, number> = Object.fromEntries(
@@ -164,16 +190,20 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
   };
 
   for (const m of realMessages.filter((m) => m.isMedia)) {
-    mediaCounts[m.sender] = (mediaCounts[m.sender] ?? 0) + 1;
+    const type = m.mediaType ?? 'image';
+    
+    if (type === 'sticker') {
+      stickerCount[m.sender] = (stickerCount[m.sender] ?? 0) + 1;
+    } else {
+      mediaCounts[m.sender] = (mediaCounts[m.sender] ?? 0) + 1;
+      mediaLeaderboard[type] = (mediaLeaderboard[type] ?? 0) + 1;
+      if (mediaLeaderboardPerSender[m.sender]) {
+        mediaLeaderboardPerSender[m.sender][type] = (mediaLeaderboardPerSender[m.sender][type] ?? 0) + 1;
+      }
+    }
 
     if (m.content.toLowerCase().includes('view once')) {
       viewOnceCount[m.sender] = (viewOnceCount[m.sender] ?? 0) + 1;
-    }
-
-    const type = m.mediaType ?? 'image';
-    mediaLeaderboard[type] = (mediaLeaderboard[type] ?? 0) + 1;
-    if (mediaLeaderboardPerSender[m.sender]) {
-      mediaLeaderboardPerSender[m.sender][type] = (mediaLeaderboardPerSender[m.sender][type] ?? 0) + 1;
     }
 
     if (type === 'link') {
@@ -350,10 +380,29 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
     late: computeEraMetrics(lateMessages),
   };
 
+  // ── Mirrored Phrases ──
+  const phraseSenders: Record<string, Set<string>> = {};
+  for (const m of contentMessages) {
+    const raw = m.content.trim().toLowerCase();
+    if (raw.length >= 3 && !STOP_WORDS.has(raw)) {
+      if (!phraseSenders[raw]) phraseSenders[raw] = new Set();
+      phraseSenders[raw].add(m.sender);
+    }
+  }
+
+  const mirroredPhrases: { phrase: string; count: number }[] = [];
+  for (const [phrase, senders] of Object.entries(phraseSenders)) {
+    if (senders.size >= 2) {
+      const count = contentMessages.filter(m => m.content.trim().toLowerCase() === phrase).length;
+      mirroredPhrases.push({ phrase, count });
+    }
+  }
+  mirroredPhrases.sort((a, b) => b.count - a.count);
+
   const sampleExcerpts = {
-    early: selectSampleExcerpts(earlyMessages.filter(m => !m.isMedia), 6),
-    median: selectSampleExcerpts(medianMessages.filter(m => !m.isMedia), 6),
-    late: selectSampleExcerpts(lateMessages.filter(m => !m.isMedia), 6),
+    early: selectContinuousExcerpts(earlyMessages.filter(m => !m.isMedia && !m.isSystem), 15, 'start'),
+    median: selectContinuousExcerpts(medianMessages.filter(m => !m.isMedia && !m.isSystem), 15, 'middle'),
+    late: selectContinuousExcerpts(lateMessages.filter(m => !m.isMedia && !m.isSystem), 15, 'end'),
   };
 
   const topKeywords = computeTopKeywords(contentMessages);
@@ -394,6 +443,9 @@ export function calculateMetrics(messages: ChatMessage[]): ParsedChatMetrics {
     viewOnceCount,
     editedMessageCount,
     deletedMessageCount,
+    activeChatDays,
+    stickerCount,
+    mirroredPhrases,
   };
 }
 
@@ -468,24 +520,23 @@ function computeTopKeywords(messages: ChatMessage[]): { word: string; count: num
   return combined.slice(0, 150).map(([word, count]) => ({ word, count }));
 }
 
-function selectSampleExcerpts(messages: ChatMessage[], count: number): string[] {
-  if (messages.length <= count) {
-    return messages.map((m) => `${m.sender}: ${m.content.slice(0, 120)}`);
+function selectContinuousExcerpts(messages: ChatMessage[], count: number, position: 'start' | 'middle' | 'end'): string[] {
+  const validMessages = messages.filter(m => m.content.trim().length > 3 && !m.isSystem);
+
+  if (validMessages.length <= count) {
+    return validMessages.map((m) => `${m.sender}: ${m.content.slice(0, 120)}`);
   }
 
-  const step = Math.floor(messages.length / count);
-  const excerpts: string[] = [];
-
-  for (let i = 0; i < count; i++) {
-    const idx = Math.min(i * step + Math.floor(Math.random() * step), messages.length - 1);
-    const m = messages[idx];
-    const content = m.content.trim();
-    if (content.length > 3) {
-      excerpts.push(`${m.sender}: ${content.slice(0, 120)}`);
-    }
+  let startIndex = 0;
+  if (position === 'middle') {
+    startIndex = Math.floor(validMessages.length / 2) - Math.floor(count / 2);
+  } else if (position === 'end') {
+    startIndex = validMessages.length - count;
   }
 
-  return excerpts;
+  return validMessages
+    .slice(startIndex, startIndex + count)
+    .map((m) => `${m.sender}: ${m.content.slice(0, 120)}`);
 }
 
 function calculateLongestStreak(messages: ChatMessage[]): number {

@@ -42,6 +42,8 @@ export interface ParsedChatMetrics {
   ghostingInstances: Record<string, number>;
   groupName: string | null;
   sharedLinks: Record<string, number>;
+  activeChatDays: number;
+  mirroredPhrases: { phrase: string; count: number }[];
 
   // Media
   mediaCounts: Record<string, number>;
@@ -49,11 +51,12 @@ export interface ParsedChatMetrics {
   editedMessageCount: Record<string, number>;
   deletedMessageCount: Record<string, number>;
 
-  // Calls
+  // Calls & Extras
   callsInitiated: Record<string, number>;
   callsMissed: Record<string, number>;
   totalCallDurationSeconds: Record<string, number>;
   longestCallSeconds: number;
+  stickerCount: Record<string, number>;
 
   // Emoji — top 10 per sender (not merged)
   topEmojisPerSender: Record<string, EmojiCount[]>;
