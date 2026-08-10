@@ -19,7 +19,7 @@ export default function App() {
   const [showChatModeModal, setShowChatModeModal] = useState(false);
   const [chatMode, setChatMode] = useState<'dm' | 'group'>('dm');
   const [privacyModalVariant, setPrivacyModalVariant] = useState<'auto' | 'manual' | null>(null);
-  const [insightStatus, setInsightStatus] = useState<'success' | 'opt_out' | 'failed'>('success');
+  const [insightStatus, setInsightStatus] = useState<'success' | 'opt_out' | 'failed_429' | 'failed_503' | 'failed'>('success');
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<ParsedChatMetrics | null>(null);
   const [insights, setInsights] = useState<GeminiInsights | null>(null);
@@ -49,7 +49,7 @@ export default function App() {
       }
 
       setLoadingStep('Crunching the numbers...');
-      const chatMetrics = calculateMetrics(messages);
+      const chatMetrics = calculateMetrics(messages, file.name);
       setMetrics(chatMetrics);
 
       if (unparsedLineCount > 0) {
@@ -121,11 +121,17 @@ export default function App() {
       try {
         geminiInsights = await analyzeWithGemini(getApiKey(), metrics, language, chatMode);
         setInsightStatus('success');
-      } catch (aiErr) {
+      } catch (aiErr: any) {
         console.warn('[Gemini] API failed, falling back to demo insights:', aiErr);
         geminiInsights = generateDemoInsights(metrics, language, chatMode);
-        setInsightStatus('failed');
-        setError('AI analysis unavailable — showing generic insights. Your stats are still real.');
+        
+        if (aiErr.message?.includes('429')) {
+          setInsightStatus('failed_429');
+        } else if (aiErr.message?.includes('503')) {
+          setInsightStatus('failed_503');
+        } else {
+          setInsightStatus('failed');
+        }
       }
       setInsights(geminiInsights);
     } else {
