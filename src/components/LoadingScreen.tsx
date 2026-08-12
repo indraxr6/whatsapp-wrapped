@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { Loader2 } from 'lucide-react';
 
 interface Props {
   step: string;
@@ -60,8 +61,8 @@ export default function LoadingScreen({ step }: Props) {
             const pending = i > currentStepIdx;
             return (
               <div key={s} className={`flex items-center gap-3 font-mono text-xs ${active ? 'text-black font-bold' : pending ? 'text-gray-400' : 'text-gray-500'}`}>
-                <span className="w-6 text-center">
-                  {done ? '[x]' : active ? '[ ]' : '   '}
+                <span className="w-6 flex justify-center items-center">
+                  {done ? '[x]' : active ? <Loader2 size={14} className="animate-spin" /> : '   '}
                 </span>
                 <span className={done ? 'line-through' : ''}>{s}</span>
               </div>

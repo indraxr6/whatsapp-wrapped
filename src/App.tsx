@@ -39,6 +39,11 @@ export default function App() {
     try {
       setView('analyzing');
       setLoadingStep('Reading your chat...');
+      
+      // Wait for the AnimatePresence fade transition (200ms) to finish 
+      // before blocking the main thread, to avoid a white-screen stutter.
+      await new Promise((resolve) => setTimeout(resolve, 250));
+
       let rawText = '';
       let activeFileName = file.name;
 
@@ -52,6 +57,7 @@ export default function App() {
       }
 
       setLoadingStep('Parsing messages...');
+      await new Promise((resolve) => setTimeout(resolve, 50)); // Yield to paint
       const { messages, unparsedLineCount } = parseWhatsAppExport(rawText);
 
       if (messages.length === 0) {
@@ -61,6 +67,7 @@ export default function App() {
       }
 
       setLoadingStep('Crunching the numbers...');
+      await new Promise((resolve) => setTimeout(resolve, 50)); // Yield to paint
       const chatMetrics = calculateMetrics(messages, activeFileName);
       setMetrics(chatMetrics);
 
@@ -360,11 +367,11 @@ function UploadPage({ onFileUpload, onOpenPrivacy, error }: UploadPageProps) {
                 { step: '03', title: t('how.step3.title'), desc: t('how.step3.desc') },
               ].map((s, i) => (
                 <div key={s.step} className={`p-5 ${i < 2 ? 'border-b-2 sm:border-b-0 sm:border-r-2 border-black' : ''}`}>
-                  <p className="font-mono text-xs text-gray-400 mb-2">{s.step}</p>
-                  <p className="font-bold text-sm mb-1 flex items-center">
-                    {s.title}
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="font-mono text-xs text-gray-400">{s.step}</p>
                     {s.step === '01' && <ExportTooltip />}
-                  </p>
+                  </div>
+                  <p className="font-bold text-sm mb-1">{s.title}</p>
                   <p className="text-xs text-gray-600 leading-relaxed">{s.desc}</p>
                 </div>
               ))}

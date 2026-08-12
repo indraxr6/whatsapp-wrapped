@@ -36,6 +36,7 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       "you're now an admin",
       'now an admin',
       'meta ai',
+      'security code',
       'null'
     ],
     mediaPlaceholders: [
@@ -104,7 +105,9 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'telepon suara',
       'telepon video',
       // Meta AI
-      'meta ai'
+      'meta ai',
+      // Security code
+      'kode keamanan'
     ],
     mediaPlaceholders: [
       // Old "dihilangkan" variants

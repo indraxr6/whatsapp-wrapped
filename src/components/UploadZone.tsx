@@ -70,7 +70,8 @@ export default function UploadZone({ onFileSelected }: Props) {
             {dragging ? t('upload.drag_active') : t('upload.drag_drop')}
           </p>
           <p className="text-sm text-gray-600">
-            {t('upload.or')} <span className="underline underline-offset-2 font-semibold">{t('upload.click_browse')}</span> {t('upload.for_file')}
+            {t('upload.or')} <span className="underline underline-offset-2 font-semibold">{t('upload.click_browse')}</span>{' '}
+            <span dangerouslySetInnerHTML={{ __html: t('upload.for_file').replace(/<bold>/g, '<strong class="font-bold">').replace(/<\/bold>/g, '</strong>') }} />
           </p>
         </div>
 

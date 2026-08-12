@@ -15,14 +15,14 @@ export const dictionaries = {
 
     // Upload Zone
     "upload.title": "Upload your chat export",
-    "upload.subtitle": "Make sure to export WITHOUT media. Must be a .txt file.",
+    "upload.subtitle": "Make sure to export WITHOUT media. Must be a <bold>.zip</bold> or <bold>.txt</bold> file.",
     "upload.or": "or",
     "upload.skipAI": "SKIP AI — USE GENERIC INSIGHTS",
-    "upload.error_invalid_file": "Please upload a WhatsApp exported chat (.txt file).",
+    "upload.error_invalid_file": "Please upload a WhatsApp exported chat (.zip or .txt file).",
     "upload.drag_drop": "Drop your WhatsApp export here",
     "upload.drag_active": "Drop to analyze",
     "upload.click_browse": "click to browse",
-    "upload.for_file": "for a .txt file",
+    "upload.for_file": "for a <bold>.zip</bold> or <bold>.txt</bold> file",
 
     // How It Works
     "how.kicker": "_ HOW IT WORKS",
@@ -238,14 +238,14 @@ export const dictionaries = {
 
     // Upload Zone
     "upload.title": "Unggah export chat Anda",
-    "upload.subtitle": "Pastikan export TANPA media (Without Media). Harus berupa file .txt.",
+    "upload.subtitle": "Pastikan export TANPA media (Without Media). Harus berupa file <bold>.zip</bold> atau <bold>.txt</bold>.",
     "upload.or": "atau",
     "upload.skipAI": "LEWATI AI — GUNAKAN DEMO INSIGHTS",
-    "upload.error_invalid_file": "Harap unggah chat export WhatsApp (file .txt).",
+    "upload.error_invalid_file": "Harap unggah chat export WhatsApp (file .zip atau .txt).",
     "upload.drag_drop": "Tarik export WhatsApp Anda ke sini",
     "upload.drag_active": "Lepaskan untuk menganalisis",
     "upload.click_browse": "klik untuk mencari",
-    "upload.for_file": "file .txt",
+    "upload.for_file": "file <bold>.zip</bold> atau <bold>.txt</bold>",
 
     // How It Works
     "how.kicker": "_ CARA KERJA",
