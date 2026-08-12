@@ -42,9 +42,31 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     throw new Error('No parseable messages found in the export.');
   }
 
-  const participants = Array.from(
+  const rawParticipants = Array.from(
     new Set(realMessages.map((m) => m.sender))
   ).filter(Boolean);
+
+  const senderNonSystemCounts: Record<string, number> = {};
+  for (const m of realMessages) {
+    // A genuine participant is someone who sends a real text/media OR initiates a call
+    if (!m.isSystem || m.isCall) {
+      senderNonSystemCounts[m.sender] = (senderNonSystemCounts[m.sender] ?? 0) + 1;
+    }
+  }
+
+  const participants = rawParticipants.filter(p => senderNonSystemCounts[p] > 0);
+  const systemOnlySenders = rawParticipants.filter(p => !senderNonSystemCounts[p]);
+
+  let dominantSystemSender: string | null = null;
+  if (systemOnlySenders.length > 0) {
+    const systemCounts: Record<string, number> = {};
+    for (const m of realMessages) {
+      if (m.isSystem && systemOnlySenders.includes(m.sender)) {
+        systemCounts[m.sender] = (systemCounts[m.sender] ?? 0) + 1;
+      }
+    }
+    dominantSystemSender = Object.keys(systemCounts).sort((a, b) => systemCounts[b] - systemCounts[a])[0];
+  }
 
   const dateRange = {
     start: realMessages[0].timestamp,
@@ -53,22 +75,30 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
 
   // ── Group Name Detection ──
   let groupName: string | null = null;
-  const renameRegex = /(?:changed the group name to|changed this group's name to|changed the subject to|mengubah nama grup menjadi|mengubah subjek menjadi|mengubah subjek grup menjadi)\s*(["“”])(.*?)\1/i;
-  const creationRegex = /(?:created group|membuat grup|telah membuat grup) (["“”]?)(.+?)\1?$/i;
+  // Group name detection regexes.
+  // NOTE: WhatsApp uses different left " (U+201C) and right " (U+201D) curly quotes.
+  // A backreference \1 would fail since the opening and closing quotes differ.
+  // We match any quote character for both open and close independently.
+  const renameRegex = /(?:changed the group name to|changed this group's name to|changed the subject to|mengubah nama grup menjadi|mengubah subjek menjadi|mengubah subjek grup menjadi)\s*[\u201c\u201d"]?([^\u201c\u201d"]+)[\u201c\u201d"]?\s*$/i;
+  const creationRegex = /(?:created group|membuat grup|telah membuat grup)\s+[\u201c\u201d"]?(.+?)[\u201c\u201d"]?\s*$/i;
 
   let latestRenameMatch: string | null = null;
   let creationMatch: string | null = null;
 
+  // Group-name stop-words that should never be treated as a real group name
+  const NAME_STOP_WORDS = new Set(['ini', 'itu', 'this', 'the', 'here', 'tersebut']);
+
   for (const m of messages) {
     if (m.isSystem) {
       const rename = m.content.match(renameRegex);
-      if (rename && rename[2]) {
-        latestRenameMatch = rename[2];
+      if (rename && rename[1]) {
+        latestRenameMatch = rename[1].trim();
       }
       if (!creationMatch) {
         const creation = m.content.match(creationRegex);
-        if (creation && creation[2]) {
-          creationMatch = creation[2];
+        // Guard: captured name must be >3 chars and not a pronoun/demonstrative
+        if (creation && creation[1] && creation[1].trim().length > 3 && !NAME_STOP_WORDS.has(creation[1].trim().toLowerCase())) {
+          creationMatch = creation[1].trim();
         }
       }
     }
@@ -78,6 +108,8 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     groupName = latestRenameMatch;
   } else if (creationMatch) {
     groupName = creationMatch.replace(/^["“”]|["“”]$/g, '').trim();
+  } else if (dominantSystemSender) {
+    groupName = dominantSystemSender;
   } else if (fileName) {
     // Attempt to extract group name from "WhatsApp Chat with My Group.txt"
     // Or "WhatsApp Chat - My Group.txt"
@@ -132,7 +164,9 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   const callsInitiated: Record<string, number> = {};
   const callsMissed: Record<string, number> = {};
   const totalCallDurationSeconds: Record<string, number> = {};
-  let longestCallSeconds = 0;
+  const totalVideoCallDurationSeconds: Record<string, number> = {};
+  let longestVoiceCallSeconds = 0;
+  let longestVideoCallSeconds = 0;
 
   for (const m of realMessages) {
     if (m.isCall) {
@@ -143,9 +177,17 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
       }
 
       if (m.callDurationSeconds) {
-        totalCallDurationSeconds[m.sender] = (totalCallDurationSeconds[m.sender] ?? 0) + m.callDurationSeconds;
-        if (m.callDurationSeconds > longestCallSeconds) {
-          longestCallSeconds = m.callDurationSeconds;
+        if (m.callType === 'video') {
+          totalVideoCallDurationSeconds[m.sender] = (totalVideoCallDurationSeconds[m.sender] ?? 0) + m.callDurationSeconds;
+          if (m.callDurationSeconds > longestVideoCallSeconds) {
+            longestVideoCallSeconds = m.callDurationSeconds;
+          }
+        } else {
+          // Voice (or unknown, treat as voice)
+          totalCallDurationSeconds[m.sender] = (totalCallDurationSeconds[m.sender] ?? 0) + m.callDurationSeconds;
+          if (m.callDurationSeconds > longestVoiceCallSeconds) {
+            longestVoiceCallSeconds = m.callDurationSeconds;
+          }
         }
       }
     }
@@ -155,7 +197,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   const mediaCounts: Record<string, number> = {};
   const stickerCount: Record<string, number> = {};
   const viewOnceCount: Record<string, number> = {};
-  const MEDIA_TYPES: MediaType[] = ['image', 'video', 'audio', 'sticker', 'gif', 'document', 'contactCard', 'link'];
+  const MEDIA_TYPES: MediaType[] = ['image', 'video', 'audio', 'sticker', 'gif', 'document', 'contactCard', 'location', 'link'];
   const mediaLeaderboard: Record<MediaType, number> = Object.fromEntries(
     MEDIA_TYPES.map((t) => [t, 0])
   ) as Record<MediaType, number>;
@@ -168,14 +210,14 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   }
 
   const sharedLinks: Record<string, number> = {
-    Spotify: 0,
+    'Spotify': 0,
     'Apple Music': 0,
-    YouTube: 0,
+    'YouTube': 0,
     'Instagram Reels': 0,
     'Instagram Stories': 0,
     'Instagram Profile': 0,
-    TikTok: 0,
-    X: 0,
+    'TikTok': 0,
+    'X': 0,
     'Google Maps': 0,
     'Google Forms': 0,
     'Google Sheets': 0,
@@ -206,31 +248,72 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
       viewOnceCount[m.sender] = (viewOnceCount[m.sender] ?? 0) + 1;
     }
 
-    if (type === 'link') {
-      const c = m.content.toLowerCase();
-      if (c.includes('open.spotify.com') || c.includes('spotify.link')) sharedLinks['Spotify']++;
-      else if (c.includes('music.apple.com')) sharedLinks['Apple Music']++;
-      else if (c.includes('youtu.be/') || c.includes('youtube.com/')) sharedLinks['YouTube']++;
-      else if (c.includes('instagram.com/reel/')) sharedLinks['Instagram Reels']++;
-      else if (c.includes('instagram.com/stories/')) sharedLinks['Instagram Stories']++;
-      else if (c.includes('instagram.com/')) sharedLinks['Instagram Profile']++;
-      else if (c.includes('vt.tiktok.com') || c.includes('tiktok.com/')) sharedLinks['TikTok']++;
-      else if (c.includes('twitter.com/') || c.includes('x.com/')) sharedLinks['X']++;
-      else if (c.includes('maps.google.com') || c.includes('google.com/maps') || c.includes('maps.app.goo.gl')) sharedLinks['Google Maps']++;
-      else if (c.includes('docs.google.com/forms')) sharedLinks['Google Forms']++;
-      else if (c.includes('docs.google.com/spreadsheets')) sharedLinks['Google Sheets']++;
-      else if (c.includes('docs.google.com/document')) sharedLinks['Google Docs']++;
-      else if (c.includes('docs.google.com/presentation')) sharedLinks['Google Slides']++;
-      else if (c.includes('drive.google.com')) sharedLinks['Google Drive']++;
-      else if (c.includes('meet.google.com')) sharedLinks['Google Meet']++;
-      else if (c.includes('github.com')) sharedLinks['GitHub']++;
-      else if (c.includes('facebook.com')) sharedLinks['Facebook']++;
-      else if (c.includes('tokopedia.com') || c.includes('tokopedia.link')) sharedLinks['Tokopedia']++;
-      else {
-        sharedLinks['Other Links']++;
-        console.log('Other link:', m.content);
-      }
-    }
+   if (type === "link") {
+     const c = m.content.toLowerCase();
+
+     if (c.includes("open.spotify.com") || c.includes("spotify.link"))
+       sharedLinks["Spotify"]++;
+     else if (c.includes("music.apple.com")) sharedLinks["Apple Music"]++;
+     else if (c.includes("youtu.be/") || c.includes("youtube.com/")) sharedLinks["YouTube"]++;
+     else if (c.includes("instagram.com/reel/")) sharedLinks["Instagram Reels"]++;
+     else if (c.includes("instagram.com/stories/")) sharedLinks["Instagram Stories"]++;
+     else if (c.includes("instagram.com/")) sharedLinks["Instagram Profile"]++;
+     else if (c.includes("twitter.com/") || c.includes("x.com/")) sharedLinks["X"]++;
+     else if (
+       c.includes("maps.google.com") ||
+       c.includes("google.com/maps") ||
+       c.includes("maps.app.goo.gl")
+     )
+       sharedLinks["Google Maps"]++;
+     else if (c.includes("docs.google.com/forms")) sharedLinks["Google Forms"]++;
+     else if (c.includes("docs.google.com/spreadsheets")) sharedLinks["Google Sheets"]++;
+     else if (c.includes("docs.google.com/document")) sharedLinks["Google Docs"]++;
+     else if (c.includes("docs.google.com/presentation")) sharedLinks["Google Slides"]++;
+     else if (c.includes("drive.google.com")) sharedLinks["Google Drive"]++;
+     else if (c.includes("meet.google.com")) sharedLinks["Google Meet"]++;
+     else if (c.includes("github.com")) sharedLinks["GitHub"]++;
+     else if (c.includes("facebook.com")) sharedLinks["Facebook"]++;
+     // --- INDONESIAN E-COMMERCE SEPARATION ---
+     // 1. TikTok Shop (Evaluated first to catch the integrated "tokopedia.com" backend links)
+     else if (
+       c.includes("seller-id.tokopedia.com") ||
+       c.includes("affiliate-id.tokopedia.com") ||
+       c.includes("shop.tokopedia.com") ||
+       c.includes("://tiktokshop.com")
+     ) {
+       sharedLinks["TikTok Shop"]++;
+     }
+
+     // 2. TikTok (Standard Videos/Profiles)
+     else if (c.includes("vt.tiktok.com") || c.includes("tiktok.com/")) {
+       sharedLinks["TikTok"]++;
+     }
+
+     // 3. Shopee Indonesia
+     else if (
+       c.includes("shopee.co.id") ||
+       c.includes("shp.ee") ||
+       c.includes("seller.shopee.co.id") ||
+       c.includes("affiliate.shopee.co.id")
+     ) {
+       sharedLinks["Shopee"]++;
+     }
+
+     // 4. Tokopedia Marketplace
+     else if (
+       c.includes("tokopedia.com") ||
+       c.includes("tokopedia.link") ||
+       c.includes("seller.tokopedia.com")
+     ) {
+       sharedLinks["Tokopedia"]++;
+     }
+
+     // ----------------------------------------
+     else {
+       sharedLinks["Other Links"]++;
+     }
+   }
+
   }
 
   // ── Response latency ──
@@ -369,10 +452,14 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   );
 
   // ── Era Sampling & Keywords ──
-  const third = Math.floor(realMessages.length / 3);
-  const earlyMessages = realMessages.slice(0, third);
-  const medianMessages = realMessages.slice(third, third * 2);
-  const lateMessages = realMessages.slice(third * 2);
+  // Filter BEFORE slicing: exclude system messages (encryption notices, admin changes, etc.)
+  // and media-only lines so era boundaries represent genuine conversation, not boilerplate.
+  // This applies to both the AI payload excerpts and the local UI "chat phases" display.
+  const genuineMessages = realMessages.filter(m => !m.isSystem && !m.isMedia && !m.isCall);
+  const third = Math.floor(genuineMessages.length / 3);
+  const earlyMessages = genuineMessages.slice(0, third);
+  const medianMessages = genuineMessages.slice(third, third * 2);
+  const lateMessages = genuineMessages.slice(third * 2);
 
   const eraMetrics = {
     early: computeEraMetrics(earlyMessages),
@@ -381,10 +468,13 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   };
 
   // ── Mirrored Phrases ──
+  // Exclude system messages regardless of locale-table completeness (defensive backstop).
+  // Also exclude short phrases (< 4 chars) to filter fillers like "yah", "ya", etc.
   const phraseSenders: Record<string, Set<string>> = {};
   for (const m of contentMessages) {
+    if (m.isSystem) continue; // Skip system messages — prevents locale-unmapped strings leaking in
     const raw = m.content.trim().toLowerCase();
-    if (raw.length >= 3 && !STOP_WORDS.has(raw)) {
+    if (raw.length >= 4 && !STOP_WORDS.has(raw)) {
       if (!phraseSenders[raw]) phraseSenders[raw] = new Set();
       phraseSenders[raw].add(m.sender);
     }
@@ -400,9 +490,10 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   mirroredPhrases.sort((a, b) => b.count - a.count);
 
   const sampleExcerpts = {
-    early: selectContinuousExcerpts(earlyMessages.filter(m => !m.isMedia && !m.isSystem), 15, 'start'),
-    median: selectContinuousExcerpts(medianMessages.filter(m => !m.isMedia && !m.isSystem), 15, 'middle'),
-    late: selectContinuousExcerpts(lateMessages.filter(m => !m.isMedia && !m.isSystem), 15, 'end'),
+    // earlyMessages/medianMessages/lateMessages are already filtered (no system/media/calls)
+    early: selectContinuousExcerpts(earlyMessages, 15, 'start'),
+    median: selectContinuousExcerpts(medianMessages, 15, 'middle'),
+    late: selectContinuousExcerpts(lateMessages, 15, 'end'),
   };
 
   const topKeywords = computeTopKeywords(contentMessages);
@@ -439,7 +530,9 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     callsInitiated,
     callsMissed,
     totalCallDurationSeconds,
-    longestCallSeconds,
+    totalVideoCallDurationSeconds,
+    longestVoiceCallSeconds,
+    longestVideoCallSeconds,
     viewOnceCount,
     editedMessageCount,
     deletedMessageCount,

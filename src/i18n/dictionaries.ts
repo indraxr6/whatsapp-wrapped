@@ -127,6 +127,7 @@ export const dictionaries = {
     "ghosting.subtitle": "(12h+ gap before replying)",
     "ghosting.none": "No major ghosting detected.",
     "ghosting.consistent": "Both parties respond within 12 hours consistently.",
+    "ghosting.consistent.plural": "Everyone responds within 12 hours consistently.",
     "ghosting.total": "total ghosting instances",
     "ghosting.worst": "WORST",
     "ghosting.note": "Note: gaps >6h at night excluded from response time averages.",
@@ -140,6 +141,7 @@ export const dictionaries = {
     "media.gif": "GIFs",
     "media.document": "Documents",
     "media.contactCard": "Contacts",
+    "media.location": "Location Shares",
     "media.link": "Links",
 
     "links.title": "_ SHARED LINKS",
@@ -153,7 +155,11 @@ export const dictionaries = {
 
     "calls.title": "_ CALLS & EXTRAS",
     "calls.duration": "Total Duration",
+    "calls.durationVoice": "Voice Duration",
+    "calls.durationVideo": "Video Duration",
     "calls.longest": "Longest Call",
+    "calls.longestVoice": "Longest Voice",
+    "calls.longestVideo": "Longest Video",
     "calls.initiated": "Calls",
     "calls.missed": "Missed/Unanswered",
     "calls.guess": "Guess this one??",
@@ -171,6 +177,7 @@ export const dictionaries = {
 
     "mirrored.title": "_ MIRRORED PHRASES",
     "mirrored.desc": "Phrases you both use a lot.",
+    "mirrored.desc.plural": "Phrases everyone uses a lot.",
 
     "excerpts.title": "_ TIMECODE EXCERPTS",
     "excerpts.early": "Early Days",
@@ -339,9 +346,10 @@ export const dictionaries = {
 
     "ghosting.title": "_ INDEKS GHOSTING",
     "ghosting.subtitle": "(jeda 12+ jam sebelum membalas)",
-    "ghosting.none": "Tidak ada ghosting besar yang terdeteksi.",
-    "ghosting.consistent": "Semua pihak membalas dalam waktu 12 jam secara konsisten.",
-    "ghosting.total": "total kejadian ghosting",
+    "ghosting.none": "Tidak terdeteksi adanya aksi ghosting.",
+    "ghosting.consistent": "Kalian berdua selalu membalas pesan dalam waktu 12 jam.",
+    "ghosting.consistent.plural": "Kalian semua selalu membalas pesan dalam waktu 12 jam.",
+    "ghosting.total": "total aksi ngilang / ghosting",
     "ghosting.worst": "TERPARAH",
     "ghosting.note": "Catatan: jeda >6 jam di malam hari diabaikan dari rata-rata waktu balas.",
 
@@ -353,7 +361,8 @@ export const dictionaries = {
     "media.sticker": "Stiker",
     "media.gif": "GIF",
     "media.document": "Dokumen",
-    "media.contactCard": "Kontak",
+    "media.contactCard": "Kartu Kontak",
+    "media.location": "Lokasi Dibagikan",
     "media.link": "Tautan",
 
     "links.title": "_ TAUTAN DIBAGIKAN",
@@ -367,7 +376,11 @@ export const dictionaries = {
 
     "calls.title": "_ PANGGILAN & LAINNYA",
     "calls.duration": "Total Durasi",
+    "calls.durationVoice": "Durasi Suara",
+    "calls.durationVideo": "Durasi Video",
     "calls.longest": "Panggilan Terlama",
+    "calls.longestVoice": "Suara Terlama",
+    "calls.longestVideo": "Video Terlama",
     "calls.initiated": "Panggilan",
     "calls.missed": "Tak Terjawab/Ditolak",
     "calls.guess": "Coba tebak??",
@@ -385,6 +398,7 @@ export const dictionaries = {
 
     "mirrored.title": "_ FRASA SAMA",
     "mirrored.desc": "Kata-kata yang sering kalian pakai berdua.",
+    "mirrored.desc.plural": "Kata-kata yang sering diucapkan di grup.",
 
     "excerpts.title": "_ CUPLIKAN WAKTU",
     "excerpts.early": "Awal Mula",

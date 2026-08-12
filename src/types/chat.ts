@@ -1,4 +1,4 @@
-export type MediaType = 'image' | 'video' | 'audio' | 'sticker' | 'gif' | 'document' | 'contactCard' | 'link';
+export type MediaType = 'image' | 'video' | 'audio' | 'sticker' | 'gif' | 'document' | 'contactCard' | 'link' | 'location';
 
 export interface ChatMessage {
   timestamp: Date;
@@ -55,7 +55,9 @@ export interface ParsedChatMetrics {
   callsInitiated: Record<string, number>;
   callsMissed: Record<string, number>;
   totalCallDurationSeconds: Record<string, number>;
-  longestCallSeconds: number;
+  totalVideoCallDurationSeconds: Record<string, number>;
+  longestVoiceCallSeconds: number;
+  longestVideoCallSeconds: number;
   stickerCount: Record<string, number>;
 
   // Emoji — top 10 per sender (not merged)

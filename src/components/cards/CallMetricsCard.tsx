@@ -1,4 +1,4 @@
-import { Phone, PhoneMissed, Clock, Eye, Edit3, Trash2 } from 'lucide-react';
+import { Phone, PhoneMissed, Clock, Eye, Edit3, Trash2, Video } from 'lucide-react';
 import type { ParsedChatMetrics } from '../../types/chat';
 
 interface Props {
@@ -20,7 +20,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
   const { t } = useLanguage();
-  const { participants, callsInitiated, callsMissed, totalCallDurationSeconds, longestCallSeconds, viewOnceCount, editedMessageCount, deletedMessageCount } = metrics;
+  const { participants, callsInitiated, callsMissed, totalCallDurationSeconds, totalVideoCallDurationSeconds, longestVoiceCallSeconds, longestVideoCallSeconds, viewOnceCount, editedMessageCount, deletedMessageCount } = metrics;
 
   const totalCalls = Object.values(callsInitiated).reduce((a, b) => a + b, 0);
   const totalViewOnce = Object.values(viewOnceCount).reduce((a, b) => a + b, 0);
@@ -34,25 +34,57 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
   const sortedParticipants = [...participants].sort((a, b) => (callsInitiated[b] ?? 0) - (callsInitiated[a] ?? 0));
   const displayParticipants = chatMode === 'group' ? sortedParticipants.slice(0, 5) : sortedParticipants;
 
+  const sumVoiceDuration = Object.values(totalCallDurationSeconds).reduce((a, b) => a + b, 0);
+  const sumVideoDuration = Object.values(totalVideoCallDurationSeconds || {}).reduce((a, b) => a + b, 0);
+
   return (
     <div className="p-6 h-full flex flex-col bg-accent-blue/10">
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
-          <Phone className="mb-2 text-accent-blue" size={24} strokeWidth={2.5} />
-          <p className="font-mono text-xs uppercase text-gray-500">{t('calls.duration')}</p>
-          <p className="font-black text-2xl">
-            {Object.values(totalCallDurationSeconds).reduce((a, b) => a + b, 0) === 0
-              ? t('calls.guess')
-              : formatDuration(Object.values(totalCallDurationSeconds).reduce((a, b) => a + b, 0))}
-          </p>
-        </div>
-        <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
-          <Clock className="mb-2 text-accent-lime" size={24} strokeWidth={2.5} />
-          <p className="font-mono text-xs uppercase text-gray-500">{t('calls.longest')}</p>
-          <p className="font-black text-2xl">
-            {longestCallSeconds === 0 ? t('calls.guess') : formatDuration(longestCallSeconds)}
-          </p>
-        </div>
+        {sumVideoDuration > 0 ? (
+          <>
+            <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
+              <Phone className="mb-2 text-accent-blue" size={24} strokeWidth={2.5} />
+              <p className="font-mono text-xs uppercase text-gray-500">{t('calls.durationVoice')}</p>
+              <p className="font-black text-2xl">
+                {sumVoiceDuration === 0 ? t('calls.guess') : formatDuration(sumVoiceDuration)}
+              </p>
+            </div>
+            <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
+              <Video className="mb-2 text-accent-blue" size={24} strokeWidth={2.5} />
+              <p className="font-mono text-xs uppercase text-gray-500">{t('calls.durationVideo')}</p>
+              <p className="font-black text-2xl">
+                {formatDuration(sumVideoDuration)}
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
+            <Phone className="mb-2 text-accent-blue" size={24} strokeWidth={2.5} />
+            <p className="font-mono text-xs uppercase text-gray-500">{t('calls.duration')}</p>
+            <p className="font-black text-2xl">
+              {sumVoiceDuration === 0 ? t('calls.guess') : formatDuration(sumVoiceDuration)}
+            </p>
+          </div>
+        )}
+
+        {(longestVoiceCallSeconds > 0 || longestVideoCallSeconds === 0) && (
+          <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
+            <Clock className="mb-2 text-accent-lime" size={24} strokeWidth={2.5} />
+            <p className="font-mono text-xs uppercase text-gray-500">{t('calls.longestVoice')}</p>
+            <p className="font-black text-2xl">
+              {longestVoiceCallSeconds === 0 ? t('calls.guess') : formatDuration(longestVoiceCallSeconds)}
+            </p>
+          </div>
+        )}
+        {longestVideoCallSeconds > 0 && (
+          <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
+            <Clock className="mb-2 text-accent-lime" size={24} strokeWidth={2.5} />
+            <p className="font-mono text-xs uppercase text-gray-500">{t('calls.longestVideo')}</p>
+            <p className="font-black text-2xl">
+              {formatDuration(longestVideoCallSeconds)}
+            </p>
+          </div>
+        )}
         {totalViewOnce > 0 && (
           <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
             <Eye className="mb-2 text-accent-orange" size={24} strokeWidth={2.5} />
