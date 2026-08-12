@@ -88,7 +88,7 @@ export function parseWhatsAppExport(rawText: string): ParseResult {
   for (let i = 0; i < lines.length; i++) {
     // Strip invisible bidirectional formatting chars (like LRM \u200e) and their literal 
     // string representations which macOS WhatsApp sometimes inserts.
-    const line = lines[i].replace(/[\u200E\u200F\u202A-\u202E]|<0x200e>|<0x200f>/gi, '');
+    const line = lines[i].replace(/[\u200E\u200F\u202A-\u202E\u2068\u2069]|<0x200e>|<0x200f>/gi, '');
     if (!line.trim()) continue;
 
     const match = MESSAGE_REGEX.exec(line);
@@ -144,7 +144,7 @@ export function parseWhatsAppExport(rawText: string): ParseResult {
       if (isCall) isSystem = true;
 
       // Check if message was edited (appended text)
-      const editedRegex = /<this message was edited>|<pesan ini telah diedit>|<telah diedit>|this message was edited|telah diedit/i;
+      const editedRegex = /<this message was edited>|<pesan ini diedit>|<pesan ini telah diedit>|<telah diedit>|this message was edited|telah diedit/i;
       const isEdited = editedRegex.test(content);
       const cleanContent = content.replace(editedRegex, '').trim();
 

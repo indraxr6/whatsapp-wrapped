@@ -1,5 +1,6 @@
 import type { ParsedChatMetrics } from '../../types/chat';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { formatParticipantPhrase } from '../../utils/pluralize';
 
 interface Props {
   metrics: ParsedChatMetrics;
@@ -15,6 +16,12 @@ export default function GhostingCard({ metrics, chatMode = 'dm' }: Props) {
   const displayParticipants = chatMode === 'group' ? sortedParticipants.slice(0, 10) : sortedParticipants;
   const ghoster = sortedParticipants[0];
 
+  const ghostingText = formatParticipantPhrase(
+    participants.length,
+    t('ghosting.consistent') || '',
+    t('ghosting.consistent.plural') || ''
+  );
+
   return (
     <div className="p-6 h-full">
       <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">{t('ghosting.title')}</p>
@@ -24,7 +31,7 @@ export default function GhostingCard({ metrics, chatMode = 'dm' }: Props) {
         <div>
           <p className="nb-stat-sm">0</p>
           <p className="text-sm text-gray-600 mt-2">{t('ghosting.none')}</p>
-          <p className="text-xs text-gray-500 mt-1">{t('ghosting.consistent')}</p>
+          <p className="text-xs text-gray-500 mt-1">{ghostingText}</p>
         </div>
       ) : (
         <div className="space-y-4">

@@ -1,6 +1,7 @@
 import { useLanguage } from '../../i18n/LanguageContext';
 import type { ParsedChatMetrics } from '../../types/chat';
 import { Layers } from 'lucide-react';
+import { formatParticipantPhrase } from '../../utils/pluralize';
 
 interface Props {
   metrics: ParsedChatMetrics;
@@ -21,7 +22,13 @@ export default function MirroredPhrasesCard({ metrics }: Props) {
         </p>
       </div>
       
-      <p className="text-xs text-gray-500 mb-4">{t('mirrored.desc')}</p>
+      <p className="text-xs text-gray-500 mb-4">
+        {formatParticipantPhrase(
+          metrics.participants.length,
+          t('mirrored.desc') || '',
+          t('mirrored.desc.plural') || ''
+        )}
+      </p>
 
       <div className="space-y-3">
         {phrases.map((p, i) => (

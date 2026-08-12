@@ -16,6 +16,7 @@ import {
   Users,
   ShoppingCart,
   Music2Icon,
+  RadioIcon,
 } from 'lucide-react';
 
 interface Props {
@@ -23,7 +24,7 @@ interface Props {
 }
 
 const ICONS: Record<string, React.ElementType> = {
-  'Spotify': Music,
+  'Spotify': RadioIcon,
   'Apple Music': Music,
   'YouTube': PlayCircle,
   'Instagram Reels': Camera,

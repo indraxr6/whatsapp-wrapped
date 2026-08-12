@@ -8,7 +8,7 @@ interface Props {
 
 // We'll translate these inline using t() based on MediaType
 
-const MEDIA_ORDER: MediaType[] = ['image', 'video', 'sticker', 'audio', 'gif', 'document', 'contactCard', 'link'];
+const MEDIA_ORDER: MediaType[] = ['image', 'video', 'sticker', 'audio', 'gif', 'document', 'contactCard', 'location', 'link'];
 
 export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
   const { t } = useLanguage();

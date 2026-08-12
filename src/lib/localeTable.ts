@@ -60,23 +60,54 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
   },
   id: {
     systemMessages: [
+      // Encryption notices
       'pesan dan panggilan dienkripsi',
+      'pesan dan telepon terenkripsi secara end-to-end',
+      // Phone number
       'mengubah nomor telepon',
+      // Member changes
       'menambahkan anda',
       'menghapus anda',
+      'bergabung menggunakan tautan undangan',
+      'anda telah keluar',
+      // Admin status
+      'sekarang menjadi admin',
+      'anda sekarang admin',
+      'anda bukan lagi seorang admin',
+      'bukan lagi admin',
+      // Group creation / rename / icon
       'membuat grup',
+      'telah membuat grup',
       'mengubah nama grup',
       'mengubah subjek',
+      'mengubah ikon grup',
+      'mengubah deskripsi grup',
+      // Leaving
       'keluar',
-      'pesan ini telah dihapus',
+      // Community operations
+      'grup ini ditambahkan ke komunitas',
+      'anda menambahkan grup ini',
+      'menonaktifkan komunitas',
+      'mengeluarkan grup ini dari komunitas',
+      'anggota baru memerlukan persetujuan admin',
+      'anggota baru perlu persetujuan admin',
+      'memerlukan persetujuan admin',
+      // Deleted messages
+      'pesan ini dihapus',
       'anda menghapus pesan ini',
+      // Missed calls
       'panggilan suara tak terjawab',
       'panggilan video tak terjawab',
-      'mengubah ikon grup',
-      'sekarang menjadi admin',
+      'telepon suara tak terjawab',
+      'tidak dijawab',
+      // Call lines (so they are tagged as system/call)
+      'telepon suara',
+      'telepon video',
+      // Meta AI
       'meta ai'
     ],
     mediaPlaceholders: [
+      // Old "dihilangkan" variants
       { pattern: '<media dihilangkan>', type: 'image' },
       { pattern: '<media omitted>', type: 'image' },
       { pattern: 'gambar dihilangkan', type: 'image' },
@@ -85,7 +116,16 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       { pattern: 'dokumen dihilangkan', type: 'document' },
       { pattern: 'stiker dihilangkan', type: 'sticker' },
       { pattern: '<terlampir:', type: 'document' },
+      // New "tidak disertakan" variants (confirmed from real exports)
+      { pattern: 'gambar tidak disertakan', type: 'image' },
+      { pattern: 'video tidak disertakan', type: 'video' },
+      { pattern: 'audio tidak disertakan', type: 'audio' },
+      { pattern: 'stiker tidak disertakan', type: 'sticker' },
+      { pattern: 'dokumen tidak disertakan', type: 'document' },
+      { pattern: 'kartu kontak tidak disertakan', type: 'contactCard' },
+      // Catch-all
       { pattern: 'dihilangkan', type: 'image' },
+      { pattern: 'tidak disertakan', type: 'document' },
       { pattern: 'view once', type: 'image' },
     ],
   },
@@ -198,6 +238,13 @@ export function getMediaType(content: string): import('../types/chat').MediaType
   // "view once" is treated as an image
   if (lower.includes('view once')) return 'image';
 
+  // Native location share — must run BEFORE generic link classification so it isn't
+  // double-counted as a plain link or a Google Maps shared link.
+  // Pattern: "Lokasi:" / "Location:" / "location:" immediately followed by maps.google.com/?q=
+  if (/^(?:lokasi|location)\s*:\s*https:\/\/maps\.google\.com\/\?q=/i.test(lower)) {
+    return 'location';
+  }
+
   for (const entry of ALL_MEDIA_ENTRIES) {
     if (lower.includes(entry.pattern.toLowerCase())) {
       return entry.type;
@@ -232,29 +279,47 @@ export interface CallInfo {
 }
 
 export function getCallInfo(content: string): CallInfo | null {
-  const lower = content.toLowerCase().replace(/[\u200E\u200F]/g, '').trim();
+  // Strip bidi and directional isolate invisible characters before matching
+  const lower = content.toLowerCase().replace(/[\u200E\u200F\u202A-\u202E\u2068\u2069]/g, '').trim();
 
   // 1. Detect call type
   let callType: 'voice' | 'video' | null = null;
-  if (lower.includes('voice call') || lower.includes('panggilan suara') || lower.includes('audio call') || lower.includes('sprach-anruf') || lower.includes('appel vocal') || lower.includes('llamada de voz')) {
+  if (
+    lower.includes('voice call') ||
+    lower.includes('telepon suara') ||
+    lower.includes('panggilan suara') ||
+    lower.includes('audio call') ||
+    lower.includes('sprach-anruf') ||
+    lower.includes('appel vocal') ||
+    lower.includes('llamada de voz')
+  ) {
     callType = 'voice';
-  } else if (lower.includes('video call') || lower.includes('panggilan video') || lower.includes('videoanruf') || lower.includes('appel vidéo') || lower.includes('llamada de video') || lower.includes('videollamada') || lower.includes('chamada de vídeo')) {
+  } else if (
+    lower.includes('video call') ||
+    lower.includes('telepon video') ||
+    lower.includes('panggilan video') ||
+    lower.includes('videoanruf') ||
+    lower.includes('appel vidéo') ||
+    lower.includes('llamada de video') ||
+    lower.includes('videollamada') ||
+    lower.includes('chamada de vídeo')
+  ) {
     callType = 'video';
   }
 
   if (!callType) return null;
 
-  // 2. Detect duration
+  // 2. Detect duration — supports EN and ID time units
   let durationSeconds: number | undefined;
-  const durationMatch = lower.match(/(\d+)\s*(sec|min|hr|detik|menit|jam|s|m|h)/i);
+  const durationMatch = lower.match(/(\d+)\s*(dtk|mnt|jam|sec|min|hr|detik|menit|s\b|m\b|h\b)/i);
   if (durationMatch) {
     const val = parseInt(durationMatch[1], 10);
     const unit = durationMatch[2].toLowerCase();
-    if (unit.startsWith('sec') || unit.startsWith('detik') || unit === 's') {
+    if (unit === 'dtk' || unit.startsWith('sec') || unit.startsWith('detik') || unit === 's') {
       durationSeconds = val;
-    } else if (unit.startsWith('min') || unit.startsWith('menit') || unit === 'm') {
+    } else if (unit === 'mnt' || unit.startsWith('min') || unit.startsWith('menit') || unit === 'm') {
       durationSeconds = val * 60;
-    } else if (unit.startsWith('hr') || unit.startsWith('jam') || unit === 'h') {
+    } else if (unit.startsWith('jam') || unit.startsWith('hr') || unit === 'h') {
       durationSeconds = val * 3600;
     }
   }
@@ -270,7 +335,7 @@ export function getCallInfo(content: string): CallInfo | null {
   let outcome: 'missed' | 'answered' | 'no-answer' = 'answered';
   if (durationSeconds !== undefined) {
     outcome = 'answered';
-  } else if (lower.includes('missed') || lower.includes('tak terjawab') || lower.includes('verpasst') || lower.includes('manqué') || lower.includes('perdida') || lower.includes('não atendida')) {
+  } else if (lower.includes('missed') || lower.includes('tak terjawab') || lower.includes('tidak dijawab') || lower.includes('verpasst') || lower.includes('manqué') || lower.includes('perdida') || lower.includes('não atendida')) {
     outcome = 'missed';
   } else {
     outcome = 'no-answer'; // Default for calls without duration and not explicitly missed
