@@ -1,43 +1,55 @@
 import { useState, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { parseWhatsAppExport } from './lib/parser';
+import { extractChatFromZip } from './lib/zipParser';
 import { calculateMetrics } from './lib/metrics';
 import { analyzeWithGemini, generateDemoInsights } from './lib/gemini';
 import type { AppView, GeminiInsights, ParsedChatMetrics } from './types/chat';
 import UploadZone from './components/UploadZone';
-import ApiKeyModal from './components/ApiKeyModal';
 import LoadingScreen from './components/LoadingScreen';
 import ResultsDashboard from './components/ResultsDashboard';
 import PrivacyModal from './components/PrivacyModal';
+import ApiKeyModal from './components/ApiKeyModal';
 import ShortChatModal from './components/ShortChatModal';
 import ChatModeModal from './components/ChatModeModal';
 import { useLanguage } from './i18n/LanguageContext';
 import LanguageToggle from './components/LanguageToggle';
+import ExportTooltip from './components/ExportTooltip';
 
 export default function App() {
   const [view, setView] = useState<AppView>('upload');
-  const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
   const [showChatModeModal, setShowChatModeModal] = useState(false);
   const [chatMode, setChatMode] = useState<'dm' | 'group'>('dm');
   const [privacyModalVariant, setPrivacyModalVariant] = useState<'auto' | 'manual' | null>(null);
+  const [apiKeyModalVariant, setApiKeyModalVariant] = useState<'auto' | 'manual' | null>(null);
   const [insightStatus, setInsightStatus] = useState<'success' | 'opt_out' | 'failed_429' | 'failed_503' | 'failed'>('success');
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<ParsedChatMetrics | null>(null);
   const [insights, setInsights] = useState<GeminiInsights | null>(null);
   const [loadingStep, setLoadingStep] = useState<string>('');
   const [showShortChatModal, setShowShortChatModal] = useState(false);
-  const [isDemoMode, setIsDemoMode] = useState(false);
+
 
   const { t, language } = useLanguage();
 
-  const getApiKey = () => localStorage.getItem('gemini_api_key') ?? '';
 
-  const processFile = useCallback(async (file: File, useDemo: boolean) => {
+  const processFile = useCallback(async (file: File) => {
     setError(null);
-    setIsDemoMode(useDemo);
+    // we don't set demo mode here anymore
     try {
       setView('analyzing');
       setLoadingStep('Reading your chat...');
-      const rawText = await file.text();
+      let rawText = '';
+      let activeFileName = file.name;
+
+      if (file.name.endsWith('.zip') || file.type.includes('zip')) {
+        setLoadingStep('Unzipping chat log...');
+        const extracted = await extractChatFromZip(file);
+        rawText = extracted.text;
+        activeFileName = extracted.filename;
+      } else {
+        rawText = await file.text();
+      }
 
       setLoadingStep('Parsing messages...');
       const { messages, unparsedLineCount } = parseWhatsAppExport(rawText);
@@ -49,7 +61,7 @@ export default function App() {
       }
 
       setLoadingStep('Crunching the numbers...');
-      const chatMetrics = calculateMetrics(messages, file.name);
+      const chatMetrics = calculateMetrics(messages, activeFileName);
       setMetrics(chatMetrics);
 
       if (unparsedLineCount > 0) {
@@ -99,65 +111,68 @@ export default function App() {
     handleReset();
   };
 
-  const handlePrivacyModalCancel = async () => {
+  const handlePrivacyModalContinue = () => {
     setPrivacyModalVariant(null);
+    if (privacyModalVariant === 'auto') {
+      setApiKeyModalVariant('auto');
+    }
+  };
+
+  const handleApiKeyModalSkip = async () => {
+    setApiKeyModalVariant(null);
     if (!metrics) return;
 
     setInsightStatus('opt_out');
-    setLoadingStep(t('loading.demo'));
-    setView('loading');
+    setLoadingStep(t('loading.demo') || 'Loading local preview...');
+    setView('analyzing');
     await new Promise((r) => setTimeout(r, 600));
     setInsights(generateDemoInsights(metrics, language, chatMode));
     setView('results');
   };
 
-  const executeAnalysis = async () => {
+  const handlePrivacyModalCancel = () => {
     setPrivacyModalVariant(null);
+    handleReset();
+  };
+
+  const executeAnalysis = async (apiKey: string) => {
+    setApiKeyModalVariant(null);
     if (!metrics) return;
 
-    if (!isDemoMode) {
-      setLoadingStep(t('loading.ai'));
-      let geminiInsights: GeminiInsights;
-      try {
-        geminiInsights = await analyzeWithGemini(getApiKey(), metrics, language, chatMode);
-        setInsightStatus('success');
-      } catch (aiErr: any) {
-        console.warn('[Gemini] API failed, falling back to demo insights:', aiErr);
-        geminiInsights = generateDemoInsights(metrics, language, chatMode);
-        
-        if (aiErr.message?.includes('429')) {
-          setInsightStatus('failed_429');
-        } else if (aiErr.message?.includes('503')) {
-          setInsightStatus('failed_503');
-        } else {
-          setInsightStatus('failed');
-        }
+    localStorage.setItem('gemini_api_key', apiKey);
+
+    setLoadingStep(t('loading.ai') || 'Generating AI insights...');
+    setView('analyzing');
+    let geminiInsights: GeminiInsights;
+    try {
+      geminiInsights = await analyzeWithGemini(apiKey, metrics, language, chatMode);
+      setInsightStatus('success');
+    } catch (aiErr: any) {
+      console.warn('[Gemini] API failed, falling back to demo insights:', aiErr);
+      geminiInsights = generateDemoInsights(metrics, language, chatMode);
+
+      if (aiErr.message?.includes('429')) {
+        setInsightStatus('failed_429');
+      } else if (aiErr.message?.includes('503')) {
+        setInsightStatus('failed_503');
+      } else {
+        setInsightStatus('failed');
       }
-      setInsights(geminiInsights);
-    } else {
-      setLoadingStep(t('loading.demo'));
-      setInsightStatus('opt_out');
-      await new Promise((r) => setTimeout(r, 600));
-      setInsights(generateDemoInsights(metrics, language, chatMode));
     }
+    setInsights(geminiInsights);
     setView('results');
   };
 
   const handleFileUpload = useCallback(async (file: File) => {
-    const apiKey = getApiKey();
-    if (!apiKey) {
-      setApiKeyModalOpen(true);
-      return;
-    }
-    await processFile(file, false);
-  }, [processFile]);
-
-  const handleDemoMode = useCallback(async (file: File) => {
-    await processFile(file, true);
+    await processFile(file);
   }, [processFile]);
 
   const handlePrivacyModalClose = () => {
     setPrivacyModalVariant(null);
+  };
+
+  const handleApiKeyModalClose = () => {
+    setApiKeyModalVariant(null);
   };
 
   const handleReset = () => {
@@ -170,71 +185,104 @@ export default function App() {
   return (
     <div className="min-h-screen bg-canvas text-ink">
       {/* Short Chat Modal */}
-      {showShortChatModal && metrics && (
-        <ShortChatModal
-          messageCount={metrics.totalMessages}
-          onContinue={handleShortChatContinue}
-          onCancel={handleShortChatCancel}
-        />
-      )}
+      <AnimatePresence>
+        {showShortChatModal && metrics && (
+          <ShortChatModal
+            messageCount={metrics.totalMessages}
+            onContinue={handleShortChatContinue}
+            onCancel={handleShortChatCancel}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Chat Mode Modal */}
-      {showChatModeModal && metrics && (
-        <ChatModeModal
-          detectedMode={metrics.participants.length > 2 ? 'group' : 'dm'}
-          onContinue={handleChatModeContinue}
-          onCancel={handleChatModeCancel}
-        />
-      )}
+      <AnimatePresence>
+        {showChatModeModal && metrics && (
+          <ChatModeModal
+            detectedMode={metrics.participants.length > 2 ? 'group' : 'dm'}
+            onContinue={handleChatModeContinue}
+            onCancel={handleChatModeCancel}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Privacy Modal */}
-      {privacyModalVariant && (
-        <PrivacyModal
-          onClose={handlePrivacyModalClose}
-          onContinue={executeAnalysis}
-          onCancel={privacyModalVariant === 'auto' ? handlePrivacyModalCancel : handlePrivacyModalClose}
-          variant={privacyModalVariant}
-        />
-      )}
+      <AnimatePresence>
+        {privacyModalVariant && (
+          <PrivacyModal
+            onClose={handlePrivacyModalClose}
+            onContinue={handlePrivacyModalContinue}
+            onCancel={handlePrivacyModalCancel}
+            variant={privacyModalVariant}
+          />
+        )}
+      </AnimatePresence>
 
       {/* API Key Modal */}
-      {apiKeyModalOpen && (
-        <ApiKeyModal
-          onClose={() => setApiKeyModalOpen(false)}
-          onSave={(key) => {
-            localStorage.setItem('gemini_api_key', key);
-            setApiKeyModalOpen(false);
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {apiKeyModalVariant && (
+          <ApiKeyModal
+            onClose={apiKeyModalVariant === 'auto' ? handlePrivacyModalCancel : handleApiKeyModalClose}
+            onContinue={executeAnalysis}
+            onSkip={handleApiKeyModalSkip}
+            variant={apiKeyModalVariant}
+          />
+        )}
+      </AnimatePresence>
 
-      {view === 'upload' && (
-        <UploadPage
-          onFileUpload={handleFileUpload}
-          onDemoMode={handleDemoMode}
-          onOpenApiKey={() => setApiKeyModalOpen(true)}
-          onOpenPrivacy={() => setPrivacyModalVariant('manual')}
-          hasApiKey={Boolean(getApiKey())}
-          error={error}
-        />
-      )}
+      <AnimatePresence mode="wait">
+        {view === 'upload' && (
+          <motion.div
+            key="upload"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full"
+          >
+            <UploadPage
+              onFileUpload={handleFileUpload}
+              onOpenPrivacy={() => setPrivacyModalVariant('manual')}
+              error={error}
+            />
+          </motion.div>
+        )}
 
-      {view === 'analyzing' && (
-        <LoadingScreen step={loadingStep} />
-      )}
+        {view === 'analyzing' && (
+          <motion.div
+            key="analyzing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full"
+          >
+            <LoadingScreen step={loadingStep} />
+          </motion.div>
+        )}
 
-      {view === 'results' && metrics && insights && (
-        <ResultsDashboard
-          metrics={metrics}
-          insights={insights}
-          chatMode={chatMode}
-          insightStatus={insightStatus}
-          onRetryAI={executeAnalysis}
-          onReset={handleReset}
-          onOpenApiKey={() => setApiKeyModalOpen(true)}
-          onOpenPrivacy={() => setPrivacyModalVariant('manual')}
-        />
-      )}
+        {view === 'results' && metrics && insights && (
+          <motion.div
+            key="results"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full"
+          >
+            <ResultsDashboard
+              metrics={metrics}
+              insights={insights}
+              chatMode={chatMode}
+              insightStatus={insightStatus}
+              onRetryAI={() => executeAnalysis(localStorage.getItem('gemini_api_key') || '')}
+              onReset={handleReset}
+              onOpenPrivacy={() => setPrivacyModalVariant('manual')}
+              onOpenApiKey={() => setApiKeyModalVariant('manual')}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -245,14 +293,11 @@ export default function App() {
 
 interface UploadPageProps {
   onFileUpload: (file: File) => void;
-  onDemoMode: (file: File) => void;
-  onOpenApiKey: () => void;
   onOpenPrivacy: () => void;
-  hasApiKey: boolean;
   error: string | null;
 }
 
-function UploadPage({ onFileUpload, onDemoMode, onOpenApiKey, onOpenPrivacy, hasApiKey, error }: UploadPageProps) {
+function UploadPage({ onFileUpload, onOpenPrivacy, error }: UploadPageProps) {
   const { t } = useLanguage();
   return (
     <div className="min-h-screen flex flex-col">
@@ -268,9 +313,6 @@ function UploadPage({ onFileUpload, onDemoMode, onOpenApiKey, onOpenPrivacy, has
           <LanguageToggle />
           <button onClick={onOpenPrivacy} className="nb-btn text-xs py-1.5 ml-2">
             {t('header.privacy')}
-          </button>
-          <button id="api-key-btn" onClick={onOpenApiKey} className="nb-btn text-xs py-1.5">
-            {hasApiKey ? '[ KEY SET ]' : '[ SET API KEY ]'}
           </button>
         </div>
       </header>
@@ -294,27 +336,6 @@ function UploadPage({ onFileUpload, onDemoMode, onOpenApiKey, onOpenPrivacy, has
         <div className="content-wrapper flex justify-center">
           <div className="max-w-2xl w-full space-y-3">
             <UploadZone onFileSelected={onFileUpload} />
-
-            {/* Demo mode */}
-            <div className="flex items-center gap-2">
-              <div className="flex-1 border-t-2 border-black" />
-              <span className="font-mono text-xs uppercase tracking-wider text-gray-500">{t('upload.or')}</span>
-              <div className="flex-1 border-t-2 border-black" />
-            </div>
-            <label htmlFor="demo-file-input" className="nb-btn w-full text-center py-2.5 block cursor-pointer text-sm">
-              {t('upload.skipAI')}
-            </label>
-            <input
-              id="demo-file-input"
-              type="file"
-              accept=".txt"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) onDemoMode(f);
-                e.target.value = '';
-              }}
-            />
           </div>
         </div>
 
@@ -340,7 +361,10 @@ function UploadPage({ onFileUpload, onDemoMode, onOpenApiKey, onOpenPrivacy, has
               ].map((s, i) => (
                 <div key={s.step} className={`p-5 ${i < 2 ? 'border-b-2 sm:border-b-0 sm:border-r-2 border-black' : ''}`}>
                   <p className="font-mono text-xs text-gray-400 mb-2">{s.step}</p>
-                  <p className="font-bold text-sm mb-1">{s.title}</p>
+                  <p className="font-bold text-sm mb-1 flex items-center">
+                    {s.title}
+                    {s.step === '01' && <ExportTooltip />}
+                  </p>
                   <p className="text-xs text-gray-600 leading-relaxed">{s.desc}</p>
                 </div>
               ))}

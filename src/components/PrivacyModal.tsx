@@ -1,4 +1,5 @@
 import { Shield, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useLanguage } from '../i18n/LanguageContext';
 import LanguageToggle from './LanguageToggle';
 
@@ -13,8 +14,21 @@ export default function PrivacyModal({ onClose, onContinue, onCancel, variant = 
   const { t } = useLanguage();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="nb-card max-w-lg w-full relative">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15, ease: 'linear' }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.15, ease: 'easeOut' }}
+        className="nb-card max-w-xl w-full relative max-h-[90vh] overflow-y-auto"
+      >
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -33,7 +47,6 @@ export default function PrivacyModal({ onClose, onContinue, onCancel, variant = 
         <div className="space-y-4 text-sm leading-relaxed">
           <p dangerouslySetInnerHTML={{ __html: t('privacy.p1').replace(/<bold>/g, '<strong>').replace(/<\/bold>/g, '</strong>') }} />
           <p dangerouslySetInnerHTML={{ __html: t('privacy.p2').replace(/<bold>/g, '<strong>').replace(/<\/bold>/g, '</strong>') }} />
-          <p>{t('privacy.p3')}</p>
 
           <div className="mt-4 p-3 border-2 border-black bg-accent-blue/10 flex items-center justify-between">
             <span className="font-bold text-sm">{t('privacy.chooseLanguage')}</span>
@@ -52,22 +65,22 @@ export default function PrivacyModal({ onClose, onContinue, onCancel, variant = 
         </div>
 
         {/* CTA */}
-        <div className="mt-6">
+        <div className="mt-6 flex gap-3">
           {variant === 'auto' ? (
-            <div className="flex gap-3">
+            <>
               <button
                 onClick={onCancel}
-                className="nb-btn flex-1 py-3"
+                className="nb-btn flex-1 py-3 text-sm"
               >
                 {t('privacy.cancel')}
               </button>
               <button
                 onClick={onContinue}
-                className="nb-btn-primary flex-[2] py-3"
+                className="nb-btn-primary flex-[2] py-3 text-base"
               >
-                {t('privacy.continue')}
+                {t('privacy.continue') || 'I Understand'}
               </button>
-            </div>
+            </>
           ) : (
             <button
               onClick={onClose}
@@ -77,7 +90,7 @@ export default function PrivacyModal({ onClose, onContinue, onCancel, variant = 
             </button>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

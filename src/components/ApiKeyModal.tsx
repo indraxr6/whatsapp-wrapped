@@ -1,10 +1,13 @@
-import { useState } from 'react';
-import { X, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Eye, EyeOff, Key } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useLanguage } from '../i18n/LanguageContext';
 
 interface Props {
-  onClose: () => void;
-  onSave: (key: string) => void;
+  onClose: () => void; // completely cancels the flow
+  onContinue: (key: string) => void;
+  onSkip: () => void;
+  variant?: 'auto' | 'manual'; // manual means user just opened it from header to edit key
 }
 
 function detectKeyType(key: string): 'api-key' | 'oauth' | 'unknown' {
@@ -14,31 +17,43 @@ function detectKeyType(key: string): 'api-key' | 'oauth' | 'unknown' {
   return 'unknown';
 }
 
-export default function ApiKeyModal({ onClose, onSave }: Props) {
+export default function ApiKeyModal({ onClose, onContinue, onSkip, variant = 'auto' }: Props) {
   const { t } = useLanguage();
-  const [key, setKey] = useState(localStorage.getItem('gemini_api_key') ?? '');
+  const [key, setKey] = useState('');
   const [visible, setVisible] = useState(false);
 
-  const handleSave = () => {
+  useEffect(() => {
+    setKey(localStorage.getItem('gemini_api_key') ?? '');
+  }, []);
+
+  const handleContinue = () => {
     if (!key.trim()) return;
-    onSave(key.trim());
+    onContinue(key.trim());
   };
 
   const keyType = detectKeyType(key.trim());
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15, ease: 'linear' }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="nb-card max-w-md w-full relative">
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.15, ease: 'easeOut' }}
+        className="nb-card max-w-md w-full relative"
+      >
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">{t('apikey.title')}</p>
-            <h3 className="font-extrabold text-xl">Gemini API Key</h3>
-            <p className="text-sm text-gray-600 mt-1">{t('apikey.p1')} {t('apikey.p2')}</p>
+          <div className="flex items-center gap-3">
+            <Key size={20} strokeWidth={2} />
+            <span className="font-mono text-xs font-semibold uppercase tracking-widest">{t('apikey.title') || 'API KEY'}</span>
           </div>
           <button
             onClick={onClose}
@@ -48,6 +63,11 @@ export default function ApiKeyModal({ onClose, onSave }: Props) {
           </button>
         </div>
 
+        <div>
+          <h3 className="font-extrabold text-xl mb-1">Gemini API Key</h3>
+          <p className="text-sm text-gray-600 mb-6">{t('apikey.p1')} {t('apikey.p2')}</p>
+        </div>
+
         {/* Input */}
         <div className="mb-4">
           <label className="font-mono text-xs uppercase tracking-widest block mb-2">API KEY</label>
@@ -55,15 +75,15 @@ export default function ApiKeyModal({ onClose, onSave }: Props) {
             <input
               id="api-key-input"
               type={visible ? 'text' : 'password'}
-              className="flex-1 px-3 py-2 font-mono text-sm bg-white focus:outline-none"
-              placeholder={t('apikey.placeholder')}
+              className="flex-1 px-3 py-3 font-mono text-sm bg-white focus:outline-none focus:bg-accent-lime/10 transition-colors"
+              placeholder={t('apikey.placeholder') || 'AIzaSy...'}
               value={key}
               onChange={(e) => setKey(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+              onKeyDown={(e) => e.key === 'Enter' && handleContinue()}
             />
             <button
               onClick={() => setVisible(!visible)}
-              className="border-l-2 border-black px-3 hover:bg-canvas transition-colors"
+              className="border-l-2 border-black px-4 hover:bg-canvas transition-colors"
             >
               {visible ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -74,13 +94,13 @@ export default function ApiKeyModal({ onClose, onSave }: Props) {
             <p className="font-mono text-xs mt-2">
               {keyType === 'api-key' && <span className="text-green-700">[ OK ] Valid API key format</span>}
               {keyType === 'oauth' && <span className="text-amber-600">[ ! ] OAuth token — supported, but short-lived</span>}
-              {keyType === 'unknown' && <span className="text-gray-500">[ ? ] Unrecognized format — keys usually start with AQ. or AIzaSy</span>}
+              {keyType === 'unknown' && <span className="text-gray-500">[ ? ] Unrecognized format</span>}
             </p>
           )}
         </div>
 
         {/* Instructions */}
-        <div className="border-2 border-black p-4 mb-4 bg-canvas">
+        <div className="border-2 border-black p-4 mb-6 bg-canvas">
           <p className="font-mono text-xs uppercase tracking-widest mb-2">_ HOW TO GET A KEY</p>
           <ol className="text-xs space-y-1 text-gray-700">
             <li>1. Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline font-semibold">aistudio.google.com/app/apikey</a></li>
@@ -89,25 +109,27 @@ export default function ApiKeyModal({ onClose, onSave }: Props) {
           </ol>
         </div>
 
-        {keyType === 'oauth' && (
-          <div className="border-2 border-amber-600 bg-amber-50 p-3 mb-4 text-xs text-amber-800">
-            <strong>Short-lived OAuth token detected.</strong> These expire in ~1 hour. Create a proper API key from AI Studio for persistent access.
-          </div>
-        )}
-
         {/* Actions */}
-        <div className="flex gap-3">
-          <button onClick={onClose} className="nb-btn flex-1">{t('apikey.cancel')}</button>
+        <div className="flex flex-col gap-3">
           <button
-            id="save-api-key-btn"
-            onClick={handleSave}
-            disabled={!key.trim()}
-            className="nb-btn-primary flex-[2] disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:shadow-nb"
+            onClick={handleContinue}
+            disabled={!key.trim() || keyType === 'unknown'}
+            className="nb-btn-primary py-4 w-full disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t('apikey.save')}
+            {variant === 'auto' ? 'Analyze with AI' : (t('apikey.save') || 'Save Key')}
           </button>
+          {variant === 'auto' && (
+            <div className="flex gap-3">
+              <button onClick={onSkip} className="nb-btn flex-[2] py-3 text-sm">
+                {t('upload.skipAI') || 'Skip AI (Local Preview)'}
+              </button>
+              <button onClick={onClose} className="border-2 border-black px-4 py-3 hover:-translate-y-px active:translate-y-0 transition-all font-bold text-sm">
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

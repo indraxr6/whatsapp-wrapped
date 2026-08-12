@@ -1,4 +1,5 @@
 import type { GeminiInsights, ParsedChatMetrics } from '../types/chat';
+import { useLanguage } from '../i18n/LanguageContext';
 import OverviewCard from './cards/OverviewCard';
 import MessageShareCard from './cards/MessageShareCard';
 import MediaCard from './cards/MediaCard';
@@ -16,8 +17,9 @@ import RoastCard from './cards/RoastCard';
 import MirroredPhrasesCard from './cards/MirroredPhrasesCard';
 import ExcerptsCard from './cards/ExcerptsCard';
 import Footer from './Footer';
-import { useLanguage } from '../i18n/LanguageContext';
 import LanguageToggle from './LanguageToggle';
+import { motion, useReducedMotion } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 
 interface Props {
   metrics: ParsedChatMetrics;
@@ -26,19 +28,48 @@ interface Props {
   insightStatus: 'success' | 'opt_out' | 'failed' | 'failed_429' | 'failed_503';
   onRetryAI: () => void;
   onReset: () => void;
-  onOpenApiKey: () => void;
   onOpenPrivacy: () => void;
+  onOpenApiKey: () => void;
 }
 
-export default function ResultsDashboard({ metrics, insights, chatMode, insightStatus, onRetryAI, onReset, onOpenApiKey, onOpenPrivacy }: Props) {
+export default function ResultsDashboard({ metrics, insights, chatMode, insightStatus, onRetryAI, onReset, onOpenPrivacy, onOpenApiKey }: Props) {
   const { t, language } = useLanguage();
+  const shouldReduceMotion = useReducedMotion();
+
+  const totalLinks = Object.values(metrics.sharedLinks).reduce((a, b) => a + b, 0);
+
+  const sectionVariants: Variants = {
+    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
+  };
+
+  const scrollVariants: Variants = {
+    offscreen: { opacity: 0, y: shouldReduceMotion ? 0 : 40 },
+    onscreen: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
+  };
+
+  const staggerContainer: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2 }
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-canvas">
+    <motion.div className="min-h-screen bg-canvas font-sans text-black" variants={staggerContainer} initial="hidden" animate="visible">
       {/* Sticky header */}
-      <header className="sticky top-0 z-10 bg-canvas border-b-2 border-black px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+      <motion.header variants={sectionVariants} className="sticky top-0 z-10 bg-canvas border-b-2 border-black px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={onReset}
             className="w-8 h-8 border-2 border-black bg-black flex items-center justify-center hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer"
             title="Start Over"
@@ -55,10 +86,10 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
             {t('footer.cta.btn')}
           </button>
         </div>
-      </header>
+      </motion.header>
 
       {/* Hero */}
-      <div className="border-b-2 border-black px-6 py-12 bg-white">
+      <motion.div variants={sectionVariants} className="border-b-2 border-black px-6 py-12 bg-white">
         <div className="content-wrapper">
           <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-3">{t('dashboard.hero.kicker', { count: metrics.totalMessages.toLocaleString() })}</p>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 gap-6">
@@ -78,50 +109,51 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
             {metrics.dateRange.start.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')} → {metrics.dateRange.end.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')} · {metrics.chatDurationDays} {t('dashboard.hero.days')}
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Dashboard grid */}
       <div className="content-wrapper py-8 space-y-12">
-
         {/* Section: The Numbers */}
-        <div>
+        <motion.div variants={sectionVariants}>
           <h2 className="font-mono text-sm uppercase tracking-widest mb-4">_ {t('section.numbers')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border-2 border-black">
+          <div className={`grid grid-cols-1 md:grid-cols-2 ${totalLinks > 0 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-0 border-2 border-black`}>
             <div className="border-b-2 lg:border-b-0 md:border-r-2 lg:border-r-2 border-black">
               <OverviewCard metrics={metrics} />
             </div>
             <div className="border-b-2 lg:border-b-0 md:border-r-0 lg:border-r-2 border-black">
               <MessageShareCard metrics={metrics} chatMode={chatMode} />
             </div>
-            <div className="border-b-2 md:border-b-0 md:border-r-2 lg:border-r-2 border-black">
+            <div className={`border-b-2 md:border-b-0 ${totalLinks > 0 ? 'md:border-r-2 lg:border-r-2' : 'md:col-span-2 lg:col-span-1 lg:border-r-0'} border-black`}>
               <MediaCard metrics={metrics} chatMode={chatMode} />
             </div>
-            <div>
-              <SharedLinksCard metrics={metrics} />
-            </div>
+            {totalLinks > 0 && (
+              <div>
+                <SharedLinksCard metrics={metrics} />
+              </div>
+            )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Section: Calls (Conditional) */}
         {Object.values(metrics.callsInitiated).some(v => v > 0) && (
-          <div>
+          <motion.div initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
             <h2 className="font-mono text-sm uppercase tracking-widest mb-4">{t('calls.title')}</h2>
             <div className="border-2 border-black">
               <CallMetricsCard metrics={metrics} chatMode={chatMode} />
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Section: Monthly Trend */}
-        <section>
+        <motion.section initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
           <SectionLabel label={t('section.monthly')} />
           <div className="border-2 border-black">
             <MonthlyCard metrics={metrics} />
           </div>
-        </section>
+        </motion.section>
 
         {/* Section: Patterns */}
-        <div>
+        <motion.div initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
           <h2 className="font-mono text-sm uppercase tracking-widest mb-4">_ {t('section.patterns')}</h2>
           <div className={`grid grid-cols-1 ${metrics.mirroredPhrases.length > 0 ? 'lg:grid-cols-3' : ''} gap-0 border-2 border-black`}>
             <div className={`${metrics.mirroredPhrases.length > 0 ? 'lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2' : ''} border-black`}>
@@ -144,18 +176,18 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
               <GhostingCard metrics={metrics} chatMode={chatMode} />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Section: Emoji DNA */}
-        <section>
+        <motion.section initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
           <SectionLabel label={t('section.emoji')} />
           <div className="border-2 border-black">
             <EmojiCard metrics={metrics} chatMode={chatMode} />
           </div>
-        </section>
+        </motion.section>
 
         {/* Section: The Vibe */}
-        <section>
+        <motion.section initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
           <SectionLabel label={t('section.vibe')} />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 border-2 border-black">
             <div className="lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2 border-black">
@@ -182,10 +214,10 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
           <div className="border-2 border-t-0 border-black">
             <ExcerptsCard metrics={metrics} />
           </div>
-        </section>
+        </motion.section>
 
         {/* Footer CTA */}
-        <div className="border-2 border-black bg-white p-8 text-center mt-12 mb-12">
+        <motion.div initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants} className="border-2 border-black bg-white p-8 text-center mt-12 mb-12">
           <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">_ DONE?</p>
           <h2 className="text-2xl font-extrabold mb-3">Analyze another chat.</h2>
           <p className="text-sm text-gray-600 mb-6">Upload a different export to compare conversations.</p>
@@ -196,11 +228,11 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
           >
             START OVER
           </button>
-        </div>
+        </motion.div>
       </div>
 
       <Footer />
-    </div>
+    </motion.div>
   );
 }
 
