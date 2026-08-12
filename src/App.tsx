@@ -22,6 +22,7 @@ export default function App() {
   const [chatMode, setChatMode] = useState<'dm' | 'group'>('dm');
   const [privacyModalVariant, setPrivacyModalVariant] = useState<'auto' | 'manual' | null>(null);
   const [apiKeyModalVariant, setApiKeyModalVariant] = useState<'auto' | 'manual' | null>(null);
+  const [pendingAiKey, setPendingAiKey] = useState<string | 'skip' | null>(null);
   const [insightStatus, setInsightStatus] = useState<'success' | 'opt_out' | 'failed_429' | 'failed_503' | 'failed'>('success');
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<ParsedChatMetrics | null>(null);
@@ -110,7 +111,7 @@ export default function App() {
       });
     }
 
-    setPrivacyModalVariant('auto');
+    setApiKeyModalVariant('auto');
   };
 
   const handleChatModeCancel = () => {
@@ -118,17 +119,51 @@ export default function App() {
     handleReset();
   };
 
-  const handlePrivacyModalContinue = () => {
-    setPrivacyModalVariant(null);
-    if (privacyModalVariant === 'auto') {
-      setApiKeyModalVariant('auto');
+  // STEP 2: Api Key Modal logic
+  const handleApiKeyModalContinue = (apiKey: string) => {
+    localStorage.setItem('gemini_api_key', apiKey);
+    setApiKeyModalVariant(null);
+    if (apiKeyModalVariant === 'auto') {
+      setPendingAiKey(apiKey);
+      setPrivacyModalVariant('auto');
     }
   };
 
-  const handleApiKeyModalSkip = async () => {
+  const handleApiKeyModalSkip = () => {
     setApiKeyModalVariant(null);
-    if (!metrics) return;
+    if (apiKeyModalVariant === 'auto') {
+      setPendingAiKey('skip');
+      setPrivacyModalVariant('auto');
+    } else if (metrics) {
+      // If manual mode, and they clicked skip? They shouldn't be able to, but let's handle it
+      executeSkip();
+    }
+  };
 
+  const handleApiKeyModalCancel = () => {
+    setApiKeyModalVariant(null);
+    handleReset();
+  };
+
+  // STEP 3: Privacy Modal logic
+  const handlePrivacyModalContinue = () => {
+    setPrivacyModalVariant(null);
+    if (privacyModalVariant === 'auto') {
+      if (pendingAiKey === 'skip') {
+        executeSkip();
+      } else if (pendingAiKey) {
+        executeAnalysis(pendingAiKey);
+      }
+    }
+  };
+
+  const handlePrivacyModalCancel = () => {
+    setPrivacyModalVariant(null);
+    handleReset();
+  };
+
+  const executeSkip = async () => {
+    if (!metrics) return;
     setInsightStatus('opt_out');
     setLoadingStep(t('loading.demo') || 'Loading local preview...');
     setView('analyzing');
@@ -137,16 +172,8 @@ export default function App() {
     setView('results');
   };
 
-  const handlePrivacyModalCancel = () => {
-    setPrivacyModalVariant(null);
-    handleReset();
-  };
-
   const executeAnalysis = async (apiKey: string) => {
-    setApiKeyModalVariant(null);
     if (!metrics) return;
-
-    localStorage.setItem('gemini_api_key', apiKey);
 
     setLoadingStep(t('loading.ai') || 'Generating AI insights...');
     setView('analyzing');
@@ -229,8 +256,8 @@ export default function App() {
       <AnimatePresence>
         {apiKeyModalVariant && (
           <ApiKeyModal
-            onClose={apiKeyModalVariant === 'auto' ? handlePrivacyModalCancel : handleApiKeyModalClose}
-            onContinue={executeAnalysis}
+            onClose={apiKeyModalVariant === 'auto' ? handleApiKeyModalCancel : handleApiKeyModalClose}
+            onContinue={apiKeyModalVariant === 'auto' ? handleApiKeyModalContinue : executeAnalysis}
             onSkip={handleApiKeyModalSkip}
             variant={apiKeyModalVariant}
           />

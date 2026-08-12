@@ -123,7 +123,7 @@ export default function ApiKeyModal({ onClose, onContinue, onSkip, variant = 'au
               <button onClick={onSkip} className="nb-btn flex-[2] py-3 text-sm">
                 {t('upload.skipAI') || 'Skip AI (Local Preview)'}
               </button>
-              <button onClick={onClose} className="border-2 border-black px-4 py-3 hover:-translate-y-px active:translate-y-0 transition-all font-bold text-sm">
+              <button onClick={onClose} className="nb-btn flex-1 py-3 text-sm">
                 Cancel
               </button>
             </div>
