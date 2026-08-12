@@ -16,6 +16,7 @@
     "@types/twemoji": "^13.1.2",
     "@types/wordcloud": "^1.2.2",
     "@vercel/analytics": "^2.0.1",
+    "fflate": "^0.8.3",
     "framer-motion": "^12.43.0",
     "lucide-react": "^1.30.0",
     "react": "^19.2.8",

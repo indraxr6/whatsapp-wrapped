@@ -12,7 +12,9 @@ export default function UploadZone({ onFileSelected }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((file: File) => {
-    if (!file.name.endsWith('.txt') && file.type !== 'text/plain') {
+    const isTxt = file.name.endsWith('.txt') || file.type === 'text/plain';
+    const isZip = file.name.endsWith('.zip') || file.type === 'application/zip' || file.type === 'application/x-zip-compressed';
+    if (!isTxt && !isZip) {
       alert(t('upload.error_invalid_file'));
       return;
     }
@@ -83,7 +85,7 @@ export default function UploadZone({ onFileSelected }: Props) {
       <input
         ref={inputRef}
         type="file"
-        accept=".txt,text/plain"
+        accept=".txt,text/plain,.zip,application/zip,application/x-zip-compressed,application/zip-compressed"
         id="file-input"
         className="hidden"
         onChange={onInputChange}
