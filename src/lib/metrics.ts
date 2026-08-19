@@ -7,7 +7,7 @@ const STOP_WORDS = new Set([
   'omitted', 'media', 'https'
 ]);
 
-const OVERNIGHT_GAP_MINUTES = 360; // 6 hours — gaps larger than this are excluded from avg latency
+const OVERNIGHT_GAP_MINUTES = 360; // 6 hours - gaps larger than this are excluded from avg latency
 
 // ──────────────────────────────────────────────
 // Emoji extraction using Unicode property escapes
@@ -472,7 +472,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   // Also exclude short phrases (< 4 chars) to filter fillers like "yah", "ya", etc.
   const phraseSenders: Record<string, Set<string>> = {};
   for (const m of contentMessages) {
-    if (m.isSystem) continue; // Skip system messages — prevents locale-unmapped strings leaking in
+    if (m.isSystem) continue; // Skip system messages - prevents locale-unmapped strings leaking in
     const raw = m.content.trim().toLowerCase();
     if (raw.length >= 4 && !STOP_WORDS.has(raw)) {
       if (!phraseSenders[raw]) phraseSenders[raw] = new Set();

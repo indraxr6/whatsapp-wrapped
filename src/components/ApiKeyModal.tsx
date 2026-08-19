@@ -93,7 +93,7 @@ export default function ApiKeyModal({ onClose, onContinue, onSkip, variant = 'au
           {key.trim().length > 10 && (
             <p className="font-mono text-xs mt-2">
               {keyType === 'api-key' && <span className="text-green-700">[ OK ] Valid API key format</span>}
-              {keyType === 'oauth' && <span className="text-amber-600">[ ! ] OAuth token — supported, but short-lived</span>}
+              {keyType === 'oauth' && <span className="text-amber-600">[ ! ] OAuth token - supported, but short-lived</span>}
               {keyType === 'unknown' && <span className="text-gray-500">[ ? ] Unrecognized format</span>}
             </p>
           )}

@@ -21,7 +21,7 @@ export default function ExportTooltip() {
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-[280px] bg-white border-2 border-black shadow-[4px_4px_0_0_#000] p-2 z-50 pointer-events-none">
+        <div className="absolute bottom-full -right-2 md:right-auto md:left-1/2 md:-translate-x-1/2 mb-2 w-[280px] bg-white border-2 border-black shadow-[4px_4px_0_0_#000] p-2 z-50 pointer-events-none">
           <div className="relative w-full aspect-[1080/1312] bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
             {/* Lazy-loaded video (only renders when tooltip is open) */}
             <video
@@ -38,7 +38,7 @@ export default function ExportTooltip() {
             </video>
           </div>
           {/* Arrow pointing down */}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-b-2 border-r-2 border-black transform rotate-45 -mt-[1.5px]" />
+          <div className="absolute top-full right-[11px] md:right-auto md:left-1/2 md:-translate-x-1/2 w-3 h-3 bg-white border-b-2 border-r-2 border-black transform rotate-45 -mt-[1.5px]" />
         </div>
       )}
     </div>

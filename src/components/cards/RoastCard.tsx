@@ -33,7 +33,7 @@ export default function RoastCard({ insights, metrics, insightStatus = 'success'
     try {
       const apiKey = localStorage.getItem('gemini_api_key') ?? '';
       if (!apiKey) {
-        setError('No API key set — set your Gemini key to generate more roasts.');
+        setError('No API key set - set your Gemini key to generate more roasts.');
         setLoading(false);
         return;
       }

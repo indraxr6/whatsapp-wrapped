@@ -31,13 +31,13 @@ export default function EmojiCard({ metrics, chatMode = 'dm' }: Props) {
         </div>
       )}
 
-      <div className={`gap-6 ${chatMode === 'group' ? 'flex flex-col max-h-[500px] overflow-y-auto pr-2 custom-scrollbar' : 'grid grid-cols-1 md:grid-cols-2 md:gap-x-8'}`}>
+      <div className={`gap-6 grid grid-cols-1 md:grid-cols-2 md:gap-x-8 ${chatMode === 'group' ? 'max-h-[500px] overflow-y-auto pr-2 custom-scrollbar' : ''}`}>
         {displayParticipants.map((p, pIdx) => {
           const emojis = emojiLeaderboardPerSender[p] ?? [];
           const maxCount = emojis[0]?.count ?? 1;
 
           return (
-            <div key={p} className={chatMode === 'dm' && pIdx > 0 ? 'mt-6 md:mt-0 md:border-l-2 md:border-black md:pl-8' : ''}>
+            <div key={p} className={chatMode === 'dm' && pIdx > 0 ? 'md:border-l-2 md:border-black md:pl-8' : ''}>
               <p className="font-bold text-sm mb-3 truncate">{p}</p>
 
               <div className="space-y-1.5">

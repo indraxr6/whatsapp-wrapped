@@ -241,7 +241,7 @@ export function getMediaType(content: string): import('../types/chat').MediaType
   // "view once" is treated as an image
   if (lower.includes('view once')) return 'image';
 
-  // Native location share — must run BEFORE generic link classification so it isn't
+  // Native location share - must run BEFORE generic link classification so it isn't
   // double-counted as a plain link or a Google Maps shared link.
   // Pattern: "Lokasi:" / "Location:" / "location:" immediately followed by maps.google.com/?q=
   if (/^(?:lokasi|location)\s*:\s*https:\/\/maps\.google\.com\/\?q=/i.test(lower)) {
@@ -254,7 +254,7 @@ export function getMediaType(content: string): import('../types/chat').MediaType
     }
   }
 
-  // URL detection (links are not in locale table — separate regex)
+  // URL detection (links are not in locale table - separate regex)
   // We ONLY treat it as "media" if the entire message is JUST a link or starts with one.
   // Actually, let's just return 'link' if it's a standalone link, otherwise null,
   // so we don't drop content messages that happen to contain a link.
@@ -312,7 +312,7 @@ export function getCallInfo(content: string): CallInfo | null {
 
   if (!callType) return null;
 
-  // 2. Detect duration — supports EN and ID time units
+  // 2. Detect duration - supports EN and ID time units
   let durationSeconds: number | undefined;
   const durationMatch = lower.match(/(\d+)\s*(dtk|mnt|jam|sec|min|hr|detik|menit|s\b|m\b|h\b)/i);
   if (durationMatch) {

@@ -93,7 +93,7 @@ export default function UploadZone({ onFileSelected }: Props) {
       />
 
       <p className="text-center mt-3 text-xs text-gray-500 font-mono">
-        — processed entirely in your browser, nothing uploaded —
+        - processed entirely in your browser, nothing uploaded -
       </p>
     </div>
   );

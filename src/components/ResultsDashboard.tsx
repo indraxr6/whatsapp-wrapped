@@ -98,10 +98,10 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
             </h1>
             <div className="text-left sm:text-right">
               <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">
-                {metrics.groupName ? 'Group Name:' : 'Chat With:'}
+                {chatMode === 'group' ? 'Group Name:' : 'Chat With:'}
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                {metrics.groupName ?? metrics.participants.join(' & ')}
+                {chatMode === 'group' ? (metrics.groupName ?? metrics.participants.join(', ')) : metrics.participants.join(' & ')}
               </h2>
             </div>
           </div>

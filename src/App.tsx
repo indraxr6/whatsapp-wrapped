@@ -103,11 +103,22 @@ export default function App() {
     setChatMode(mode);
     setShowChatModeModal(false);
 
-    if (mode === 'dm' && metrics && metrics.participants.length > 2) {
-      const sorted = [...metrics.participants].sort((a, b) => (metrics.messagesPerSender[b] ?? 0) - (metrics.messagesPerSender[a] ?? 0));
+    if (metrics) {
+      let updatedParticipants = [...metrics.participants];
+
+      if (mode === 'dm' && updatedParticipants.length > 2) {
+        updatedParticipants.sort((a, b) => (metrics.messagesPerSender[b] ?? 0) - (metrics.messagesPerSender[a] ?? 0));
+        updatedParticipants = updatedParticipants.slice(0, 2);
+      } else if (mode === 'group' && metrics.groupName) {
+        // Normalize names to strip variation selectors (like \uFE0F) that might differ between the file name and the chat content
+        const normalize = (s: string) => s.replace(/[\uFE0F\u200D]/g, '').trim();
+        const normalizedGroupName = normalize(metrics.groupName);
+        updatedParticipants = updatedParticipants.filter(p => normalize(p) !== normalizedGroupName);
+      }
+
       setMetrics({
         ...metrics,
-        participants: sorted.slice(0, 2)
+        participants: updatedParticipants
       });
     }
 

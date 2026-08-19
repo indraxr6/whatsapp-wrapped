@@ -27,7 +27,7 @@ function parseTimestamp(dateStr: string, timeStr: string): Date {
     const c = parseInt(parts[2]);
 
     if (c > 31) {
-      // YYYY is the third part — likely D/M/YYYY
+      // YYYY is the third part - likely D/M/YYYY
       day = a;
       month = b;
       year = c;
@@ -59,7 +59,7 @@ function parseTimestamp(dateStr: string, timeStr: string): Date {
     normalizedTime = normalizedTime.replace(/\s?[AP]M$/i, '').trim();
   }
 
-  // Split on either `:` or `.` — WhatsApp uses both depending on locale/OS
+  // Split on either `:` or `.` - WhatsApp uses both depending on locale/OS
   const timeParts = normalizedTime.split(/[:.]/);
   let hours = parseInt(timeParts[0]);
   const minutes = parseInt(timeParts[1]);
@@ -165,7 +165,7 @@ export function parseWhatsAppExport(rawText: string): ParseResult {
         } : {})
       };
     } else if (currentMessage) {
-      // Multi-line continuation — append to the last message's content
+      // Multi-line continuation - append to the last message's content
       currentMessage.content += '\n' + line;
     } else {
       // Could not parse line and no current message context

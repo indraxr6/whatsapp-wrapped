@@ -60,7 +60,7 @@ export interface ParsedChatMetrics {
   longestVideoCallSeconds: number;
   stickerCount: Record<string, number>;
 
-  // Emoji — top 10 per sender (not merged)
+  // Emoji - top 10 per sender (not merged)
   topEmojisPerSender: Record<string, EmojiCount[]>;
   emojiLeaderboardPerSender: Record<string, EmojiCount[]>;
   emojiSpamOutliers: { sender: string; emoji: string; count: number }[];
@@ -95,7 +95,7 @@ export interface ParsedChatMetrics {
   mediaLeaderboardPerSender: Record<string, Record<MediaType, number>>;
 }
 
-// V2 Gemini schema — simplified single-paragraph approach
+// V2 Gemini schema - simplified single-paragraph approach
 export interface GeminiInsights {
   personality_summary: string; // 4-5 sentences merged: archetype + vibe + power balance
   roast: string;               // 1-2 sentences
