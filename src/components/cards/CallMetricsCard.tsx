@@ -67,16 +67,16 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
           </div>
         )}
 
-        {(longestVoiceCallSeconds > 0 || longestVideoCallSeconds === 0) && (
+        {longestVoiceCallSeconds > 0 && longestVoiceCallSeconds !== sumVoiceDuration && (
           <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
             <Clock className="mb-2 text-accent-lime" size={24} strokeWidth={2.5} />
             <p className="font-mono text-xs uppercase text-gray-500">{t('calls.longestVoice')}</p>
             <p className="font-black text-2xl">
-              {longestVoiceCallSeconds === 0 ? t('calls.guess') : formatDuration(longestVoiceCallSeconds)}
+              {formatDuration(longestVoiceCallSeconds)}
             </p>
           </div>
         )}
-        {longestVideoCallSeconds > 0 && (
+        {longestVideoCallSeconds > 0 && longestVideoCallSeconds !== sumVideoDuration && (
           <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
             <Clock className="mb-2 text-accent-lime" size={24} strokeWidth={2.5} />
             <p className="font-mono text-xs uppercase text-gray-500">{t('calls.longestVideo')}</p>
