@@ -79,26 +79,54 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   // NOTE: WhatsApp uses different left " (U+201C) and right " (U+201D) curly quotes.
   // A backreference \1 would fail since the opening and closing quotes differ.
   // We match any quote character for both open and close independently.
-  const renameRegex = /(?:changed the group name to|changed this group's name to|changed the subject to|mengubah nama grup menjadi|mengubah subjek menjadi|mengubah subjek grup menjadi)\s*[\u201c\u201d"]?([^\u201c\u201d"]+)[\u201c\u201d"]?\s*$/i;
-  const creationRegex = /(?:created group|membuat grup|telah membuat grup)\s+[\u201c\u201d"]?(.+?)[\u201c\u201d"]?\s*$/i;
+  const renameRegex = /^(?:(.+?)\s+)?(?:changed the group name to|changed this group's name to|changed the subject to|mengubah nama grup menjadi|mengubah subjek menjadi|mengubah subjek grup menjadi)\s*[\u201c\u201d"]?([^\u201c\u201d"]+)[\u201c\u201d"]?\s*$/i;
+  const creationRegex = /^(?:(.+?)\s+)?(?:created group|membuat grup|telah membuat grup)\s+[\u201c\u201d"]?(.+?)[\u201c\u201d"]?\s*$/i;
+  const iconChangeRegex = /^(?:(.+?)\s+)?(?:changed this group's icon|mengubah ikon grup ini)\s*$/i;
 
   let latestRenameMatch: string | null = null;
   let creationMatch: string | null = null;
+
+  let groupNameHistory: import('../types/chat').GroupRenameEvent[] = [];
+  let iconChangeCount = 0;
 
   // Group-name stop-words that should never be treated as a real group name
   const NAME_STOP_WORDS = new Set(['ini', 'itu', 'this', 'the', 'here', 'tersebut']);
 
   for (const m of messages) {
     if (m.isSystem) {
-      const rename = m.content.match(renameRegex);
-      if (rename && rename[1]) {
-        latestRenameMatch = rename[1].trim();
+      if (iconChangeRegex.test(m.content)) {
+        iconChangeCount++;
       }
+
+      const rename = m.content.match(renameRegex);
+      if (rename && rename[2]) {
+        latestRenameMatch = rename[2].trim();
+
+        let rawActor = rename[1] ? rename[1].trim() : (m.sender !== 'System' ? m.sender : 'Unknown');
+        if (rawActor.toLowerCase() === 'you' || rawActor.toLowerCase() === 'anda') {
+          rawActor = 'You';
+        }
+
+        const newName = latestRenameMatch;
+        const oldName = groupNameHistory.length > 0 ? groupNameHistory[groupNameHistory.length - 1].newName : null;
+
+        groupNameHistory.push({
+          date: m.timestamp,
+          actor: rawActor,
+          oldName,
+          newName
+        });
+      }
+      
       if (!creationMatch) {
         const creation = m.content.match(creationRegex);
         // Guard: captured name must be >3 chars and not a pronoun/demonstrative
-        if (creation && creation[1] && creation[1].trim().length > 3 && !NAME_STOP_WORDS.has(creation[1].trim().toLowerCase())) {
-          creationMatch = creation[1].trim();
+        if (creation && creation[2] && creation[2].trim().length > 3 && !NAME_STOP_WORDS.has(creation[2].trim().toLowerCase())) {
+          creationMatch = creation[2].trim();
+          
+          if (groupNameHistory.length > 0 && groupNameHistory[0].oldName === null) {
+            groupNameHistory[0].oldName = creationMatch;
+          }
         }
       }
     }
@@ -197,7 +225,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   const mediaCounts: Record<string, number> = {};
   const stickerCount: Record<string, number> = {};
   const viewOnceCount: Record<string, number> = {};
-  const MEDIA_TYPES: MediaType[] = ['image', 'video', 'audio', 'sticker', 'gif', 'document', 'contactCard', 'location', 'link'];
+  const MEDIA_TYPES: MediaType[] = ['image', 'video', 'audio', 'sticker', 'gif', 'document', 'contactCard', 'location', 'link', 'unknown'];
   const mediaLeaderboard: Record<MediaType, number> = Object.fromEntries(
     MEDIA_TYPES.map((t) => [t, 0])
   ) as Record<MediaType, number>;
@@ -489,11 +517,20 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   }
   mirroredPhrases.sort((a, b) => b.count - a.count);
 
+  const earlyExcerptData = selectContinuousExcerpts(earlyMessages, 60, 'start');
+  const medianExcerptData = selectContinuousExcerpts(medianMessages, 60, 'middle');
+  const lateExcerptData = selectContinuousExcerpts(lateMessages, 15, 'end');
+
   const sampleExcerpts = {
-    // earlyMessages/medianMessages/lateMessages are already filtered (no system/media/calls)
-    early: selectContinuousExcerpts(earlyMessages, 15, 'start'),
-    median: selectContinuousExcerpts(medianMessages, 15, 'middle'),
-    late: selectContinuousExcerpts(lateMessages, 15, 'end'),
+    early: earlyExcerptData.excerpts,
+    median: medianExcerptData.excerpts,
+    late: lateExcerptData.excerpts,
+  };
+
+  const eraDateRanges = {
+    early: earlyExcerptData.dateRange,
+    median: medianExcerptData.dateRange,
+    late: lateExcerptData.dateRange,
   };
 
   const topKeywords = computeTopKeywords(contentMessages);
@@ -539,6 +576,9 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     activeChatDays,
     stickerCount,
     mirroredPhrases,
+    eraDateRanges,
+    groupNameHistory,
+    iconChangeCount,
   };
 }
 
@@ -613,11 +653,21 @@ function computeTopKeywords(messages: ChatMessage[]): { word: string; count: num
   return combined.slice(0, 150).map(([word, count]) => ({ word, count }));
 }
 
-function selectContinuousExcerpts(messages: ChatMessage[], count: number, position: 'start' | 'middle' | 'end'): string[] {
+function selectContinuousExcerpts(messages: ChatMessage[], count: number, position: 'start' | 'middle' | 'end'): { excerpts: string[]; dateRange: { start: Date; end: Date } | null } {
   const validMessages = messages.filter(m => m.content.trim().length > 3 && !m.isSystem);
 
+  if (validMessages.length === 0) {
+    return { excerpts: [], dateRange: null };
+  }
+
   if (validMessages.length <= count) {
-    return validMessages.map((m) => `${m.sender}: ${m.content.slice(0, 120)}`);
+    return {
+      excerpts: validMessages.map((m) => `${m.sender}: ${m.content.slice(0, 120)}`),
+      dateRange: {
+        start: validMessages[0].timestamp,
+        end: validMessages[validMessages.length - 1].timestamp
+      }
+    };
   }
 
   let startIndex = 0;
@@ -627,9 +677,15 @@ function selectContinuousExcerpts(messages: ChatMessage[], count: number, positi
     startIndex = validMessages.length - count;
   }
 
-  return validMessages
-    .slice(startIndex, startIndex + count)
-    .map((m) => `${m.sender}: ${m.content.slice(0, 120)}`);
+  const selectedMessages = validMessages.slice(startIndex, startIndex + count);
+
+  return {
+    excerpts: selectedMessages.map((m) => `${m.sender}: ${m.content.slice(0, 120)}`),
+    dateRange: {
+      start: selectedMessages[0].timestamp,
+      end: selectedMessages[selectedMessages.length - 1].timestamp
+    }
+  };
 }
 
 function calculateLongestStreak(messages: ChatMessage[]): number {

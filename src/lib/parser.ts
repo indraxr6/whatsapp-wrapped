@@ -12,39 +12,40 @@ import { getMediaType, isSystemLine, getCallInfo } from './localeTable';
 const MESSAGE_REGEX =
   /^(?:\[(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}),?\s(\d{1,2}[:.\uFF0E]\d{2}(?:[:.\uFF0E]\d{2})?(?:\s?[AP]M)?)\]|(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}),?\s(\d{1,2}[:.\uFF0E]\d{2}(?:[:.\uFF0E]\d{2})?(?:\s?[AP]M)?)\s[-–])\s([\s\S]*)$/i;
 
-function parseTimestamp(dateStr: string, timeStr: string): Date {
+function parseTimestamp(dateStr: string, timeStr: string, format: 'DD/MM' | 'MM/DD'): Date | null {
   // Normalize separators
   const normalizedDate = dateStr.replace(/[.\-]/g, '/');
   const parts = normalizedDate.split('/');
 
-  // Try to detect DD/MM/YYYY vs MM/DD/YYYY heuristically
-  // WhatsApp predominantly uses DD/MM/YYYY globally
   let day: number, month: number, year: number;
 
   if (parts.length === 3) {
-    const a = parseInt(parts[0]);
-    const b = parseInt(parts[1]);
-    const c = parseInt(parts[2]);
+    const a = parseInt(parts[0], 10);
+    const b = parseInt(parts[1], 10);
+    const c = parseInt(parts[2], 10);
 
     if (c > 31) {
-      // YYYY is the third part - likely D/M/YYYY
-      day = a;
-      month = b;
+      // YYYY is the third part
       year = c;
-    } else if (a > 12) {
-      // First part > 12, must be day
-      day = a;
-      month = b;
-      year = c < 100 ? 2000 + c : c;
+      if (format === 'DD/MM') { day = a; month = b; }
+      else { month = a; day = b; }
+    } else if (a > 31) {
+      // YYYY is the first part (rare in WhatsApp, but safe to handle)
+      year = a; month = b; day = c;
     } else {
-      // Default to DD/MM/YYYY (most common globally)
-      day = a;
-      month = b;
+      // 2-digit year at the end
       year = c < 100 ? 2000 + c : c;
+      if (format === 'DD/MM') { day = a; month = b; }
+      else { month = a; day = b; }
     }
   } else {
-    return new Date(NaN);
+    return null;
   }
+
+  // Defensive validation
+  if (month < 1 || month > 12) return null;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  if (day < 1 || day > daysInMonth) return null;
 
   // Normalize time string (remove AM/PM for 24h conversion)
   let normalizedTime = timeStr.trim();
@@ -71,6 +72,31 @@ function parseTimestamp(dateStr: string, timeStr: string): Date {
   return new Date(year, month - 1, day, hours, minutes, seconds);
 }
 
+function detectDateFormat(lines: string[]): 'DD/MM' | 'MM/DD' {
+  for (const line of lines) {
+    // Strip invisible bidirectional formatting chars first, same as parsing loop
+    const cleanLine = line.replace(/[\u200E\u200F\u202A-\u202E\u2068\u2069]|<0x200e>|<0x200f>/gi, '');
+    if (!cleanLine.trim()) continue;
+
+    const match = MESSAGE_REGEX.exec(cleanLine);
+    if (!match) continue;
+
+    const dateStr = match[1] || match[3];
+    const parts = dateStr.replace(/[.\-]/g, '/').split('/');
+    if (parts.length === 3) {
+      const a = parseInt(parts[0], 10);
+      const b = parseInt(parts[1], 10);
+      // We only care about A and B since C is usually year
+      if (a > 12 && a <= 31) {
+        return 'DD/MM';
+      } else if (b > 12 && b <= 31) {
+        return 'MM/DD';
+      }
+    }
+  }
+  return 'DD/MM'; // Fallback
+}
+
 export interface ParseResult {
   messages: ChatMessage[];
   unparsedLineCount: number;
@@ -84,6 +110,7 @@ export function parseWhatsAppExport(rawText: string): ParseResult {
   let detectedFormat: 'ios' | 'android' | 'unknown' = 'unknown';
 
   let currentMessage: ChatMessage | null = null;
+  const dateFormat = detectDateFormat(lines);
 
   for (let i = 0; i < lines.length; i++) {
     // Strip invisible bidirectional formatting chars (like LRM \u200e) and their literal 
@@ -134,7 +161,16 @@ export function parseWhatsAppExport(rawText: string): ParseResult {
         detectedFormat = isIOS ? 'ios' : 'android';
       }
 
-      const timestamp = parseTimestamp(dateStr, timeStr);
+      const timestamp = parseTimestamp(dateStr, timeStr, dateFormat);
+      if (!timestamp) {
+        // Invalid date - treat as unparsed line
+        unparsedLineCount++;
+        if (currentMessage) {
+          currentMessage.content += '\n' + line;
+        }
+        continue;
+      }
+
       const mediaType = getMediaType(content);
       const isMedia = mediaType !== null;
       

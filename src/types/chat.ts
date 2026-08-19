@@ -1,4 +1,4 @@
-export type MediaType = 'image' | 'video' | 'audio' | 'sticker' | 'gif' | 'document' | 'contactCard' | 'link' | 'location';
+export type MediaType = 'image' | 'video' | 'audio' | 'sticker' | 'gif' | 'document' | 'contactCard' | 'link' | 'location' | 'unknown';
 
 export interface ChatMessage {
   timestamp: Date;
@@ -31,6 +31,13 @@ export interface EraMetrics {
   topEmoji: string | null;
 }
 
+export interface GroupRenameEvent {
+  date: Date;
+  actor: string;
+  oldName: string | null;
+  newName: string;
+}
+
 export interface ParsedChatMetrics {
   totalMessages: number;
   dateRange: { start: Date; end: Date };
@@ -41,6 +48,8 @@ export interface ParsedChatMetrics {
   doubleTextCounts: Record<string, number>;
   ghostingInstances: Record<string, number>;
   groupName: string | null;
+  groupNameHistory: GroupRenameEvent[];
+  iconChangeCount: number;
   sharedLinks: Record<string, number>;
   activeChatDays: number;
   mirroredPhrases: { phrase: string; count: number }[];
@@ -74,6 +83,11 @@ export interface ParsedChatMetrics {
     early: string[];
     median: string[];
     late: string[];
+  };
+  eraDateRanges: {
+    early: { start: Date; end: Date } | null;
+    median: { start: Date; end: Date } | null;
+    late: { start: Date; end: Date } | null;
   };
   eraMetrics: {
     early: EraMetrics;

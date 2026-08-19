@@ -26,6 +26,7 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'created group',
       'changed the group name',
       "changed this group's icon",
+      'changed the group description',
       'left',
       "joined using this group's invite link",
       'you were added',
@@ -40,7 +41,7 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'null'
     ],
     mediaPlaceholders: [
-      { pattern: '<media omitted>', type: 'image' },
+      { pattern: '<media omitted>', type: 'unknown' },
       { pattern: 'image omitted', type: 'image' },
       { pattern: 'photo omitted', type: 'image' },
       { pattern: 'video omitted', type: 'video' },
@@ -55,7 +56,7 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       { pattern: 'location: https://', type: 'link' },
       { pattern: 'live location shared', type: 'link' },
       // Catch-all for missing prefixes in some exports
-      { pattern: 'omitted', type: 'image' },
+      { pattern: 'omitted', type: 'unknown' },
       { pattern: 'view once', type: 'image' },
     ],
   },
@@ -80,8 +81,10 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'membuat grup',
       'telah membuat grup',
       'mengubah nama grup',
+      'mengubah nama grup menjadi',
       'mengubah subjek',
       'mengubah ikon grup',
+      'mengubah ikon grup ini',
       'mengubah deskripsi grup',
       // Leaving
       'keluar',
@@ -111,8 +114,8 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
     ],
     mediaPlaceholders: [
       // Old "dihilangkan" variants
-      { pattern: '<media dihilangkan>', type: 'image' },
-      { pattern: '<media omitted>', type: 'image' },
+      { pattern: '<media dihilangkan>', type: 'unknown' },
+      { pattern: '<media omitted>', type: 'unknown' },
       { pattern: 'gambar dihilangkan', type: 'image' },
       { pattern: 'video dihilangkan', type: 'video' },
       { pattern: 'audio dihilangkan', type: 'audio' },
@@ -127,8 +130,8 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       { pattern: 'dokumen tidak disertakan', type: 'document' },
       { pattern: 'kartu kontak tidak disertakan', type: 'contactCard' },
       // Catch-all
-      { pattern: 'dihilangkan', type: 'image' },
-      { pattern: 'tidak disertakan', type: 'document' },
+      { pattern: 'dihilangkan', type: 'unknown' },
+      { pattern: 'tidak disertakan', type: 'unknown' },
       { pattern: 'view once', type: 'image' },
     ],
   },
@@ -145,8 +148,8 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'du hast diese nachricht gelöscht',
     ],
     mediaPlaceholders: [
-      { pattern: '<medien weggelassen>', type: 'image' },
-      { pattern: '<media omitted>', type: 'image' },
+      { pattern: '<medien weggelassen>', type: 'unknown' },
+      { pattern: '<media omitted>', type: 'unknown' },
       { pattern: 'bild weggelassen', type: 'image' },
       { pattern: 'video weggelassen', type: 'video' },
       { pattern: '<angehängt:', type: 'document' },
@@ -165,8 +168,8 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'vous avez supprimé ce message',
     ],
     mediaPlaceholders: [
-      { pattern: '<média omis>', type: 'image' },
-      { pattern: '<media omitted>', type: 'image' },
+      { pattern: '<média omis>', type: 'unknown' },
+      { pattern: '<media omitted>', type: 'unknown' },
       { pattern: 'image omise', type: 'image' },
       { pattern: 'vidéo omise', type: 'video' },
       { pattern: '<joint :', type: 'document' },
@@ -185,8 +188,8 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'eliminaste este mensaje',
     ],
     mediaPlaceholders: [
-      { pattern: '<multimedia omitido>', type: 'image' },
-      { pattern: '<media omitted>', type: 'image' },
+      { pattern: '<multimedia omitido>', type: 'unknown' },
+      { pattern: '<media omitted>', type: 'unknown' },
       { pattern: 'imagen omitida', type: 'image' },
       { pattern: 'video omitido', type: 'video' },
       { pattern: '<adjunto:', type: 'document' },
@@ -205,8 +208,8 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'você apagou esta mensagem',
     ],
     mediaPlaceholders: [
-      { pattern: '<mídia omitida>', type: 'image' },
-      { pattern: '<media omitted>', type: 'image' },
+      { pattern: '<mídia omitida>', type: 'unknown' },
+      { pattern: '<media omitted>', type: 'unknown' },
       { pattern: 'imagem omitida', type: 'image' },
       { pattern: 'vídeo omitido', type: 'video' },
       { pattern: '<arquivo:', type: 'document' },
