@@ -36,20 +36,20 @@ export default function WordCloudCard({ metrics }: Props) {
 
     canvasRef.current.width = width * dpr;
     canvasRef.current.height = height * dpr;
-    
+
     // Scale canvas via CSS back to original dimensions
     canvasRef.current.style.width = `${width}px`;
     canvasRef.current.style.height = `${height}px`;
 
     const list: [string, number][] = metrics.topKeywords.map(k => [k.word, k.count]);
-    
+
     // Normalize counts to font sizes
     const maxCount = Math.max(...list.map(w => w[1]));
     const minCount = Math.min(...list.map(w => w[1]));
-    
+
     // Scale weights based on devicePixelRatio to maintain visual size
     const scaledList: [string, number][] = list.map(([word, count]) => {
-      const weight = maxCount === minCount 
+      const weight = maxCount === minCount
         ? 30 * dpr
         : (15 + ((count - minCount) / (maxCount - minCount)) * 45) * dpr;
       return [word, weight];
@@ -76,7 +76,7 @@ export default function WordCloudCard({ metrics }: Props) {
     <div className="p-6 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <p className="font-mono text-xs uppercase tracking-widest text-white/70">{t('wordcloud.title')}</p>
-        <button 
+        <button
           onClick={() => setKey(k => k + 1)}
           className="border-2 border-black p-1 hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] transition-all duration-[150ms] ease-linear bg-white text-black"
           title={t('wordcloud.reroll')}
