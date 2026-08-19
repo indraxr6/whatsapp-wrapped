@@ -295,9 +295,6 @@ export function getCallInfo(content: string): CallInfo | null {
     lower.includes('telepon suara') ||
     lower.includes('panggilan suara') ||
     lower.includes('audio call') ||
-    lower.includes('started a call') ||
-    lower.includes('memulai panggilan') ||
-    lower.includes('memulai telepon') ||
     lower.includes('sprach-anruf') ||
     lower.includes('appel vocal') ||
     lower.includes('llamada de voz')
