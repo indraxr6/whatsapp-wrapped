@@ -18,6 +18,7 @@ import MirroredPhrasesCard from './cards/MirroredPhrasesCard';
 import ExcerptsCard from './cards/ExcerptsCard';
 import Footer from './Footer';
 import LanguageToggle from './LanguageToggle';
+import GroupHistory from './GroupHistory';
 import { motion, useReducedMotion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 
@@ -28,11 +29,9 @@ interface Props {
   insightStatus: 'success' | 'opt_out' | 'failed' | 'failed_429' | 'failed_503';
   onRetryAI: () => void;
   onReset: () => void;
-  onOpenPrivacy: () => void;
-  onOpenApiKey: () => void;
 }
 
-export default function ResultsDashboard({ metrics, insights, chatMode, insightStatus, onRetryAI, onReset, onOpenPrivacy, onOpenApiKey }: Props) {
+export default function ResultsDashboard({ metrics, insights, chatMode, insightStatus, onRetryAI, onReset }: Props) {
   const { t, language } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
 
@@ -67,7 +66,7 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
   return (
     <motion.div className="min-h-screen bg-canvas font-sans text-black" variants={staggerContainer} initial="hidden" animate="visible">
       {/* Sticky header */}
-      <motion.header variants={sectionVariants} className="sticky top-0 z-10 bg-canvas border-b-2 border-black px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+      <motion.header variants={sectionVariants} className="sticky top-0 z-10 bg-canvas border-b-2 border-black px-6 py-3 flex sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
         <div className="flex items-center gap-3">
           <button
             onClick={onReset}
@@ -80,8 +79,6 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <LanguageToggle />
-          <button onClick={onOpenPrivacy} className="nb-btn text-xs py-1.5 whitespace-nowrap flex-shrink-0">{t('header.privacy')}</button>
-          <button onClick={onOpenApiKey} className="nb-btn text-xs py-1.5 whitespace-nowrap flex-shrink-0">[ KEY ]</button>
           <button id="analyze-again-btn" onClick={onReset} className="nb-btn-primary text-xs py-1.5 whitespace-nowrap flex-shrink-0">
             {t('footer.cta.btn')}
           </button>
@@ -103,6 +100,9 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 {chatMode === 'group' ? (metrics.groupName ?? metrics.participants.join(', ')) : metrics.participants.join(' & ')}
               </h2>
+              {chatMode === 'group' && (
+                <GroupHistory history={metrics.groupNameHistory} iconChangeCount={metrics.iconChangeCount} />
+              )}
             </div>
           </div>
           <p className="text-sm text-gray-600 font-mono">
