@@ -1,12 +1,13 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, FileText } from 'lucide-react';
+import { Upload, FileText, ShieldCheck, WifiOff } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 
 interface Props {
   onFileSelected: (file: File) => void;
+  onUploadClickIntent?: (triggerPicker: () => void) => void;
 }
 
-export default function UploadZone({ onFileSelected }: Props) {
+export default function UploadZone({ onFileSelected, onUploadClickIntent }: Props) {
   const { t } = useLanguage();
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,14 +48,20 @@ export default function UploadZone({ onFileSelected }: Props) {
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        onClick={() => inputRef.current?.click()}
+        onClick={() => {
+          if (onUploadClickIntent) {
+            onUploadClickIntent(() => inputRef.current?.click());
+          } else {
+            inputRef.current?.click();
+          }
+        }}
         className={`
           border-2 border-black p-10 cursor-pointer select-none
           flex flex-col items-center justify-center gap-4
           transition-all duration-[150ms] ease-linear
           ${dragging
             ? 'bg-accent-lime shadow-nb-lg -translate-y-1'
-            : 'bg-white hover:shadow-nb hover:-translate-y-px'
+            : 'bg-white hover:shadow-nb hover:-translate-y-px active:bg-accent-lime active:shadow-none active:translate-x-[2px] active:translate-y-[2px]'
           }
         `}
       >
@@ -78,8 +85,7 @@ export default function UploadZone({ onFileSelected }: Props) {
         <div className="flex items-center gap-3 font-mono text-xs text-gray-500">
           <span className="border border-gray-400 px-1.5 py-0.5">iOS</span>
           <span className="border border-gray-400 px-1.5 py-0.5">Android</span>
-          <span className="border border-gray-400 px-1.5 py-0.5">12h / 24h</span>
-          <span className="border border-gray-400 px-1.5 py-0.5">ID / EN / ...</span>
+          <span className="border border-gray-400 px-1.5 py-0.5">ID / EN</span>
         </div>
       </div>
 
@@ -92,9 +98,16 @@ export default function UploadZone({ onFileSelected }: Props) {
         onChange={onInputChange}
       />
 
-      <p className="text-center mt-3 text-xs text-gray-500 font-mono">
-        - processed entirely in your browser, nothing uploaded -
-      </p>
+      <div className="flex flex-col items-start sm:items-center mt-5 space-y-2 text-xs text-gray-500 font-mono px-2 sm:px-0">
+        <div className="flex items-start sm:items-center gap-2 text-left sm:text-center">
+          <ShieldCheck size={14} className="flex-shrink-0 mt-0.5 sm:mt-0" />
+          <span>{t('upload.processedLocal') || 'Processed entirely in your browser, nothing uploaded'}</span>
+        </div>
+        <div className="flex items-start sm:items-center gap-2 text-left sm:text-center">
+          <WifiOff size={14} className="flex-shrink-0 mt-0.5 sm:mt-0" />
+          <span>{t('upload.offlineCapable') || 'Works without internet after load'}</span>
+        </div>
+      </div>
     </div>
   );
 }

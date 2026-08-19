@@ -10,6 +10,7 @@ import LoadingScreen from './components/LoadingScreen';
 import ResultsDashboard from './components/ResultsDashboard';
 import PrivacyModal from './components/PrivacyModal';
 import ApiKeyModal from './components/ApiKeyModal';
+import WrappedChoiceModal from './components/WrappedChoiceModal';
 import ShortChatModal from './components/ShortChatModal';
 import ChatModeModal from './components/ChatModeModal';
 import { useLanguage } from './i18n/LanguageContext';
@@ -21,8 +22,11 @@ export default function App() {
   const [showChatModeModal, setShowChatModeModal] = useState(false);
   const [chatMode, setChatMode] = useState<'dm' | 'group'>('dm');
   const [privacyModalVariant, setPrivacyModalVariant] = useState<'auto' | 'manual' | null>(null);
+  const [privacyFlow, setPrivacyFlow] = useState<'upload_click' | 'file_dropped' | null>(null);
+  const [uploadClickCb, setUploadClickCb] = useState<(() => void) | null>(null);
   const [apiKeyModalVariant, setApiKeyModalVariant] = useState<'auto' | 'manual' | null>(null);
-  const [pendingAiKey, setPendingAiKey] = useState<string | 'skip' | null>(null);
+  const [showWrappedChoiceModal, setShowWrappedChoiceModal] = useState(false);
+  const [activeFile, setActiveFile] = useState<File | null>(null);
   const [insightStatus, setInsightStatus] = useState<'success' | 'opt_out' | 'failed_429' | 'failed_503' | 'failed'>('success');
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<ParsedChatMetrics | null>(null);
@@ -122,7 +126,7 @@ export default function App() {
       });
     }
 
-    setApiKeyModalVariant('auto');
+    setShowWrappedChoiceModal(true);
   };
 
   const handleChatModeCancel = () => {
@@ -135,19 +139,14 @@ export default function App() {
     localStorage.setItem('gemini_api_key', apiKey);
     setApiKeyModalVariant(null);
     if (apiKeyModalVariant === 'auto') {
-      setPendingAiKey(apiKey);
-      setPrivacyModalVariant('auto');
+      executeAnalysis(apiKey);
     }
   };
 
-  const handleApiKeyModalSkip = () => {
+  const handleApiKeyModalBack = () => {
     setApiKeyModalVariant(null);
     if (apiKeyModalVariant === 'auto') {
-      setPendingAiKey('skip');
-      setPrivacyModalVariant('auto');
-    } else if (metrics) {
-      // If manual mode, and they clicked skip? They shouldn't be able to, but let's handle it
-      executeSkip();
+      setShowWrappedChoiceModal(true);
     }
   };
 
@@ -160,10 +159,11 @@ export default function App() {
   const handlePrivacyModalContinue = () => {
     setPrivacyModalVariant(null);
     if (privacyModalVariant === 'auto') {
-      if (pendingAiKey === 'skip') {
-        executeSkip();
-      } else if (pendingAiKey) {
-        executeAnalysis(pendingAiKey);
+      if (privacyFlow === 'upload_click' && uploadClickCb) {
+        uploadClickCb();
+      } else if (privacyFlow === 'file_dropped' && activeFile) {
+        processFile(activeFile);
+        setPrivacyFlow(null);
       }
     }
   };
@@ -208,9 +208,39 @@ export default function App() {
     setView('results');
   };
 
-  const handleFileUpload = useCallback(async (file: File) => {
-    await processFile(file);
-  }, [processFile]);
+  const handleUploadClickIntent = useCallback((cb: () => void) => {
+    setUploadClickCb(() => cb);
+    setPrivacyModalVariant('auto');
+    setPrivacyFlow('upload_click');
+  }, []);
+
+  const handleFileUpload = useCallback((file: File) => {
+    if (privacyFlow === 'upload_click') {
+      // Privacy already accepted
+      setPrivacyFlow(null);
+      processFile(file);
+    } else {
+      // File dropped directly
+      setActiveFile(file);
+      setPrivacyModalVariant('auto');
+      setPrivacyFlow('file_dropped');
+    }
+  }, [privacyFlow, processFile]);
+
+  const handleChoiceAI = () => {
+    setShowWrappedChoiceModal(false);
+    setApiKeyModalVariant('auto');
+  };
+
+  const handleChoiceStats = () => {
+    setShowWrappedChoiceModal(false);
+    executeSkip();
+  };
+
+  const handleChoiceCancel = () => {
+    setShowWrappedChoiceModal(false);
+    handleReset();
+  };
 
   const handlePrivacyModalClose = () => {
     setPrivacyModalVariant(null);
@@ -224,6 +254,8 @@ export default function App() {
     setMetrics(null);
     setInsights(null);
     setError(null);
+    setActiveFile(null);
+    setShowWrappedChoiceModal(false);
     setView('upload');
   };
 
@@ -269,8 +301,19 @@ export default function App() {
           <ApiKeyModal
             onClose={apiKeyModalVariant === 'auto' ? handleApiKeyModalCancel : handleApiKeyModalClose}
             onContinue={apiKeyModalVariant === 'auto' ? handleApiKeyModalContinue : executeAnalysis}
-            onSkip={handleApiKeyModalSkip}
+            onBack={handleApiKeyModalBack}
             variant={apiKeyModalVariant}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Wrapped Choice Modal */}
+      <AnimatePresence>
+        {showWrappedChoiceModal && (
+          <WrappedChoiceModal 
+            onSelectAI={handleChoiceAI}
+            onSelectStats={handleChoiceStats}
+            onCancel={handleChoiceCancel}
           />
         )}
       </AnimatePresence>
@@ -287,6 +330,7 @@ export default function App() {
           >
             <UploadPage
               onFileUpload={handleFileUpload}
+              onUploadClickIntent={handleUploadClickIntent}
               onOpenPrivacy={() => setPrivacyModalVariant('manual')}
               error={error}
             />
@@ -322,8 +366,6 @@ export default function App() {
               insightStatus={insightStatus}
               onRetryAI={() => executeAnalysis(localStorage.getItem('gemini_api_key') || '')}
               onReset={handleReset}
-              onOpenPrivacy={() => setPrivacyModalVariant('manual')}
-              onOpenApiKey={() => setApiKeyModalVariant('manual')}
             />
           </motion.div>
         )}
@@ -338,16 +380,17 @@ export default function App() {
 
 interface UploadPageProps {
   onFileUpload: (file: File) => void;
+  onUploadClickIntent?: (triggerPicker: () => void) => void;
   onOpenPrivacy: () => void;
   error: string | null;
 }
 
-function UploadPage({ onFileUpload, onOpenPrivacy, error }: UploadPageProps) {
+function UploadPage({ onFileUpload, onUploadClickIntent, onOpenPrivacy, error }: UploadPageProps) {
   const { t } = useLanguage();
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-canvas">
       {/* Header */}
-      <header className="border-b-2 border-black px-6 py-4 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-canvas border-b-2 border-black px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-black bg-black flex items-center justify-center">
             <span className="font-mono text-white text-xs font-bold">_WA</span>
@@ -363,7 +406,7 @@ function UploadPage({ onFileUpload, onOpenPrivacy, error }: UploadPageProps) {
       </header>
 
       {/* Main */}
-      <main className="flex-1 flex flex-col items-center justify-center py-16 gap-12">
+      <main className="flex-1 flex flex-col items-center justify-center pt-28 pb-16 gap-12">
         {/* Hero text */}
         <div className="content-wrapper flex flex-col items-center text-center">
           <div className="max-w-2xl w-full">
@@ -380,7 +423,10 @@ function UploadPage({ onFileUpload, onOpenPrivacy, error }: UploadPageProps) {
         {/* Upload zone */}
         <div className="content-wrapper flex justify-center">
           <div className="max-w-2xl w-full space-y-3">
-            <UploadZone onFileSelected={onFileUpload} />
+            <UploadZone 
+              onFileSelected={onFileUpload} 
+              onUploadClickIntent={onUploadClickIntent}
+            />
           </div>
         </div>
 

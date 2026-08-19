@@ -78,7 +78,7 @@ export default function PrivacyModal({ onClose, onContinue, onCancel, variant = 
                 onClick={onContinue}
                 className="nb-btn-primary flex-[2] py-3 text-base"
               >
-                {t('privacy.continue') || 'I Understand'}
+                {t('privacy.continueUploading') || 'Continue uploading'}
               </button>
             </>
           ) : (

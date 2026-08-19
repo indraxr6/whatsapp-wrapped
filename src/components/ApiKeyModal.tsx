@@ -6,7 +6,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 interface Props {
   onClose: () => void; // completely cancels the flow
   onContinue: (key: string) => void;
-  onSkip: () => void;
+  onBack: () => void;
   variant?: 'auto' | 'manual'; // manual means user just opened it from header to edit key
 }
 
@@ -17,7 +17,7 @@ function detectKeyType(key: string): 'api-key' | 'oauth' | 'unknown' {
   return 'unknown';
 }
 
-export default function ApiKeyModal({ onClose, onContinue, onSkip, variant = 'auto' }: Props) {
+export default function ApiKeyModal({ onClose, onContinue, onBack, variant = 'auto' }: Props) {
   const { t } = useLanguage();
   const [key, setKey] = useState('');
   const [visible, setVisible] = useState(false);
@@ -119,14 +119,9 @@ export default function ApiKeyModal({ onClose, onContinue, onSkip, variant = 'au
             {variant === 'auto' ? 'Analyze with AI' : (t('apikey.save') || 'Save Key')}
           </button>
           {variant === 'auto' && (
-            <div className="flex gap-3">
-              <button onClick={onSkip} className="nb-btn flex-[2] py-3 text-sm">
-                {t('upload.skipAI') || 'Skip AI (Local Preview)'}
-              </button>
-              <button onClick={onClose} className="nb-btn flex-1 py-3 text-sm">
-                Cancel
-              </button>
-            </div>
+            <button onClick={onBack} className="nb-btn w-full py-3 text-sm">
+              Go back
+            </button>
           )}
         </div>
       </motion.div>
