@@ -59,8 +59,8 @@ export interface ParsedChatMetrics {
   viewOnceCount: Record<string, number>;
   editedMessageCount: Record<string, number>;
   deletedMessageCount: Record<string, number>;
-
-  // Calls & Extras
+  totalVoiceCalls: number;
+  totalVideoCalls: number;
   callsInitiated: Record<string, number>;
   callsMissed: Record<string, number>;
   totalCallDurationSeconds: Record<string, number>;

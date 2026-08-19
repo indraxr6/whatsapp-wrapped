@@ -20,7 +20,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
   const { t } = useLanguage();
-  const { participants, callsInitiated, callsMissed, totalCallDurationSeconds, totalVideoCallDurationSeconds, longestVoiceCallSeconds, longestVideoCallSeconds, viewOnceCount, editedMessageCount, deletedMessageCount } = metrics;
+  const { participants, callsInitiated, callsMissed, totalCallDurationSeconds, totalVideoCallDurationSeconds, longestVoiceCallSeconds, longestVideoCallSeconds, viewOnceCount, editedMessageCount, deletedMessageCount, totalVoiceCalls, totalVideoCalls } = metrics;
 
   const totalCalls = Object.values(callsInitiated).reduce((a, b) => a + b, 0);
   const totalViewOnce = Object.values(viewOnceCount).reduce((a, b) => a + b, 0);
@@ -40,29 +40,29 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
   return (
     <div className="p-6 h-full flex flex-col bg-accent-blue/10">
       <div className="grid grid-cols-2 gap-4 mb-6">
-        {sumVideoDuration > 0 ? (
+        {(sumVideoDuration > 0 || totalVideoCalls > 0) ? (
           <>
             <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
               <Phone className="mb-2 text-accent-blue" size={24} strokeWidth={2.5} />
-              <p className="font-mono text-xs uppercase text-gray-500">{t('calls.durationVoice')}</p>
+              <p className="font-mono text-xs uppercase text-gray-500">{sumVoiceDuration === 0 ? t('calls.initiated') : t('calls.durationVoice')}</p>
               <p className="font-black text-2xl">
-                {sumVoiceDuration === 0 ? t('calls.guess') : formatDuration(sumVoiceDuration)}
+                {sumVoiceDuration === 0 ? totalVoiceCalls : formatDuration(sumVoiceDuration)}
               </p>
             </div>
             <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
               <Video className="mb-2 text-accent-blue" size={24} strokeWidth={2.5} />
-              <p className="font-mono text-xs uppercase text-gray-500">{t('calls.durationVideo')}</p>
+              <p className="font-mono text-xs uppercase text-gray-500">{sumVideoDuration === 0 ? t('calls.initiated') : t('calls.durationVideo')}</p>
               <p className="font-black text-2xl">
-                {formatDuration(sumVideoDuration)}
+                {sumVideoDuration === 0 ? totalVideoCalls : formatDuration(sumVideoDuration)}
               </p>
             </div>
           </>
         ) : (
           <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
             <Phone className="mb-2 text-accent-blue" size={24} strokeWidth={2.5} />
-            <p className="font-mono text-xs uppercase text-gray-500">{t('calls.duration')}</p>
+            <p className="font-mono text-xs uppercase text-gray-500">{sumVoiceDuration === 0 ? t('calls.initiated') : t('calls.duration')}</p>
             <p className="font-black text-2xl">
-              {sumVoiceDuration === 0 ? t('calls.guess') : formatDuration(sumVoiceDuration)}
+              {sumVoiceDuration === 0 ? totalVoiceCalls : formatDuration(sumVoiceDuration)}
             </p>
           </div>
         )}

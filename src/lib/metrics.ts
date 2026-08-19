@@ -117,13 +117,13 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
           newName
         });
       }
-      
+
       if (!creationMatch) {
         const creation = m.content.match(creationRegex);
         // Guard: captured name must be >3 chars and not a pronoun/demonstrative
         if (creation && creation[2] && creation[2].trim().length > 3 && !NAME_STOP_WORDS.has(creation[2].trim().toLowerCase())) {
           creationMatch = creation[2].trim();
-          
+
           if (groupNameHistory.length > 0 && groupNameHistory[0].oldName === null) {
             groupNameHistory[0].oldName = creationMatch;
           }
@@ -195,10 +195,18 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   const totalVideoCallDurationSeconds: Record<string, number> = {};
   let longestVoiceCallSeconds = 0;
   let longestVideoCallSeconds = 0;
+  let totalVoiceCalls = 0;
+  let totalVideoCalls = 0;
 
   for (const m of realMessages) {
     if (m.isCall) {
       callsInitiated[m.sender] = (callsInitiated[m.sender] ?? 0) + 1;
+
+      if (m.callType === 'video') {
+        totalVideoCalls++;
+      } else {
+        totalVoiceCalls++;
+      }
 
       if (m.callOutcome === 'missed' || m.callOutcome === 'no-answer') {
         callsMissed[m.sender] = (callsMissed[m.sender] ?? 0) + 1;
@@ -261,7 +269,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
 
   for (const m of realMessages.filter((m) => m.isMedia)) {
     const type = m.mediaType ?? 'image';
-    
+
     if (type === 'sticker') {
       stickerCount[m.sender] = (stickerCount[m.sender] ?? 0) + 1;
     } else {
@@ -276,72 +284,70 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
       viewOnceCount[m.sender] = (viewOnceCount[m.sender] ?? 0) + 1;
     }
 
-   if (type === "link") {
-     const c = m.content.toLowerCase();
+    if (type === "link") {
+      const c = m.content.toLowerCase();
 
-     if (c.includes("open.spotify.com") || c.includes("spotify.link"))
-       sharedLinks["Spotify"]++;
-     else if (c.includes("music.apple.com")) sharedLinks["Apple Music"]++;
-     else if (c.includes("youtu.be/") || c.includes("youtube.com/")) sharedLinks["YouTube"]++;
-     else if (c.includes("instagram.com/reel/")) sharedLinks["Instagram Reels"]++;
-     else if (c.includes("instagram.com/stories/")) sharedLinks["Instagram Stories"]++;
-     else if (c.includes("instagram.com/")) sharedLinks["Instagram Profile"]++;
-     else if (c.includes("twitter.com/") || c.includes("x.com/")) sharedLinks["X"]++;
-     else if (
-       c.includes("maps.google.com") ||
-       c.includes("google.com/maps") ||
-       c.includes("maps.app.goo.gl")
-     )
-       sharedLinks["Google Maps"]++;
-     else if (c.includes("docs.google.com/forms")) sharedLinks["Google Forms"]++;
-     else if (c.includes("docs.google.com/spreadsheets")) sharedLinks["Google Sheets"]++;
-     else if (c.includes("docs.google.com/document")) sharedLinks["Google Docs"]++;
-     else if (c.includes("docs.google.com/presentation")) sharedLinks["Google Slides"]++;
-     else if (c.includes("drive.google.com")) sharedLinks["Google Drive"]++;
-     else if (c.includes("meet.google.com")) sharedLinks["Google Meet"]++;
-     else if (c.includes("github.com")) sharedLinks["GitHub"]++;
-     else if (c.includes("facebook.com")) sharedLinks["Facebook"]++;
-     // --- INDONESIAN E-COMMERCE SEPARATION ---
-     // 1. TikTok Shop (Evaluated first to catch the integrated "tokopedia.com" backend links)
-     else if (
-       c.includes("seller-id.tokopedia.com") ||
-       c.includes("affiliate-id.tokopedia.com") ||
-       c.includes("shop.tokopedia.com") ||
-       c.includes("://tiktokshop.com")
-     ) {
-       sharedLinks["TikTok Shop"]++;
-     }
+      if (c.includes("open.spotify.com") || c.includes("spotify.link"))
+        sharedLinks["Spotify"]++;
+      else if (c.includes("music.apple.com")) sharedLinks["Apple Music"]++;
+      else if (c.includes("youtu.be/") || c.includes("youtube.com/")) sharedLinks["YouTube"]++;
+      else if (c.includes("instagram.com/reel/")) sharedLinks["Instagram Reels"]++;
+      else if (c.includes("instagram.com/stories/")) sharedLinks["Instagram Stories"]++;
+      else if (c.includes("instagram.com/")) sharedLinks["Instagram Profile"]++;
+      else if (c.includes("twitter.com/") || c.includes("x.com/")) sharedLinks["X"]++;
+      else if (
+        c.includes("maps.google.com") ||
+        c.includes("google.com/maps") ||
+        c.includes("maps.app.goo.gl")
+      )
+        sharedLinks["Google Maps"]++;
+      else if (c.includes("docs.google.com/forms")) sharedLinks["Google Forms"]++;
+      else if (c.includes("docs.google.com/spreadsheets")) sharedLinks["Google Sheets"]++;
+      else if (c.includes("docs.google.com/document")) sharedLinks["Google Docs"]++;
+      else if (c.includes("docs.google.com/presentation")) sharedLinks["Google Slides"]++;
+      else if (c.includes("drive.google.com")) sharedLinks["Google Drive"]++;
+      else if (c.includes("meet.google.com")) sharedLinks["Google Meet"]++;
+      else if (c.includes("github.com")) sharedLinks["GitHub"]++;
+      else if (c.includes("facebook.com")) sharedLinks["Facebook"]++;
+      // --- INDONESIAN E-COMMERCE SEPARATION ---
+      // 1. TikTok Shop (Evaluated first to catch the integrated "tokopedia.com" backend links)
+      else if (
+        c.includes("seller-id.tokopedia.com") ||
+        c.includes("affiliate-id.tokopedia.com") ||
+        c.includes("shop.tokopedia.com") ||
+        c.includes("://tiktokshop.com")
+      ) {
+        sharedLinks["TikTok Shop"]++;
+      }
 
-     // 2. TikTok (Standard Videos/Profiles)
-     else if (c.includes("vt.tiktok.com") || c.includes("tiktok.com/")) {
-       sharedLinks["TikTok"]++;
-     }
+      // 2. TikTok (Standard Videos/Profiles)
+      else if (c.includes("vt.tiktok.com") || c.includes("tiktok.com/")) {
+        sharedLinks["TikTok"]++;
+      }
 
-     // 3. Shopee Indonesia
-     else if (
-       c.includes("shopee.co.id") ||
-       c.includes("shp.ee") ||
-       c.includes("seller.shopee.co.id") ||
-       c.includes("affiliate.shopee.co.id")
-     ) {
-       sharedLinks["Shopee"]++;
-     }
+      // 3. Shopee Indonesia
+      else if (
+        c.includes("shopee.co.id") ||
+        c.includes("shp.ee") ||
+        c.includes("seller.shopee.co.id") ||
+        c.includes("affiliate.shopee.co.id")
+      ) {
+        sharedLinks["Shopee"]++;
+      }
 
-     // 4. Tokopedia Marketplace
-     else if (
-       c.includes("tokopedia.com") ||
-       c.includes("tokopedia.link") ||
-       c.includes("seller.tokopedia.com")
-     ) {
-       sharedLinks["Tokopedia"]++;
-     }
+      // 4. Tokopedia Marketplace
+      else if (
+        c.includes("tokopedia.com") ||
+        c.includes("tokopedia.link") ||
+        c.includes("seller.tokopedia.com")
+      ) {
+        sharedLinks["Tokopedia"]++;
+      }
 
-     // ----------------------------------------
-     else {
-       sharedLinks["Other Links"]++;
-     }
-   }
-
+      else {
+        sharedLinks["Other Links"]++;
+      }
+    }
   }
 
   // ── Response latency ──
@@ -573,6 +579,8 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     viewOnceCount,
     editedMessageCount,
     deletedMessageCount,
+    totalVoiceCalls,
+    totalVideoCalls,
     activeChatDays,
     stickerCount,
     mirroredPhrases,
