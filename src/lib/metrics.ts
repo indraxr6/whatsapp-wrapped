@@ -270,10 +270,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
       continue;
     }
     
-    // We found a potential link text, let's log it to help debug
-    if (c.includes('http') || c.includes('www.')) {
-      console.log("[DEBUG LINK] Potential link message:", c);
-    }
+
 
     if (c.includes("open.spotify.com") || c.includes("spotify.link"))
       sharedLinks["Spotify"]++;
@@ -329,7 +326,6 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
       // Only count as "Other Links" if it's explicitly a url scheme 
       // (to avoid false positives on sentences that just happen to end in a dot then word)
       sharedLinks["Other Links"]++;
-      console.log("[DEBUG LINK] Matched Other Link:", c);
     }
   }
 
