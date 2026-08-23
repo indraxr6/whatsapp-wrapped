@@ -1,4 +1,4 @@
-import type { GeminiInsights, ParsedChatMetrics, GroupRenameEvent } from '../types/chat';
+import type { GeminiInsights, ParsedChatMetrics } from '../types/chat';
 
 function getDatesForYear(year: number) {
   return {
@@ -57,8 +57,6 @@ export function getDemoData(mode: 'dm' | 'group', lang: 'en' | 'id'): { metrics:
       viewOnceCount: { [p1]: 24, [p2]: 12 },
       editedMessageCount: { [p1]: 85, [p2]: 30 },
       deletedMessageCount: { [p1]: 12, [p2]: 4 },
-      totalVoiceCalls: 45,
-      totalVideoCalls: 12,
       callsInitiated: { [p1]: 35, [p2]: 22 },
       callsMissed: { [p1]: 5, [p2]: 12 },
       totalCallDurationSeconds: { [p1]: 18500, [p2]: 12400 },
@@ -185,7 +183,6 @@ export function getDemoData(mode: 'dm' | 'group', lang: 'en' | 'id'): { metrics:
         'Spotify': 310,
         'Google Maps': 280,
         'Google Drive': 145,
-        'Instagram Stories': 85,
         'Google Docs': 42,
         'GitHub': 30,
         'Google Meet': 25,
@@ -212,8 +209,6 @@ export function getDemoData(mode: 'dm' | 'group', lang: 'en' | 'id'): { metrics:
       viewOnceCount: { [p1]: 85, [p2]: 42, [p3]: 12, [p4]: 5, [p5]: 0 },
       editedMessageCount: { [p1]: 420, [p2]: 150, [p3]: 80, [p4]: 10, [p5]: 0 },
       deletedMessageCount: { [p1]: 150, [p2]: 80, [p3]: 20, [p4]: 5, [p5]: 0 },
-      totalVoiceCalls: 120,
-      totalVideoCalls: 45,
       callsInitiated: { [p1]: 85, [p2]: 50, [p3]: 25, [p4]: 5, [p5]: 0 },
       callsMissed: { [p1]: 10, [p2]: 15, [p3]: 20, [p4]: 50, [p5]: 120 },
       totalCallDurationSeconds: { [p1]: 185000, [p2]: 142000, [p3]: 85000, [p4]: 12000, [p5]: 0 },

@@ -18,7 +18,6 @@ import { useLanguage } from './i18n/LanguageContext';
 import LanguageToggle from './components/LanguageToggle';
 import ExportTooltip from './components/ExportTooltip';
 import DemoChoiceModal from './components/DemoChoiceModal';
-import ExcerptsCard from './components/cards/ExcerptsCard';
 import { getDemoData } from './lib/demoData';
 
 export default function App() {
