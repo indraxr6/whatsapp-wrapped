@@ -75,7 +75,7 @@ function parseTimestamp(dateStr: string, timeStr: string, format: 'DD/MM' | 'MM/
 function detectDateFormat(lines: string[]): 'DD/MM' | 'MM/DD' {
   for (const line of lines) {
     // Strip invisible bidirectional formatting chars first, same as parsing loop
-    const cleanLine = line.replace(/[\u200E\u200F\u202A-\u202E\u2068\u2069]|<0x200e>|<0x200f>/gi, '');
+    const cleanLine = line.replace(/[\u200E\u200F\u202A-\u202E\u2068\u2069\u202F]|<0x200e>|<0x200f>|<0x202f>/gi, '');
     if (!cleanLine.trim()) continue;
 
     const match = MESSAGE_REGEX.exec(cleanLine);
@@ -115,7 +115,7 @@ export function parseWhatsAppExport(rawText: string): ParseResult {
   for (let i = 0; i < lines.length; i++) {
     // Strip invisible bidirectional formatting chars (like LRM \u200e) and their literal 
     // string representations which macOS WhatsApp sometimes inserts.
-    const line = lines[i].replace(/[\u200E\u200F\u202A-\u202E\u2068\u2069]|<0x200e>|<0x200f>/gi, '');
+    const line = lines[i].replace(/[\u200E\u200F\u202A-\u202E\u2068\u2069\u202F]|<0x200e>|<0x200f>|<0x202f>/gi, '');
     if (!line.trim()) continue;
 
     const match = MESSAGE_REGEX.exec(line);
