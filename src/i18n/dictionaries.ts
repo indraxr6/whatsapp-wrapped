@@ -5,6 +5,7 @@ export const dictionaries = {
     // App Header
     "header.title": "Chat Wrapped",
     "header.privacy": "PRIVACY",
+    "header.start_over": "Start Over",
 
     // Upload Hero
     "hero.kicker": "_ WHOLE CONVERSATION RECAP",
@@ -25,6 +26,17 @@ export const dictionaries = {
     "upload.for_file": "for a <bold>.zip</bold> or <bold>.txt</bold> file",
     "upload.processedLocal": "Processed entirely in your browser, nothing uploaded",
     "upload.offlineCapable": "Works without internet after load",
+
+    // Demo Mode
+    "demo.look_around": "Or Look Around",
+    "demo.choose_desc": "Choose a demo mode to see what a generated wrapped looks like.",
+    "demo.banner_text": "This is a complete, fabricated dataset showcasing every possible card.",
+    "demo.exit_btn": "Exit Demo",
+    "demo.dm_title": "Personal Demo",
+    "demo.dm_desc": "Preview a 2-person chat",
+    "demo.group_title": "Group Demo",
+    "demo.group_desc": "Preview a group chat with history",
+    "demo.cancel": "Cancel",
 
     // How It Works
     "how.kicker": "_ HOW IT WORKS",
@@ -79,10 +91,12 @@ export const dictionaries = {
     "chatmode.btnGroup": "Group Chat (3+ People)",
 
     // Dashboard Hero
-    "dashboard.hero.kicker": "_ {{count}} MESSAGES ANALYZED",
-    "dashboard.hero.title1": "Your Chat",
+    "dashboard.hero.kicker": "_ {{count}} MESSAGES PARSED",
+    "dashboard.hero.title1": "Chat",
     "dashboard.hero.title2": "Wrapped.",
-    "dashboard.hero.days": "days",
+    "dashboard.hero.days": "Days",
+    "dashboard.hero.group_name": "Group Name:",
+    "dashboard.hero.chat_with": "Chat With:",
 
     // Section Labels
     "section.numbers": "THE NUMBERS",
@@ -214,10 +228,12 @@ export const dictionaries = {
     "group.from": "from",
 
     // Footer CTA
-    "footer.cta.kicker": "_ DONE?",
-    "footer.cta.title": "Analyze another chat.",
-    "footer.cta.desc": "Upload a different export to compare conversations.",
-    "footer.cta.btn": "START OVER",
+    "footer.cta.text": "Check out",
+    "footer.cta.link": "the repo on GitHub",
+    "footer.cta.btn": "ANALYZE ANOTHER CHAT",
+    "footer.done": "_ DONE?",
+    "footer.analyze_another": "Analyze another chat.",
+    "footer.upload_different": "Upload a different export to compare conversations.",
 
     "loading.title": "Processing your chat",
     "loading.reading": "Reading your chat...",
@@ -235,6 +251,7 @@ export const dictionaries = {
     // App Header
     "header.title": "Chat Wrapped",
     "header.privacy": "PRIVASI",
+    "header.start_over": "Mulai Lagi",
 
     // Upload Hero
     "hero.kicker": "_ REKAP PERCAKAPAN",
@@ -255,6 +272,17 @@ export const dictionaries = {
     "upload.for_file": "untuk file <bold>.zip</bold> atau <bold>.txt</bold>",
     "upload.processedLocal": "Diproses sepenuhnya di browser Anda, tidak ada yang diunggah",
     "upload.offlineCapable": "Dapat digunakan tanpa internet setelah dimuat",
+
+    // Demo Mode
+    "demo.look_around": "Atau Lihat Demo",
+    "demo.choose_desc": "Pilih mode demo untuk melihat contoh hasil wrapped.",
+    "demo.banner_text": "Ini adalah data rekayasa yang lengkap untuk menampilkan semua kartu yang tersedia.",
+    "demo.exit_btn": "Keluar Demo",
+    "demo.dm_title": "Demo Personal",
+    "demo.dm_desc": "Lihat contoh chat 2 orang",
+    "demo.group_title": "Demo Grup",
+    "demo.group_desc": "Lihat contoh chat grup dengan riwayat lengkap",
+    "demo.cancel": "Batal",
 
     // How It Works
     "how.kicker": "_ CARA KERJA",
@@ -307,10 +335,12 @@ export const dictionaries = {
     "chatmode.btnGroup": "Grup Chat (3+ Orang)",
 
     // Dashboard Hero
-    "dashboard.hero.kicker": "_ {{count}} PESAN DIANALISIS",
+    "dashboard.hero.kicker": "_ {{count}} PESAN DIPROSES",
     "dashboard.hero.title1": "Chat",
-    "dashboard.hero.title2": "Wrapped Anda.",
-    "dashboard.hero.days": "hari",
+    "dashboard.hero.title2": "Wrapped.",
+    "dashboard.hero.days": "Hari",
+    "dashboard.hero.group_name": "Nama Grup:",
+    "dashboard.hero.chat_with": "Chat Dengan:",
 
     // Section Labels
     "section.numbers": "ANGKA-ANGKA",
@@ -442,10 +472,12 @@ export const dictionaries = {
     "group.from": "dari",
 
     // Footer CTA
-    "footer.cta.kicker": "_ SELESAI?",
-    "footer.cta.title": "Analisis chat lain.",
-    "footer.cta.desc": "Unggah export chat lain untuk membandingkan percakapan.",
+    "footer.cta.text": "Lihat",
+    "footer.cta.link": "repo di GitHub",
     "footer.cta.btn": "MULAI LAGI",
+    "footer.done": "_ SELESAI?",
+    "footer.analyze_another": "Analisis chat lain.",
+    "footer.upload_different": "Unggah ekspor berbeda untuk membandingkan obrolan.",
 
     "loading.title": "Memproses chat Anda",
     "loading.reading": "Membaca chat Anda...",
