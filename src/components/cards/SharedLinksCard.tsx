@@ -17,6 +17,7 @@ import {
   ShoppingCart,
   Music2Icon,
   RadioIcon,
+  Briefcase,
 } from 'lucide-react';
 
 interface Props {
@@ -42,6 +43,7 @@ const ICONS: Record<string, React.ElementType> = {
   'Google Meet': Video,
   'Facebook': Users,
   'Tokopedia': ShoppingCart,
+  'LinkedIn': Briefcase,
   'Other Links': Link2,
 };
 

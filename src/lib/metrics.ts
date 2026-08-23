@@ -79,7 +79,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   // NOTE: WhatsApp uses different left " (U+201C) and right " (U+201D) curly quotes.
   // A backreference \1 would fail since the opening and closing quotes differ.
   // We match any quote character for both open and close independently.
-  const renameRegex = /^(?:(.+?)\s+)?(?:changed the group name to|changed this group's name to|changed the subject to|mengubah nama grup menjadi|mengubah subjek menjadi|mengubah subjek grup menjadi)\s*[\u201c\u201d"]?([^\u201c\u201d"]+)[\u201c\u201d"]?\s*$/i;
+  const renameRegex = /^(?:(.+?)\s+)?(?:changed the group name(?: from\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*to|changed this group's name to|changed the subject(?: from\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*to|mengubah nama grup(?: dari\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*menjadi|mengubah subjek(?: dari\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*menjadi|mengubah subjek grup menjadi)\s*[\u201c\u201d"]?([^\u201c\u201d"]+)[\u201c\u201d"]?\s*$/i;
   const creationRegex = /^(?:(.+?)\s+)?(?:created group|membuat grup|telah membuat grup)\s+[\u201c\u201d"]?(.+?)[\u201c\u201d"]?\s*$/i;
   const iconChangeRegex = /^(?:(.+?)\s+)?(?:changed this group's icon|mengubah ikon grup ini)\s*$/i;
 
@@ -256,6 +256,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     'GitHub': 0,
     'Facebook': 0,
     'Tokopedia': 0,
+    'LinkedIn': 0,
     'Other Links': 0,
   };
 
@@ -300,6 +301,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
      else if (c.includes("drive.google.com")) sharedLinks["Google Drive"]++;
      else if (c.includes("meet.google.com")) sharedLinks["Google Meet"]++;
      else if (c.includes("github.com")) sharedLinks["GitHub"]++;
+     else if (c.includes("linkedin.com") || c.includes("lnkd.in")) sharedLinks["LinkedIn"]++;
      else if (c.includes("facebook.com")) sharedLinks["Facebook"]++;
      // --- INDONESIAN E-COMMERCE SEPARATION ---
      // 1. TikTok Shop (Evaluated first to catch the integrated "tokopedia.com" backend links)
