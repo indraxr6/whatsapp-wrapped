@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Eye } from 'lucide-react';
 import { parseWhatsAppExport } from './lib/parser';
 import { extractChatFromZip } from './lib/zipParser';
 import { calculateMetrics } from './lib/metrics';
@@ -16,6 +17,9 @@ import ChatModeModal from './components/ChatModeModal';
 import { useLanguage } from './i18n/LanguageContext';
 import LanguageToggle from './components/LanguageToggle';
 import ExportTooltip from './components/ExportTooltip';
+import DemoChoiceModal from './components/DemoChoiceModal';
+import ExcerptsCard from './components/cards/ExcerptsCard';
+import { getDemoData } from './lib/demoData';
 
 export default function App() {
   const [view, setView] = useState<AppView>('upload');
@@ -26,7 +30,9 @@ export default function App() {
   const [uploadClickCb, setUploadClickCb] = useState<(() => void) | null>(null);
   const [apiKeyModalVariant, setApiKeyModalVariant] = useState<'auto' | 'manual' | null>(null);
   const [showWrappedChoiceModal, setShowWrappedChoiceModal] = useState(false);
+  const [showDemoChoiceModal, setShowDemoChoiceModal] = useState(false);
   const [activeFile, setActiveFile] = useState<File | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [insightStatus, setInsightStatus] = useState<'success' | 'opt_out' | 'failed_429' | 'failed_503' | 'failed'>('success');
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<ParsedChatMetrics | null>(null);
@@ -255,8 +261,20 @@ export default function App() {
     setInsights(null);
     setError(null);
     setActiveFile(null);
+    setIsDemoMode(false);
     setShowWrappedChoiceModal(false);
     setView('upload');
+  };
+
+  const handleDemoSelect = (mode: 'dm' | 'group') => {
+    setShowDemoChoiceModal(false);
+    setIsDemoMode(true);
+    setChatMode(mode);
+    const { metrics: demoMetrics, insights: demoInsights } = getDemoData(mode, language);
+    setMetrics(demoMetrics);
+    setInsights(demoInsights);
+    setInsightStatus('success');
+    setView('results');
   };
 
   return (
@@ -318,6 +336,16 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* Demo Choice Modal */}
+      <AnimatePresence>
+        {showDemoChoiceModal && (
+          <DemoChoiceModal
+            onSelect={handleDemoSelect}
+            onCancel={() => setShowDemoChoiceModal(false)}
+          />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         {view === 'upload' && (
           <motion.div
@@ -332,6 +360,7 @@ export default function App() {
               onFileUpload={handleFileUpload}
               onUploadClickIntent={handleUploadClickIntent}
               onOpenPrivacy={() => setPrivacyModalVariant('manual')}
+              onLookAround={() => setShowDemoChoiceModal(true)}
               error={error}
             />
           </motion.div>
@@ -366,6 +395,7 @@ export default function App() {
               insightStatus={insightStatus}
               onRetryAI={() => executeAnalysis(localStorage.getItem('gemini_api_key') || '')}
               onReset={handleReset}
+              isDemoMode={isDemoMode}
             />
           </motion.div>
         )}
@@ -382,10 +412,11 @@ interface UploadPageProps {
   onFileUpload: (file: File) => void;
   onUploadClickIntent?: (triggerPicker: () => void) => void;
   onOpenPrivacy: () => void;
+  onLookAround: () => void;
   error: string | null;
 }
 
-function UploadPage({ onFileUpload, onUploadClickIntent, onOpenPrivacy, error }: UploadPageProps) {
+function UploadPage({ onFileUpload, onUploadClickIntent, onOpenPrivacy, onLookAround, error }: UploadPageProps) {
   const { t } = useLanguage();
   return (
     <div className="min-h-screen flex flex-col bg-canvas">
@@ -427,6 +458,16 @@ function UploadPage({ onFileUpload, onUploadClickIntent, onOpenPrivacy, error }:
               onFileSelected={onFileUpload} 
               onUploadClickIntent={onUploadClickIntent}
             />
+
+            <div className="pt-4 flex flex-col items-center">
+              <button 
+                onClick={onLookAround}
+                className="w-full sm:w-auto nb-btn bg-white hover:bg-accent-lime px-8 py-2.5 text-sm font-bold tracking-wide flex items-center justify-center gap-2"
+              >
+                <Eye size={18} />
+                <span>{t('demo.look_around')}</span>
+              </button>
+            </div>
           </div>
         </div>
 

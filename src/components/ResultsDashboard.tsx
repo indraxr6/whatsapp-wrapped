@@ -29,9 +29,10 @@ interface Props {
   insightStatus: 'success' | 'opt_out' | 'failed' | 'failed_429' | 'failed_503';
   onRetryAI: () => void;
   onReset: () => void;
+  isDemoMode?: boolean;
 }
 
-export default function ResultsDashboard({ metrics, insights, chatMode, insightStatus, onRetryAI, onReset }: Props) {
+export default function ResultsDashboard({ metrics, insights, chatMode, insightStatus, onRetryAI, onReset, isDemoMode = false }: Props) {
   const { t, language } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
 
@@ -65,8 +66,25 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
 
   return (
     <motion.div className="min-h-screen bg-canvas font-sans text-black" variants={staggerContainer} initial="hidden" animate="visible">
+      {isDemoMode && (
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-canvas text-black p-3 sm:p-4 border-2 sm:border-4 border-black shadow-nb-md sm:shadow-nb-lg max-w-[200px] sm:max-w-sm flex flex-col gap-2 sm:gap-3">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[8px] sm:text-[10px] uppercase tracking-widest bg-accent-lime text-black px-1.5 py-0.5 font-bold border-2 border-black">Demo Mode</span>
+          </div>
+          <p className="text-[9px] sm:text-sm font-semibold leading-tight">
+            {t('demo.banner_text') || 'This is a complete, fabricated dataset showcasing every possible card.'}
+          </p>
+          <button 
+            onClick={onReset}
+            className="nb-btn w-full bg-black text-white hover:bg-accent-orange hover:text-black hover:border-black text-[10px] sm:text-sm px-2 py-1.5 sm:px-4 sm:py-2 mt-0 sm:mt-1"
+          >
+            {t('demo.exit_btn') || 'Exit Demo & Upload Your Chat'}
+          </button>
+        </div>
+      )}
+
       {/* Sticky header */}
-      <motion.header variants={sectionVariants} className="sticky top-0 z-10 bg-canvas border-b-2 border-black px-6 py-3 flex sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+      <motion.header variants={sectionVariants} className="sticky top-0 z-40 bg-canvas border-b-2 border-black px-6 py-3 flex sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
         <div className="flex items-center gap-3">
           <button
             onClick={onReset}
@@ -80,7 +98,7 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
         <div className="flex flex-wrap items-center gap-2">
           <LanguageToggle />
           <button id="analyze-again-btn" onClick={onReset} className="nb-btn-primary text-xs py-1.5 whitespace-nowrap flex-shrink-0">
-            {t('footer.cta.btn')}
+            {t('header.start_over')}
           </button>
         </div>
       </motion.header>
@@ -95,7 +113,7 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
             </h1>
             <div className="text-left sm:text-right">
               <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">
-                {chatMode === 'group' ? 'Group Name:' : 'Chat With:'}
+                {chatMode === 'group' ? t('dashboard.hero.group_name') : t('dashboard.hero.chat_with')}
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 {chatMode === 'group' ? (metrics.groupName ?? metrics.participants.join(', ')) : metrics.participants.join(' & ')}
@@ -218,15 +236,15 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
 
         {/* Footer CTA */}
         <motion.div initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants} className="border-2 border-black bg-white p-8 text-center mt-12 mb-12">
-          <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">_ DONE?</p>
-          <h2 className="text-2xl font-extrabold mb-3">Analyze another chat.</h2>
-          <p className="text-sm text-gray-600 mb-6">Upload a different export to compare conversations.</p>
+          <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">{t('footer.done')}</p>
+          <h2 className="text-2xl font-extrabold mb-3">{t('footer.analyze_another')}</h2>
+          <p className="text-sm text-gray-600 mb-6">{t('footer.upload_different')}</p>
           <button
             id="analyze-another-btn"
             onClick={onReset}
             className="nb-btn-primary px-8 py-3"
           >
-            START OVER
+            {t('footer.cta.btn')}
           </button>
         </motion.div>
       </div>
