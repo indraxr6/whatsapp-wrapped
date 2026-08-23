@@ -43,6 +43,8 @@ const ICONS: Record<string, React.ElementType> = {
   'Google Meet': Video,
   'Facebook': Users,
   'Tokopedia': ShoppingCart,
+  'Shopee': ShoppingCart,
+  'TikTok Shop': ShoppingCart,
   'LinkedIn': Briefcase,
   'Other Links': Link2,
 };

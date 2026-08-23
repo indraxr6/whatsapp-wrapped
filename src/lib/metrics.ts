@@ -256,9 +256,82 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     'GitHub': 0,
     'Facebook': 0,
     'Tokopedia': 0,
+    'Shopee': 0,
+    'TikTok Shop': 0,
     'LinkedIn': 0,
     'Other Links': 0,
   };
+
+  for (const m of realMessages) {
+    const c = m.content.toLowerCase();
+    
+    // Quick filter to avoid running string checks on every single message
+    if (!c.includes('http') && !c.includes('www.') && !c.includes('.com') && !c.includes('.id') && !c.includes('.ee') && !c.includes('.gl') && !c.includes('.in') && !c.includes('.be')) {
+      continue;
+    }
+    
+    // We found a potential link text, let's log it to help debug
+    if (c.includes('http') || c.includes('www.')) {
+      console.log("[DEBUG LINK] Potential link message:", c);
+    }
+
+    if (c.includes("open.spotify.com") || c.includes("spotify.link"))
+      sharedLinks["Spotify"]++;
+    else if (c.includes("music.apple.com")) sharedLinks["Apple Music"]++;
+    else if (c.includes("youtu.be/") || c.includes("youtube.com/")) sharedLinks["YouTube"]++;
+    else if (c.includes("instagram.com/reel/")) sharedLinks["Instagram Reels"]++;
+    else if (c.includes("instagram.com/stories/")) sharedLinks["Instagram Stories"]++;
+    else if (c.includes("instagram.com/")) sharedLinks["Instagram Profile"]++;
+    else if (c.includes("twitter.com/") || c.includes("x.com/")) sharedLinks["X"]++;
+    else if (
+      c.includes("maps.google.com") ||
+      c.includes("google.com/maps") ||
+      c.includes("maps.app.goo.gl")
+    )
+      sharedLinks["Google Maps"]++;
+    else if (c.includes("docs.google.com/forms")) sharedLinks["Google Forms"]++;
+    else if (c.includes("docs.google.com/spreadsheets")) sharedLinks["Google Sheets"]++;
+    else if (c.includes("docs.google.com/document")) sharedLinks["Google Docs"]++;
+    else if (c.includes("docs.google.com/presentation")) sharedLinks["Google Slides"]++;
+    else if (c.includes("drive.google.com")) sharedLinks["Google Drive"]++;
+    else if (c.includes("meet.google.com")) sharedLinks["Google Meet"]++;
+    else if (c.includes("github.com")) sharedLinks["GitHub"]++;
+    else if (c.includes("linkedin.com") || c.includes("lnkd.in")) sharedLinks["LinkedIn"]++;
+    else if (c.includes("facebook.com")) sharedLinks["Facebook"]++;
+    // --- INDONESIAN E-COMMERCE SEPARATION ---
+    else if (
+      c.includes("seller-id.tokopedia.com") ||
+      c.includes("affiliate-id.tokopedia.com") ||
+      c.includes("shop.tokopedia.com") ||
+      c.includes("://tiktokshop.com")
+    ) {
+      sharedLinks["TikTok Shop"]++;
+    }
+    else if (c.includes("vt.tiktok.com") || c.includes("tiktok.com/")) {
+      sharedLinks["TikTok"]++;
+    }
+    else if (
+      c.includes("shopee.co.id") ||
+      c.includes("shp.ee") ||
+      c.includes("seller.shopee.co.id") ||
+      c.includes("affiliate.shopee.co.id")
+    ) {
+      sharedLinks["Shopee"]++;
+    }
+    else if (
+      c.includes("tokopedia.com") ||
+      c.includes("tokopedia.link") ||
+      c.includes("seller.tokopedia.com")
+    ) {
+      sharedLinks["Tokopedia"]++;
+    }
+    else if (c.includes('http://') || c.includes('https://')) {
+      // Only count as "Other Links" if it's explicitly a url scheme 
+      // (to avoid false positives on sentences that just happen to end in a dot then word)
+      sharedLinks["Other Links"]++;
+      console.log("[DEBUG LINK] Matched Other Link:", c);
+    }
+  }
 
   for (const m of realMessages.filter((m) => m.isMedia)) {
     const type = m.mediaType ?? 'image';
@@ -277,72 +350,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
       viewOnceCount[m.sender] = (viewOnceCount[m.sender] ?? 0) + 1;
     }
 
-   if (type === "link") {
-     const c = m.content.toLowerCase();
-
-     if (c.includes("open.spotify.com") || c.includes("spotify.link"))
-       sharedLinks["Spotify"]++;
-     else if (c.includes("music.apple.com")) sharedLinks["Apple Music"]++;
-     else if (c.includes("youtu.be/") || c.includes("youtube.com/")) sharedLinks["YouTube"]++;
-     else if (c.includes("instagram.com/reel/")) sharedLinks["Instagram Reels"]++;
-     else if (c.includes("instagram.com/stories/")) sharedLinks["Instagram Stories"]++;
-     else if (c.includes("instagram.com/")) sharedLinks["Instagram Profile"]++;
-     else if (c.includes("twitter.com/") || c.includes("x.com/")) sharedLinks["X"]++;
-     else if (
-       c.includes("maps.google.com") ||
-       c.includes("google.com/maps") ||
-       c.includes("maps.app.goo.gl")
-     )
-       sharedLinks["Google Maps"]++;
-     else if (c.includes("docs.google.com/forms")) sharedLinks["Google Forms"]++;
-     else if (c.includes("docs.google.com/spreadsheets")) sharedLinks["Google Sheets"]++;
-     else if (c.includes("docs.google.com/document")) sharedLinks["Google Docs"]++;
-     else if (c.includes("docs.google.com/presentation")) sharedLinks["Google Slides"]++;
-     else if (c.includes("drive.google.com")) sharedLinks["Google Drive"]++;
-     else if (c.includes("meet.google.com")) sharedLinks["Google Meet"]++;
-     else if (c.includes("github.com")) sharedLinks["GitHub"]++;
-     else if (c.includes("linkedin.com") || c.includes("lnkd.in")) sharedLinks["LinkedIn"]++;
-     else if (c.includes("facebook.com")) sharedLinks["Facebook"]++;
-     // --- INDONESIAN E-COMMERCE SEPARATION ---
-     // 1. TikTok Shop (Evaluated first to catch the integrated "tokopedia.com" backend links)
-     else if (
-       c.includes("seller-id.tokopedia.com") ||
-       c.includes("affiliate-id.tokopedia.com") ||
-       c.includes("shop.tokopedia.com") ||
-       c.includes("://tiktokshop.com")
-     ) {
-       sharedLinks["TikTok Shop"]++;
-     }
-
-     // 2. TikTok (Standard Videos/Profiles)
-     else if (c.includes("vt.tiktok.com") || c.includes("tiktok.com/")) {
-       sharedLinks["TikTok"]++;
-     }
-
-     // 3. Shopee Indonesia
-     else if (
-       c.includes("shopee.co.id") ||
-       c.includes("shp.ee") ||
-       c.includes("seller.shopee.co.id") ||
-       c.includes("affiliate.shopee.co.id")
-     ) {
-       sharedLinks["Shopee"]++;
-     }
-
-     // 4. Tokopedia Marketplace
-     else if (
-       c.includes("tokopedia.com") ||
-       c.includes("tokopedia.link") ||
-       c.includes("seller.tokopedia.com")
-     ) {
-       sharedLinks["Tokopedia"]++;
-     }
-
-     // ----------------------------------------
-     else {
-       sharedLinks["Other Links"]++;
-     }
-   }
+    // Removed from here: sharedLinks logic extracted to a separate loop
 
   }
 
