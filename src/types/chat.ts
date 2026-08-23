@@ -51,6 +51,7 @@ export interface ParsedChatMetrics {
   groupNameHistory: GroupRenameEvent[];
   iconChangeCount: number;
   sharedLinks: Record<string, number>;
+  recentSpotifyLinks: string[];
   activeChatDays: number;
   mirroredPhrases: { phrase: string; count: number }[];
 

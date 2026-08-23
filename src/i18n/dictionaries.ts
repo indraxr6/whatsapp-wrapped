@@ -56,8 +56,8 @@ export const dictionaries = {
     "privacy.cancel": "Cancel",
     "privacy.continue": "Got it - show my Wrapped",
     "privacy.continueUploading": "Continue uploading",
-    "privacy.p1": "Your chat file is processed <bold>entirely in your browser</bold> - parsing, counting, and every metric on this page run as local JavaScript. We have no servers and no backend to send your data to.",
-    "privacy.p2": "Optionally, if you choose to use the AI personality/roast feature later, it communicates directly from your browser to Google's Gemini API.",
+    "privacy.p1": "Your chat file is processed <bold>entirely in your browser</bold> - parsing, counting, and every metric on this page run as local JavaScript. We do not upload your chat data to any servers.",
+    "privacy.p2": "If you use the AI roast feature, it communicates directly from your browser to Google's Gemini API. If Spotify links are found, only those public Spotify IDs (and nothing else) are sent to our serverless backend to fetch album art.",
     "privacy.p3": "",
     "privacy.chooseLanguage": "Choose your language:",
     "privacy.tech.title": "Technical details",
@@ -200,6 +200,11 @@ export const dictionaries = {
     "excerpts.early": "Early Days",
     "excerpts.median": "The Middle",
     "excerpts.late": "Recently",
+    
+    "spotify.title": "Spotify Metadata Trial",
+    "spotify.badge": "BETA",
+    "spotify.recent": "Recent Shares",
+    "spotify.noArt": "No Art",
 
     "roast.title": "_ AI ROAST",
 
@@ -300,8 +305,8 @@ export const dictionaries = {
     "privacy.cancel": "Batal",
     "privacy.continue": "Mengerti - tunjukkan Wrapped saya",
     "privacy.continueUploading": "Lanjutkan upload",
-    "privacy.p1": "File obrolan Anda diproses <bold>sepenuhnya di browser Anda</bold> - parsing, perhitungan, dan setiap metrik di halaman ini berjalan sebagai JavaScript lokal. Kami tidak memiliki server atau backend untuk menerima data Anda.",
-    "privacy.p2": "Secara opsional, jika Anda memilih untuk menggunakan fitur kepribadian/roast AI nantinya, fitur tersebut akan berkomunikasi langsung dari browser Anda ke Gemini API Google.",
+    "privacy.p1": "File obrolan Anda diproses <bold>sepenuhnya di browser Anda</bold> - parsing, perhitungan, dan setiap metrik di halaman ini berjalan sebagai JavaScript lokal. Kami tidak mengunggah data obrolan Anda ke server mana pun.",
+    "privacy.p2": "Jika Anda menggunakan fitur roast AI, fitur tersebut berkomunikasi langsung dari browser Anda ke Gemini API Google. Jika tautan Spotify ditemukan, hanya ID Spotify publik tersebut (dan tidak ada yang lain) yang dikirim ke serverless backend kami untuk mengambil sampul album.",
     "privacy.p3": "",
     "privacy.chooseLanguage": "Pilih bahasa Anda:",
     "privacy.tech.title": "Detail teknis",
@@ -444,6 +449,11 @@ export const dictionaries = {
     "excerpts.early": "Awal Mula",
     "excerpts.median": "Pertengahan",
     "excerpts.late": "Baru-baru Ini",
+    
+    "spotify.title": "Uji Coba Metadata Spotify",
+    "spotify.badge": "BETA",
+    "spotify.recent": "Baru Dibagikan",
+    "spotify.noArt": "Tidak Ada",
 
     "roast.title": "_ AI ROAST",
 

@@ -11,6 +11,7 @@ import GhostingCard from './cards/GhostingCard';
 import EmojiCard from './cards/EmojiCard';
 import MonthlyCard from './cards/MonthlyCard';
 import SharedLinksCard from './cards/SharedLinksCard';
+import SpotifyTrialCard from './cards/SpotifyTrialCard';
 import PersonalityCard from './cards/PersonalityCard';
 import TopicsCard from './cards/TopicsCard';
 import RoastCard from './cards/RoastCard';
@@ -145,8 +146,15 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
               <MediaCard metrics={metrics} chatMode={chatMode} />
             </div>
             {totalLinks > 0 && (
-              <div>
+              <div className="flex flex-col border-b-2 md:border-b-0 md:border-r-2 lg:border-r-0 border-black col-span-1 md:col-span-2 lg:col-span-1">
                 <SharedLinksCard metrics={metrics} />
+              </div>
+            )}
+            
+            {/* Spotify Trial Card */}
+            {metrics.recentSpotifyLinks && metrics.recentSpotifyLinks.length > 0 && (
+              <div className="col-span-1 md:col-span-2 lg:col-span-4 border-t-2 border-black">
+                <SpotifyTrialCard metrics={metrics} />
               </div>
             )}
           </div>

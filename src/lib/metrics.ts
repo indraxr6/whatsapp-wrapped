@@ -117,13 +117,13 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
           newName
         });
       }
-      
+
       if (!creationMatch) {
         const creation = m.content.match(creationRegex);
         // Guard: captured name must be >3 chars and not a pronoun/demonstrative
         if (creation && creation[2] && creation[2].trim().length > 3 && !NAME_STOP_WORDS.has(creation[2].trim().toLowerCase())) {
           creationMatch = creation[2].trim();
-          
+
           if (groupNameHistory.length > 0 && groupNameHistory[0].oldName === null) {
             groupNameHistory[0].oldName = creationMatch;
           }
@@ -262,18 +262,31 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     'Other Links': 0,
   };
 
+  const spotifyLinks: string[] = [];
+
   for (const m of realMessages) {
     const c = m.content.toLowerCase();
-    
+
     // Quick filter to avoid running string checks on every single message
     if (!c.includes('http') && !c.includes('www.') && !c.includes('.com') && !c.includes('.id') && !c.includes('.ee') && !c.includes('.gl') && !c.includes('.in') && !c.includes('.be')) {
       continue;
     }
-    
 
 
-    if (c.includes("open.spotify.com") || c.includes("spotify.link"))
+
+    if (c.includes("open.spotify.com") || c.includes("spotify.link")) {
       sharedLinks["Spotify"]++;
+      const match = m.content.match(/https?:\/\/(?:open\.spotify\.com|spotify\.link)[^\s]+/i);
+      if (match) {
+        const url = match[0];
+        const isTrackOrAlbum = url.includes('/track/') || url.includes('/album/');
+        const isShortLink = url.includes('spotify.link');
+        
+        if (!spotifyLinks.includes(url) && (isTrackOrAlbum || isShortLink)) {
+          spotifyLinks.push(url);
+        }
+      }
+    }
     else if (c.includes("music.apple.com")) sharedLinks["Apple Music"]++;
     else if (c.includes("youtu.be/") || c.includes("youtube.com/")) sharedLinks["YouTube"]++;
     else if (c.includes("instagram.com/reel/")) sharedLinks["Instagram Reels"]++;
@@ -331,7 +344,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
 
   for (const m of realMessages.filter((m) => m.isMedia)) {
     const type = m.mediaType ?? 'image';
-    
+
     if (type === 'sticker') {
       stickerCount[m.sender] = (stickerCount[m.sender] ?? 0) + 1;
     } else {
@@ -555,6 +568,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     ghostingInstances,
     groupName,
     sharedLinks,
+    recentSpotifyLinks: spotifyLinks.slice(-8),
     mediaCounts,
     topEmojisPerSender,
     emojiLeaderboardPerSender,
