@@ -49,20 +49,23 @@ export default function ChatModeModal({ detectedMode, onContinue, onCancel }: Pr
         </div>
 
         {/* CTA */}
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => onContinue('dm')}
-            className="nb-btn w-full py-4 flex items-center justify-center gap-2 hover:bg-black hover:text-white group"
+            className="w-full nb-btn bg-white hover:bg-accent-lime p-4 text-sm border-2 border-black font-bold flex flex-col items-center justify-center text-center group"
           >
-            <User size={18} strokeWidth={2} className="group-hover:text-white text-black" />
-            <span className="font-bold">{t('chatmode.btnDM')}</span>
+            <User size={24} strokeWidth={2} className="mb-2 text-black" />
+            <span>{t('chatmode.btnDM')}</span>
+            <span className="font-normal text-[10px] sm:text-xs text-gray-600 mt-1 leading-tight">{t('chatmode.btnDMDesc') as string}</span>
           </button>
+          
           <button
             onClick={() => onContinue('group')}
-            className="nb-btn w-full py-4 flex items-center justify-center gap-2 hover:bg-black hover:text-white group"
+            className="w-full nb-btn bg-white hover:bg-accent-blue hover:text-white p-4 text-sm border-2 border-black font-bold flex flex-col items-center justify-center text-center group"
           >
-            <Users size={18} strokeWidth={2} className="group-hover:text-white text-black" />
-            <span className="font-bold">{t('chatmode.btnGroup')}</span>
+            <Users size={24} strokeWidth={2} className="mb-2 group-hover:text-white text-black" />
+            <span>{t('chatmode.btnGroup')}</span>
+            <span className="font-normal text-[10px] sm:text-xs text-gray-600 group-hover:text-white/80 mt-1 leading-tight">{t('chatmode.btnGroupDesc') as string}</span>
           </button>
         </div>
       </motion.div>

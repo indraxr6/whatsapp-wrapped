@@ -26,7 +26,7 @@ export default function DemoChoiceModal({ onSelect, onCancel }: Props) {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => onSelect('dm')}
-            className="w-full nb-btn bg-white hover:bg-accent-lime p-3 text-sm border-2 border-black font-bold flex flex-col items-center justify-center text-center group transition-colors"
+            className="w-full nb-btn bg-white hover:bg-accent-lime p-3 text-sm border-2 border-black font-bold flex flex-col items-center justify-center text-center group"
           >
             <User size={24} className="mb-2" />
             <span>{t('demo.dm_title') || 'Personal Demo'}</span>
@@ -35,7 +35,7 @@ export default function DemoChoiceModal({ onSelect, onCancel }: Props) {
           
           <button
             onClick={() => onSelect('group')}
-            className="w-full nb-btn bg-white hover:bg-accent-blue hover:text-white p-3 text-sm border-2 border-black font-bold flex flex-col items-center justify-center text-center group transition-colors"
+            className="w-full nb-btn bg-white hover:bg-accent-blue hover:text-white p-3 text-sm border-2 border-black font-bold flex flex-col items-center justify-center text-center group"
           >
             <Users size={24} className="mb-2" />
             <span>{t('demo.group_title') || 'Group Demo'}</span>
@@ -45,7 +45,7 @@ export default function DemoChoiceModal({ onSelect, onCancel }: Props) {
 
         <button
           onClick={onCancel}
-          className="mt-4 w-full nb-btn py-2 text-xs border-2 border-black bg-white hover:bg-black hover:text-white transition-colors"
+          className="mt-4 w-full nb-btn py-2 text-xs border-2 border-black bg-white hover:bg-black hover:text-white"
         >
           {t('demo.cancel') || 'Cancel'}
         </button>
