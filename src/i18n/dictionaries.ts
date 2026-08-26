@@ -9,9 +9,9 @@ export const dictionaries = {
 
     // Upload Hero
     "hero.kicker": "_ WHOLE CONVERSATION RECAP",
-    "hero.title1": "WhatsApp",
+    "hero.title1": "_WhatsApp",
     "hero.title2": "Chat",
-    "hero.title3": "Wrapped.",
+    "hero.title3": "Wrapped;",
     "hero.subtitle": "Parses your exported chat log locally. Counts everything. Gets AI to roast you. Keeps your data in your browser.",
 
     // Upload Zone
@@ -202,7 +202,7 @@ export const dictionaries = {
     "excerpts.early": "Early Days",
     "excerpts.median": "The Middle",
     "excerpts.late": "Recently",
-    
+
     "spotify.title": "Spotify Gallery",
     "spotify.badge": "BETA",
     "spotify.recent": "Recent Shares",
@@ -267,7 +267,7 @@ export const dictionaries = {
     "hero.kicker": "_ REKAP PERCAKAPAN",
     "hero.title1": "WhatsApp",
     "hero.title2": "Chat",
-    "hero.title3": "Wrapped.",
+    "hero.title3": "Wrapped;",
     "hero.subtitle": "Baca data chat secara lokal. Hitung semua metrik. Minta AI untuk meroasting. Data tetap aman di browser Anda.",
 
     // Upload Zone
@@ -456,7 +456,7 @@ export const dictionaries = {
     "excerpts.early": "Awal Mula",
     "excerpts.median": "Pertengahan",
     "excerpts.late": "Baru-baru Ini",
-    
+
     "spotify.title": "Galeri Spotify",
     "spotify.badge": "BETA",
     "spotify.recent": "Baru Dibagikan",

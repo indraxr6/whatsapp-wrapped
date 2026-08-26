@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Eye } from 'lucide-react';
 import { parseWhatsAppExport } from './lib/parser';
@@ -18,6 +18,7 @@ import { useLanguage } from './i18n/LanguageContext';
 import LanguageToggle from './components/LanguageToggle';
 import ExportTooltip from './components/ExportTooltip';
 import DemoChoiceModal from './components/DemoChoiceModal';
+import Footer from './components/Footer';
 import { getDemoData } from './lib/demoData';
 
 export default function App() {
@@ -49,7 +50,7 @@ export default function App() {
     try {
       setView('analyzing');
       setLoadingStep('Reading your chat...');
-      
+
       // Wait for the AnimatePresence fade transition (200ms) to finish 
       // before blocking the main thread, to avoid a white-screen stutter.
       await new Promise((resolve) => setTimeout(resolve, 250));
@@ -327,7 +328,7 @@ export default function App() {
       {/* Wrapped Choice Modal */}
       <AnimatePresence>
         {showWrappedChoiceModal && (
-          <WrappedChoiceModal 
+          <WrappedChoiceModal
             onSelectAI={handleChoiceAI}
             onSelectStats={handleChoiceStats}
             onCancel={handleChoiceCancel}
@@ -415,21 +416,83 @@ interface UploadPageProps {
   error: string | null;
 }
 
+function TypewriterTitle({ title1, title2, title3 }: { title1: string, title2: string, title3: string }) {
+  const fullText = `${title1}\n${title2}\n${title3}`;
+  const [displayedText, setDisplayedText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const tick = () => {
+      if (!isDeleting) {
+        if (displayedText.length < fullText.length) {
+          setDisplayedText(fullText.slice(0, displayedText.length + 1));
+          timeoutId = setTimeout(tick, 50 + Math.random() * 30); // Faster, smoother typing
+        } else {
+          timeoutId = setTimeout(() => setIsDeleting(true), 4000); // Pause before deleting
+        }
+      } else {
+        if (displayedText.length > 0) {
+          setDisplayedText(fullText.slice(0, displayedText.length - 1));
+          timeoutId = setTimeout(tick, 15); // Fast smooth delete
+        } else {
+          timeoutId = setTimeout(() => setIsDeleting(false), 500); // Pause before re-typing
+        }
+      }
+    };
+
+    timeoutId = setTimeout(tick, 50);
+    return () => clearTimeout(timeoutId);
+  }, [displayedText, isDeleting, fullText]);
+
+  const lines = displayedText.split('\n');
+  const fullLines = fullText.split('\n');
+
+  return (
+    <div className="relative inline-block text-center mb-6">
+      {/* Invisible placeholder to lock width and prevent centering wiggle */}
+      <h1 className="text-6xl sm:text-7xl font-extrabold leading-none tracking-tight opacity-0 select-none pointer-events-none">
+        {fullLines.map((line, i) => (
+          <span key={`ph-${i}`}>
+            {line}
+            {i === fullLines.length - 1 && <span className="inline-block w-[0.4em] ml-1"></span>}
+            {i < fullLines.length - 1 && <br />}
+          </span>
+        ))}
+      </h1>
+
+      {/* Actual typing text */}
+      <h1 className="absolute top-0 left-0 text-6xl sm:text-7xl font-extrabold leading-none tracking-tight w-full whitespace-pre-wrap">
+        {lines.map((line, i) => (
+          <span key={`typ-${i}`}>
+            {line}
+            {i === lines.length - 1 && (
+              <span className="inline-block w-[0.1em] h-[0.75em] bg-black animate-[pulse_0.8s_ease-in-out_infinite] align-baseline ml-1"></span>
+            )}
+            {i < lines.length - 1 && <br />}
+          </span>
+        ))}
+      </h1>
+    </div>
+  );
+}
+
 function UploadPage({ onFileUpload, onUploadClickIntent, onOpenPrivacy, onLookAround, error }: UploadPageProps) {
   const { t } = useLanguage();
   return (
     <div className="min-h-screen flex flex-col bg-canvas">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-canvas border-b-2 border-black px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-black bg-black flex items-center justify-center">
-            <span className="font-mono text-white text-xs font-bold">_WA</span>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-canvas border-b-2 border-black px-3 min-[415px]:px-6 py-3 min-[415px]:py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2 min-[415px]:gap-3 min-w-0">
+          <div className="w-7 h-7 min-[415px]:w-8 min-[415px]:h-8 border-2 border-black bg-black flex items-center justify-center shrink-0">
+            <span className="font-mono text-white text-[10px] min-[415px]:text-xs font-bold">_WA</span>
           </div>
-          <span className="font-sans font-extrabold text-lg tracking-tight">{t('header.title')}</span>
+          <span className="font-sans font-extrabold text-sm min-[415px]:text-lg tracking-tight truncate whitespace-nowrap">{t('header.title')}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 min-[415px]:gap-2 shrink-0">
           <LanguageToggle />
-          <button onClick={onOpenPrivacy} className="nb-btn text-xs py-1.5 ml-2">
+          <button onClick={onOpenPrivacy} className="nb-btn text-[10px] min-[415px]:text-xs py-1 min-[415px]:py-1.5 px-2 min-[415px]:px-3 ml-1 min-[415px]:ml-2 whitespace-nowrap">
             {t('header.privacy')}
           </button>
         </div>
@@ -441,9 +504,7 @@ function UploadPage({ onFileUpload, onUploadClickIntent, onOpenPrivacy, onLookAr
         <div className="content-wrapper flex flex-col items-center text-center">
           <div className="max-w-2xl w-full">
             <p className="font-mono text-xs uppercase tracking-widest mb-4">{t('hero.kicker')}</p>
-            <h1 className="text-6xl sm:text-7xl font-extrabold leading-none tracking-tight mb-6">
-              {t('hero.title1')}<br />{t('hero.title2')}<br />{t('hero.title3')}
-            </h1>
+            <TypewriterTitle title1={t('hero.title1')} title2={t('hero.title2')} title3={t('hero.title3')} />
             <p className="text-base text-gray-700 mx-auto max-w-md leading-relaxed">
               {t('hero.subtitle')}
             </p>
@@ -453,13 +514,13 @@ function UploadPage({ onFileUpload, onUploadClickIntent, onOpenPrivacy, onLookAr
         {/* Upload zone */}
         <div className="content-wrapper flex justify-center">
           <div className="max-w-2xl w-full space-y-3">
-            <UploadZone 
-              onFileSelected={onFileUpload} 
+            <UploadZone
+              onFileSelected={onFileUpload}
               onUploadClickIntent={onUploadClickIntent}
             />
 
             <div className="pt-4 flex flex-col items-center">
-              <button 
+              <button
                 onClick={onLookAround}
                 className="w-full sm:w-auto nb-btn bg-white hover:bg-accent-lime px-8 py-2.5 text-sm font-bold tracking-wide flex items-center justify-center gap-2"
               >
@@ -503,6 +564,9 @@ function UploadPage({ onFileUpload, onUploadClickIntent, onOpenPrivacy, onLookAr
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <Footer compact />
     </div>
   );
 }

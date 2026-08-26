@@ -1,6 +1,6 @@
-export default function Footer() {
+export default function Footer({ compact = false }: { compact?: boolean }) {
   return (
-    <footer className="border-t-2 border-black bg-white px-6 py-12 text-center">
+    <footer className={`border-t-2 border-black bg-white px-6 text-center ${compact ? 'py-6 mt-12' : 'py-12'}`}>
       <div className="content-wrapper flex flex-col items-center">
         <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">
           _BUILT_BY

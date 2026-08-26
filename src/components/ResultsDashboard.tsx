@@ -90,27 +90,23 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
       )}
 
       {/* Sticky header */}
-      <motion.header variants={sectionVariants} className="sticky top-0 z-40 bg-canvas border-b-2 border-black px-6 py-3 flex sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onReset}
-            className="w-8 h-8 border-2 border-black bg-black flex items-center justify-center hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer"
-            title="Start Over"
-          >
-            <span className="font-mono text-white text-xs font-bold">_WA</span>
-          </button>
-          <span className="font-sans font-extrabold tracking-tight">{t('header.title')}</span>
+      <motion.header variants={sectionVariants} className="fixed top-0 left-0 right-0 z-50 bg-canvas border-b-2 border-black px-3 min-[415px]:px-6 py-3 min-[415px]:py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2 min-[415px]:gap-3 min-w-0">
+          <div className="w-7 h-7 min-[415px]:w-8 min-[415px]:h-8 border-2 border-black bg-black flex items-center justify-center shrink-0">
+            <span className="font-mono text-white text-[10px] min-[415px]:text-xs font-bold">_WA</span>
+          </div>
+          <span className="font-sans font-extrabold text-sm min-[415px]:text-lg tracking-tight truncate whitespace-nowrap">{t('header.title')}</span>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1 min-[415px]:gap-2 shrink-0">
           <LanguageToggle />
-          <button id="analyze-again-btn" onClick={onReset} className="nb-btn-primary text-xs py-1.5 whitespace-nowrap flex-shrink-0">
+          <button onClick={onReset} className="nb-btn text-[10px] min-[415px]:text-xs py-1 min-[415px]:py-1.5 px-2 min-[415px]:px-3 ml-1 min-[415px]:ml-2 whitespace-nowrap">
             {t('header.start_over')}
           </button>
         </div>
       </motion.header>
 
       {/* Hero */}
-      <motion.div variants={sectionVariants} className="border-b-2 border-black px-6 py-12 bg-white">
+      <motion.div variants={sectionVariants} className="border-b-2 border-black px-6 py-12 bg-white pt-24">
         <div className="content-wrapper">
           <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-3">{t('dashboard.hero.kicker', { count: metrics.totalMessages.toLocaleString() })}</p>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 gap-6">
