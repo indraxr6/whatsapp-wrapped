@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { RadioIcon } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import type { ParsedChatMetrics } from '../../types/chat';
 
@@ -11,7 +12,7 @@ interface SpotifyItem {
   title: string;
   artist: string;
   albumArt: string | null;
-  type: 'track' | 'album';
+  type: 'track' | 'album' | 'playlist';
 }
 
 export default function SpotifyTrialCard({ metrics }: Props) {
@@ -69,27 +70,36 @@ export default function SpotifyTrialCard({ metrics }: Props) {
 
   return (
     <div className="p-6 h-full flex flex-col bg-white">
-      <div className="flex items-center justify-between mb-4">
-        <p className="font-mono text-xs uppercase tracking-widest text-gray-700">{t('spotify.title')}</p>
-        <span className="bg-black text-white px-2 py-0.5 text-[10px] font-bold tracking-wider rounded-sm">{t('spotify.badge')}</span>
+      <div className="mb-4 flex items-center gap-2 text-gray-700">
+        <RadioIcon className="w-4 h-4" />
+        <p className="font-mono text-xs uppercase tracking-widest">{t('spotify.title')}</p>
       </div>
 
-      <p className="text-sm font-bold mb-4">{t('spotify.recent')}</p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm font-bold">{t('spotify.recent')}</p>
+        {(items.length > 2 || loading) && (
+          <div className="flex items-center gap-1 text-gray-400 md:hidden animate-pulse">
+            <span className="text-[10px] font-mono uppercase tracking-widest">Scroll</span>
+            <span>→</span>
+          </div>
+        )}
+      </div>
 
       {loading ? (
-        <div className="flex gap-4 overflow-x-auto custom-scrollbar pb-2 opacity-50 animate-pulse">
+        <div className="grid grid-rows-2 grid-flow-col gap-4 md:flex overflow-x-auto custom-scrollbar pb-2 opacity-50 animate-pulse">
           {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="flex-shrink-0 w-48 border-2 border-gray-200">
               <div className="w-full aspect-square bg-gray-200" />
-              <div className="p-2 space-y-2">
-                <div className="h-3 bg-gray-200 w-3/4 rounded-sm" />
+              <div className="p-2 flex-1 flex flex-col justify-center gap-1">
+                <div className="h-2.5 bg-gray-200 w-3/4 rounded-sm" />
+                <div className="h-1.5 bg-gray-200 w-1/4 rounded-sm" />
                 <div className="h-2 bg-gray-200 w-1/2 rounded-sm" />
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="flex gap-4 overflow-x-auto custom-scrollbar pb-2 snap-x">
+        <div className="grid grid-rows-2 grid-flow-col gap-4 md:flex overflow-x-auto custom-scrollbar pb-2 snap-x">
           {items.map((item, idx) => (
             <a
               key={idx}
@@ -106,8 +116,9 @@ export default function SpotifyTrialCard({ metrics }: Props) {
                 )}
               </div>
               <div className="p-2 flex-1 flex flex-col justify-center">
-                <p className="text-xs font-bold truncate text-black">{item.title}</p>
-                <p className="text-[10px] truncate text-gray-700 mt-0.5">{item.artist}</p>
+                <p className="text-xs font-bold truncate leading-tight">{item.title}</p>
+                <p className="text-[8px] font-mono uppercase tracking-widest text-gray-500 mt-0.5 mb-0.5">{t(`spotify.type.${item.type}` as any)}</p>
+                <p className="text-[10px] text-gray-600 truncate leading-tight">{item.artist}</p>
               </div>
             </a>
           ))}
