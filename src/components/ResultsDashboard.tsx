@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { GeminiInsights, ParsedChatMetrics } from '../types/chat';
 import { useLanguage } from '../i18n/LanguageContext';
 import OverviewCard from './cards/OverviewCard';
@@ -34,6 +35,10 @@ interface Props {
 }
 
 export default function ResultsDashboard({ metrics, insights, chatMode, insightStatus, onRetryAI, onReset, isDemoMode = false }: Props) {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const { t, language } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
 
@@ -142,11 +147,11 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
             <div className="border-b-2 lg:border-b-0 md:border-r-0 lg:border-r-2 border-black">
               <MessageShareCard metrics={metrics} chatMode={chatMode} />
             </div>
-            <div className={`border-b-2 md:border-b-0 ${totalLinks > 0 ? 'md:border-r-2 lg:border-r-2' : 'md:col-span-2 lg:col-span-1 lg:border-r-0'} border-black`}>
+            <div className={`${totalLinks > 0 ? 'border-b-2 md:border-b-0 md:border-r-2 lg:border-r-2' : 'md:col-span-2 lg:col-span-1 lg:border-r-0'} border-black`}>
               <MediaCard metrics={metrics} chatMode={chatMode} />
             </div>
             {totalLinks > 0 && (
-              <div className="flex flex-col border-b-2 md:border-b-0 md:border-r-2 lg:border-r-0 border-black col-span-1 md:col-span-2 lg:col-span-1">
+              <div className="flex flex-col">
                 <SharedLinksCard metrics={metrics} />
               </div>
             )}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { GroupRenameEvent } from '../types/chat';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -31,21 +32,31 @@ export default function GroupHistory({ history, iconChangeCount }: Props) {
               <span className="text-[10px]">{expanded ? '▲' : '▼'}</span>
             </button>
 
-            {expanded && (
-              <div className="mt-3 flex flex-col gap-3 border-l-2 sm:border-l-0 sm:border-r-2 border-black pl-3 sm:pl-0 sm:pr-3 pl-3  text-left sm:text-right max-h-48 overflow-y-auto custom-scrollbar bg-gray-50 p-3 shadow-[inset_2px_2px_0px_rgba(0,0,0,0.1)]">
-                {history.map((evt, i) => (
-                  <div key={i} className="flex flex-col">
-                    <span className="text-[10px] text-gray-500 font-bold mb-0.5">{evt.date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                    <span className="leading-tight">
-                      <span className="font-bold text-black">{evt.actor}</span> {t('group.changedTo')} <span className="font-bold text-black">"{evt.newName}"</span>
-                    </span>
-                    {evt.oldName && (
-                      <span className="text-[10px] text-gray-500 mt-0.5">{t('group.from')} "{evt.oldName}"</span>
-                    )}
+            <AnimatePresence>
+              {expanded && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex flex-col gap-3 border-l-2 sm:border-l-0 sm:border-r-2 border-black p-3 sm:pl-6 pr-6 sm:pr-8 text-left sm:text-right max-h-48 overflow-y-auto custom-scrollbar bg-gray-50 shadow-[inset_2px_2px_0px_rgba(0,0,0,0.1)]">
+                    {history.map((evt, i) => (
+                      <div key={i} className="flex flex-col">
+                        <span className="text-[10px] text-gray-500 font-bold mb-0.5">{evt.date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        <span className="leading-tight">
+                          <span className="font-bold text-black">{evt.actor}</span> {t('group.changedTo')} <span className="font-bold text-black">"{evt.newName}"</span>
+                        </span>
+                        {evt.oldName && (
+                          <span className="text-[10px] text-gray-500 mt-0.5">{t('group.from')} "{evt.oldName}"</span>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
