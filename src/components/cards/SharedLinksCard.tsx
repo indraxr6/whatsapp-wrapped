@@ -74,7 +74,7 @@ export default function SharedLinksCard({ metrics }: Props) {
         <p className="text-sm text-gray-700 mt-1">{t('links.total')}</p>
       </div>
 
-      <div className="space-y-3 border-t-2 border-black pt-4 flex-1 overflow-y-auto custom-scrollbar pr-2 max-h-[340px]">
+      <div className="space-y-3 border-t-2 border-black pt-4 flex-1 overflow-y-auto custom-scrollbar pr-2 max-h-[380px]">
         {activeLinks.map(([category, count]) => {
           const Icon = ICONS[category] || Link2;
           const barPct = Math.round((count / maxCount) * 100);

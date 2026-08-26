@@ -17,7 +17,7 @@ export default function EmojiCard({ metrics, chatMode = 'dm' }: Props) {
 
   return (
     <div className="p-6">
-      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-6">{t('section.emoji')}</p>
+      <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-6">{t('emoji.title')}</p>
 
       {topSpam && (
         <div className="mb-6 bg-accent-orange/10 border border-accent-orange p-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-2">

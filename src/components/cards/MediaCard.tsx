@@ -1,5 +1,28 @@
 import type { MediaType, ParsedChatMetrics } from '../../types/chat';
 import { useLanguage } from '../../i18n/LanguageContext';
+import {
+  ImageIcon,
+  Video,
+  Mic,
+  Film,
+  FileText,
+  Contact,
+  MapPin,
+  Link2,
+  Sticker,
+} from 'lucide-react';
+
+const ICONS: Record<string, any> = {
+  image: ImageIcon,
+  video: Video,
+  sticker: Sticker,
+  audio: Mic,
+  gif: Film,
+  document: FileText,
+  contactCard: Contact,
+  location: MapPin,
+  link: Link2,
+};
 
 interface Props {
   metrics: ParsedChatMetrics;
@@ -16,7 +39,7 @@ export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
   const totalMedia = Object.values(mediaCounts).reduce((a, b) => a + b, 0);
   const totalStickers = Object.values(stickerCount).reduce((a, b) => a + b, 0);
   const maxType = Math.max(...Object.values(mediaLeaderboard), 1);
-  
+
   const sortedParticipants = [...participants].sort((a, b) => (mediaCounts[b] ?? 0) - (mediaCounts[a] ?? 0));
   const displayParticipants = chatMode === 'group' ? sortedParticipants.slice(0, 10) : sortedParticipants;
 
@@ -33,10 +56,14 @@ export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
         {MEDIA_ORDER.filter((t) => t !== 'sticker' && (mediaLeaderboard[t] ?? 0) > 0).map((type) => {
           const count = mediaLeaderboard[type] ?? 0;
           const barPct = Math.round((count / maxType) * 100);
+          const Icon = ICONS[type] || FileText;
           return (
             <div key={type}>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-mono uppercase tracking-wide">{t(`media.${type}` as any)}</span>
+                <div className="flex items-center gap-2">
+                  <Icon className="w-4 h-4 text-gray-700" />
+                  <span className="font-mono uppercase tracking-wide">{t(`media.${type}` as any)}</span>
+                </div>
                 <span className="font-bold">{count}</span>
               </div>
               <div className="border border-black h-2 bg-canvas">
@@ -48,7 +75,10 @@ export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
         {totalStickers > 0 && (
           <div className="pt-2 mt-2 border-t-2 border-black border-dashed">
             <div className="flex items-center justify-between text-xs mb-1">
-              <span className="font-mono uppercase tracking-wide text-gray-500">{t('media.sticker')}</span>
+              <div className="flex items-center gap-2 text-gray-500">
+                <Sticker className="w-4 h-4" />
+                <span className="font-mono uppercase tracking-wide">{t('media.sticker')}</span>
+              </div>
               <span className="font-bold">{totalStickers.toLocaleString()}</span>
             </div>
           </div>
