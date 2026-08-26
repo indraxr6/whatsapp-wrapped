@@ -5,6 +5,8 @@ import type { ParsedChatMetrics } from '../../types/chat';
 
 interface Props {
   metrics: ParsedChatMetrics;
+  isDemoMode?: boolean;
+  chatMode?: 'dm' | 'group';
 }
 
 interface SpotifyItem {
@@ -15,7 +17,48 @@ interface SpotifyItem {
   type: 'track' | 'album' | 'playlist';
 }
 
-export default function SpotifyTrialCard({ metrics }: Props) {
+
+const GROUP_DEMO_DATA: SpotifyItem[] = [
+  {
+    "url": "https://open.spotify.com/track/3wvW8GIpS8Y95nCt2Wjt5t?si=jzrUFvZtTd-U3IceQmDY8g",
+    "title": "20191012 Fooled By Love",
+    "artist": "Mac DeMarco",
+    "albumArt": "https://i.scdn.co/image/ab67616d0000b27340461e96808378ae2787a7e4",
+    "type": "track"
+  },
+  {
+    "url": "https://open.spotify.com/track/7qUkZhXym0LCTdcmwhGO3b?si=ea43f61076aa45ff",
+    "title": "Konservatif",
+    "artist": "The Adams",
+    "albumArt": "https://i.scdn.co/image/ab67616d0000b273535749cdd3ac5452d99289be",
+    "type": "track"
+  },
+  {
+    "url": "https://open.spotify.com/album/4EA34edROIFSbaZ74QAxC6?si=BA3ni5tASVKfQ5wgCZ1SPg",
+    "title": "SNIPPET",
+    "artist": "ini.bin",
+    "albumArt": "https://i.scdn.co/image/ab67616d0000b2730af2517f9a1c80389b0ae813",
+    "type": "album"
+  },
+  {
+    "url": "https://open.spotify.com/album/6es3mdUqpOlHSXPT6QeC7Y?si=yQmAVQ5JQmuQcnFxkVeeRA&utm_source=copy-link",
+    "title": "虹伝説～THE RAINBOW GOBLINS～",
+    "artist": "Masayoshi Takanaka",
+    "albumArt": "https://i.scdn.co/image/ab67616d0000b273a8fd1d331c811e557db74d27",
+    "type": "album"
+  },
+  {
+    "url": "https://open.spotify.com/playlist/7p1MWKdCUfIJLV4Avrsw6v?si=b8a80b84b722446a",
+    "title": "oahm",
+    "artist": "Indra",
+    "albumArt": "https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da841f5ae6345988558ed31db7a1",
+    "type": "playlist"
+  },
+  { "url": "https://open.spotify.com/track/3JPykcDhUA7DMrxN6eXzQ4?si=55bd7f600e0845af", "title": "Rom-Com Gone Wrong", "artist": "Matt Maltese", "albumArt": "https://i.scdn.co/image/ab67616d0000b273f01251e6e914959ebbd88ae5", "type": "track" },
+  { "url": "https://open.spotify.com/album/7b55VfUk2Vpuqnac9NDREc?si=2837b5f6b15c4a37", "title": "ランプ幻想", "artist": "Lamp", "albumArt": "https://i.scdn.co/image/ab67616d0000b273bbc2ac628f52cd6127e20bfa", "type": "album" }
+];
+
+export default function SpotifyTrialCard({ metrics, isDemoMode }: Props) {
   const { t } = useLanguage();
   const { recentSpotifyLinks } = metrics;
 
@@ -24,6 +67,12 @@ export default function SpotifyTrialCard({ metrics }: Props) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    if (isDemoMode) {
+      setItems(GROUP_DEMO_DATA);
+      setLoading(false);
+      return;
+    }
+
     if (!recentSpotifyLinks || recentSpotifyLinks.length === 0) {
       setLoading(false);
       return;

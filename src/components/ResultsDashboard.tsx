@@ -157,9 +157,9 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
             )}
             
             {/* Spotify Trial Card */}
-            {metrics.recentSpotifyLinks && metrics.recentSpotifyLinks.length > 0 && (
+            {(isDemoMode || (metrics.recentSpotifyLinks && metrics.recentSpotifyLinks.length > 0)) && (
               <div className="col-span-1 md:col-span-2 lg:col-span-4 border-t-2 border-black">
-                <SpotifyTrialCard metrics={metrics} />
+                <SpotifyTrialCard metrics={metrics} isDemoMode={isDemoMode} chatMode={chatMode} />
               </div>
             )}
           </div>
