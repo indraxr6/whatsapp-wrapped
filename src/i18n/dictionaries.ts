@@ -87,8 +87,10 @@ export const dictionaries = {
     "chatmode.detectedGroup": "We detected more than 2 participants in the export, so we think it's a <strong>Group Chat</strong>.",
     "chatmode.detectedDM": "We detected 2 participants in the export, so we think it's a <strong>Direct Message</strong>.",
     "chatmode.confirm": "Please confirm the chat type. This changes how metrics and leaderboards are displayed.",
-    "chatmode.btnDM": "Direct Message (2 People)",
-    "chatmode.btnGroup": "Group Chat (3+ People)",
+    "chatmode.btnDM": "Direct Message",
+    "chatmode.btnDMDesc": "(2 People)",
+    "chatmode.btnGroup": "Group Chat",
+    "chatmode.btnGroupDesc": "(3+ People)",
 
     // Dashboard Hero
     "dashboard.hero.kicker": "_ {{count}} MESSAGES PARSED",
@@ -141,10 +143,10 @@ export const dictionaries = {
     "latency.avgReply": "avg reply latency",
 
     "ghosting.title": "_ GHOSTING INDEX",
-    "ghosting.subtitle": "(12h+ gap before replying)",
+    "ghosting.subtitle": "(72h+ gap before replying)",
     "ghosting.none": "No major ghosting detected.",
-    "ghosting.consistent": "Both parties respond within 12 hours consistently.",
-    "ghosting.consistent.plural": "Everyone responds within 12 hours consistently.",
+    "ghosting.consistent": "Both parties respond within 72 hours consistently.",
+    "ghosting.consistent.plural": "Everyone responds within 72 hours consistently.",
     "ghosting.total": "total ghosting instances",
     "ghosting.worst": "WORST",
     "ghosting.note": "Note: gaps >6h at night excluded from response time averages.",
@@ -164,7 +166,7 @@ export const dictionaries = {
     "links.title": "_ SHARED LINKS",
     "links.total": "categorized links",
 
-    "emoji.title": "_ TOP EMOJIS",
+    "emoji.title": "Top Emojis",
     "emoji.none": "No emojis used",
     "emoji.burstTitle": "Most extreme emoji burst",
     "emoji.burstSent": "sent",
@@ -201,10 +203,13 @@ export const dictionaries = {
     "excerpts.median": "The Middle",
     "excerpts.late": "Recently",
     
-    "spotify.title": "Spotify Metadata Trial",
+    "spotify.title": "Spotify Gallery",
     "spotify.badge": "BETA",
     "spotify.recent": "Recent Shares",
     "spotify.noArt": "No Art",
+    "spotify.type.track": "Single",
+    "spotify.type.album": "Album",
+    "spotify.type.playlist": "Playlist",
 
     "roast.title": "_ AI ROAST",
 
@@ -336,8 +341,10 @@ export const dictionaries = {
     "chatmode.detectedGroup": "Kami mendeteksi lebih dari 2 partisipan dalam file, jadi sepertinya ini adalah <strong>Grup Chat</strong>.",
     "chatmode.detectedDM": "Kami mendeteksi 2 partisipan dalam file, jadi sepertinya ini adalah <strong>Pesan Pribadi</strong>.",
     "chatmode.confirm": "Mohon konfirmasi jenis obrolan. Ini akan mengubah cara statistik ditampilkan.",
-    "chatmode.btnDM": "Pesan Pribadi (2 Orang)",
-    "chatmode.btnGroup": "Grup Chat (3+ Orang)",
+    "chatmode.btnDM": "Pesan Pribadi",
+    "chatmode.btnDMDesc": "(2 Orang)",
+    "chatmode.btnGroup": "Grup Chat",
+    "chatmode.btnGroupDesc": "(3+ Orang)",
 
     // Dashboard Hero
     "dashboard.hero.kicker": "_ {{count}} PESAN DIPROSES",
@@ -390,10 +397,10 @@ export const dictionaries = {
     "latency.avgReply": "rata-rata waktu balas",
 
     "ghosting.title": "_ INDEKS GHOSTING",
-    "ghosting.subtitle": "(jeda 12+ jam sebelum membalas)",
+    "ghosting.subtitle": "(jeda 72+ jam sebelum membalas)",
     "ghosting.none": "Tidak terdeteksi adanya aksi ghosting.",
-    "ghosting.consistent": "Kalian berdua selalu membalas pesan dalam waktu 12 jam.",
-    "ghosting.consistent.plural": "Kalian semua selalu membalas pesan dalam waktu 12 jam.",
+    "ghosting.consistent": "Kalian berdua selalu membalas pesan dalam waktu 72 jam.",
+    "ghosting.consistent.plural": "Kalian semua selalu membalas pesan dalam waktu 72 jam.",
     "ghosting.total": "total aksi ngilang / ghosting",
     "ghosting.worst": "TERPARAH",
     "ghosting.note": "Catatan: jeda >6 jam di malam hari diabaikan dari rata-rata waktu balas.",
@@ -413,8 +420,8 @@ export const dictionaries = {
     "links.title": "_ TAUTAN DIBAGIKAN",
     "links.total": "tautan terkategori",
 
-    "emoji.title": "_ EMOJI TERBANYAK",
-    "emoji.none": "Tidak ada emoji",
+    "emoji.title": "Emoji Teratas",
+    "emoji.none": "Tidak ada emoji yang digunakan",
     "emoji.burstTitle": "Ledakan emoji paling ekstrem",
     "emoji.burstSent": "mengirim",
     "emoji.burstTimes": "kali dalam satu pesan",
@@ -450,10 +457,13 @@ export const dictionaries = {
     "excerpts.median": "Pertengahan",
     "excerpts.late": "Baru-baru Ini",
     
-    "spotify.title": "Uji Coba Metadata Spotify",
+    "spotify.title": "Galeri Spotify",
     "spotify.badge": "BETA",
     "spotify.recent": "Baru Dibagikan",
-    "spotify.noArt": "Tidak Ada",
+    "spotify.noArt": "Tanpa Seni",
+    "spotify.type.track": "Singel",
+    "spotify.type.album": "Album",
+    "spotify.type.playlist": "Daftar Putar",
 
     "roast.title": "_ AI ROAST",
 

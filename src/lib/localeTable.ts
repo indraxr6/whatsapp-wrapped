@@ -39,7 +39,8 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'meta ai',
       'security code',
       'waiting for this message',
-      'null'
+      'null',
+      'only admins can edit'
     ],
     mediaPlaceholders: [
       { pattern: '<media omitted>', type: 'unknown' },
@@ -112,7 +113,8 @@ export const LOCALE_TABLE: Record<LocaleCode, LocaleEntry> = {
       'meta ai',
       // Security code
       'kode keamanan',
-      'menunggu pesan ini'
+      'menunggu pesan ini',
+      'hanya admin yang dapat'
     ],
     mediaPlaceholders: [
       // Old "dihilangkan" variants

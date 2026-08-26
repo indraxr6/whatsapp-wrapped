@@ -279,7 +279,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
       const match = m.content.match(/https?:\/\/(?:open\.spotify\.com|spotify\.link)[^\s]+/i);
       if (match) {
         const url = match[0];
-        const isTrackOrAlbum = url.includes('/track/') || url.includes('/album/');
+        const isTrackOrAlbum = url.includes('/track/') || url.includes('/album/') || url.includes('/playlist/');
         const isShortLink = url.includes('spotify.link');
         
         if (!spotifyLinks.includes(url) && (isTrackOrAlbum || isShortLink)) {
@@ -429,7 +429,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     if (next.sender !== current.sender) {
       const diffMinutes =
         (next.timestamp.getTime() - current.timestamp.getTime()) / 60000;
-      if (diffMinutes >= 720) {
+      if (diffMinutes >= 4320) {
         ghostingInstances[next.sender] =
           (ghostingInstances[next.sender] ?? 0) + 1;
       }
