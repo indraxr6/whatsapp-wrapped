@@ -42,6 +42,15 @@ export default {
         DEFAULT: '150ms',
         slow: '200ms',
       },
+      keyframes: {
+        cursorBlink: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0' },
+        }
+      },
+      animation: {
+        'cursor-blink': 'cursorBlink 0.8s ease-in-out infinite',
+      }
     },
   },
   plugins: [],

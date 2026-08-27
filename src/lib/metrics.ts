@@ -42,54 +42,15 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     throw new Error('No parseable messages found in the export.');
   }
 
-  const rawParticipants = Array.from(
-    new Set(realMessages.map((m) => m.sender))
-  ).filter(Boolean);
-
-  const senderNonSystemCounts: Record<string, number> = {};
-  for (const m of realMessages) {
-    // A genuine participant is someone who sends a real text/media OR initiates a call
-    if (!m.isSystem || m.isCall) {
-      senderNonSystemCounts[m.sender] = (senderNonSystemCounts[m.sender] ?? 0) + 1;
-    }
-  }
-
-  const participants = rawParticipants.filter(p => senderNonSystemCounts[p] > 0);
-  const systemOnlySenders = rawParticipants.filter(p => !senderNonSystemCounts[p]);
-
-  let dominantSystemSender: string | null = null;
-  if (systemOnlySenders.length > 0) {
-    const systemCounts: Record<string, number> = {};
-    for (const m of realMessages) {
-      if (m.isSystem && systemOnlySenders.includes(m.sender)) {
-        systemCounts[m.sender] = (systemCounts[m.sender] ?? 0) + 1;
-      }
-    }
-    dominantSystemSender = Object.keys(systemCounts).sort((a, b) => systemCounts[b] - systemCounts[a])[0];
-  }
-
-  const dateRange = {
-    start: realMessages[0].timestamp,
-    end: realMessages[realMessages.length - 1].timestamp,
-  };
-
-  // ── Group Name Detection ──
-  let groupName: string | null = null;
-  // Group name detection regexes.
-  // NOTE: WhatsApp uses different left " (U+201C) and right " (U+201D) curly quotes.
-  // A backreference \1 would fail since the opening and closing quotes differ.
-  // We match any quote character for both open and close independently.
-  const renameRegex = /^(?:(.+?)\s+)?(?:changed the group name(?: from\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*to|changed this group's name to|changed the subject(?: from\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*to|mengubah nama grup(?: dari\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*menjadi|mengubah subjek(?: dari\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*menjadi|mengubah subjek grup menjadi)\s*[\u201c\u201d"]?([^\u201c\u201d"]+)[\u201c\u201d"]?\s*$/i;
-  const creationRegex = /^(?:(.+?)\s+)?(?:created group|membuat grup|telah membuat grup)\s+[\u201c\u201d"]?(.+?)[\u201c\u201d"]?\s*$/i;
-  const iconChangeRegex = /^(?:(.+?)\s+)?(?:changed this group's icon|mengubah ikon grup ini)\s*$/i;
-
+  // ── 1. Group Name Detection & History ──
   let latestRenameMatch: string | null = null;
   let creationMatch: string | null = null;
-
   let groupNameHistory: import('../types/chat').GroupRenameEvent[] = [];
   let iconChangeCount = 0;
 
-  // Group-name stop-words that should never be treated as a real group name
+  const renameRegex = /^(?:(.+?)\s+)?(?:changed the group name(?: from\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*to|changed this group's name to|changed the subject(?: from\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*to|mengubah nama grup(?: dari\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*menjadi|mengubah subjek(?: dari\s+[\u201c\u201d"]?.*?[\u201c\u201d"]?)?\s*menjadi|mengubah subjek grup menjadi)\s*[\u201c\u201d"]?([^\u201c\u201d"]+)[\u201c\u201d"]?\s*$/i;
+  const creationRegex = /^(?:(.+?)\s+)?(?:created group|membuat grup|telah membuat grup)\s+[\u201c\u201d"]?(.+?)[\u201c\u201d"]?\s*$/i;
+  const iconChangeRegex = /^(?:(.+?)\s+)?(?:changed this group's icon|mengubah ikon grup ini)\s*$/i;
   const NAME_STOP_WORDS = new Set(['ini', 'itu', 'this', 'the', 'here', 'tersebut']);
 
   for (const m of messages) {
@@ -101,12 +62,10 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
       const rename = m.content.match(renameRegex);
       if (rename && rename[2]) {
         latestRenameMatch = rename[2].trim();
-
         let rawActor = rename[1] ? rename[1].trim() : (m.sender !== 'System' ? m.sender : 'Unknown');
         if (rawActor.toLowerCase() === 'you' || rawActor.toLowerCase() === 'anda') {
           rawActor = 'You';
         }
-
         const newName = latestRenameMatch;
         const oldName = groupNameHistory.length > 0 ? groupNameHistory[groupNameHistory.length - 1].newName : null;
 
@@ -120,10 +79,8 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
 
       if (!creationMatch) {
         const creation = m.content.match(creationRegex);
-        // Guard: captured name must be >3 chars and not a pronoun/demonstrative
         if (creation && creation[2] && creation[2].trim().length > 3 && !NAME_STOP_WORDS.has(creation[2].trim().toLowerCase())) {
           creationMatch = creation[2].trim();
-
           if (groupNameHistory.length > 0 && groupNameHistory[0].oldName === null) {
             groupNameHistory[0].oldName = creationMatch;
           }
@@ -132,26 +89,98 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     }
   }
 
+  let groupName: string | null = null;
   if (latestRenameMatch) {
     groupName = latestRenameMatch;
   } else if (creationMatch) {
     groupName = creationMatch.replace(/^["“”]|["“”]$/g, '').trim();
-  } else if (dominantSystemSender) {
-    groupName = dominantSystemSender;
-  } else if (fileName) {
-    // Attempt to extract group name from "WhatsApp Chat with My Group.txt"
-    // Or "WhatsApp Chat - My Group.txt"
+  }
+
+  // Fallback 1: Find the iOS encryption notice sender (iOS attributes system messages to the group name)
+  if (!groupName) {
+    const encryptionMsg = realMessages.find(m => 
+      m.isSystem && 
+      m.sender !== 'System' && 
+      (m.content.toLowerCase().includes('end-to-end') || m.content.toLowerCase().includes('dienkripsi'))
+    );
+    
+    // Safety check: ensure it's not a DM by verifying this sender has very few "real" messages.
+    // In a DM, Alice sends the encryption message but also thousands of real messages.
+    // In a Group, the Group Name sends the encryption message and < 50 real messages (unrecognized system messages).
+    if (encryptionMsg && !NAME_STOP_WORDS.has(encryptionMsg.sender.toLowerCase())) {
+      let realMessageCount = 0;
+      for (const m of realMessages) {
+        if (!m.isSystem && m.sender === encryptionMsg.sender) {
+          realMessageCount++;
+        }
+      }
+      
+      if (realMessageCount < 50) {
+        groupName = encryptionMsg.sender;
+      }
+    }
+  }
+
+  // Fallback 2: The dominant system sender with low real messages
+  if (!groupName) {
+    const systemCounts: Record<string, number> = {};
+    const realCounts: Record<string, number> = {};
+    
+    for (const m of realMessages) {
+      if (m.isSystem && m.sender !== 'System') {
+        systemCounts[m.sender] = (systemCounts[m.sender] ?? 0) + 1;
+      } else if (!m.isSystem) {
+        realCounts[m.sender] = (realCounts[m.sender] ?? 0) + 1;
+      }
+    }
+    
+    const possibleGroupNames = Object.keys(systemCounts).filter(s => (realCounts[s] ?? 0) < 50);
+    const sorted = possibleGroupNames.sort((a, b) => systemCounts[b] - systemCounts[a]);
+    
+    if (sorted.length > 0) {
+      groupName = sorted[0];
+    }
+  }
+
+  // Fallback 3: Filename
+  if (!groupName && fileName) {
     const fnMatch = fileName.match(/WhatsApp Chat (?:with|-)?\s*(.+)\.txt/i);
     if (fnMatch && fnMatch[1] && fnMatch[1].trim() !== '') {
       groupName = fnMatch[1].trim();
-    } else if (participants.length > 2) {
-      groupName = 'Group Chat';
     }
-  } else if (participants.length > 2) {
+  }
+
+  // ── 2. Purge Group Name from Messages ──
+  // Any message sent by the detected Group Name is forcefully marked as a system message.
+  // This cleans up unrecognized system messages (like "added" or "removed") from polluting participant stats.
+  if (groupName) {
+    for (const m of realMessages) {
+      if (m.sender === groupName) {
+        m.isSystem = true;
+      }
+    }
+  }
+
+  // ── 3. Calculate Participants ──
+  const senderNonSystemCounts: Record<string, number> = {};
+  for (const m of realMessages) {
+    if (!m.isSystem || m.isCall) {
+      senderNonSystemCounts[m.sender] = (senderNonSystemCounts[m.sender] ?? 0) + 1;
+    }
+  }
+
+  const participants = Object.keys(senderNonSystemCounts).filter(p => senderNonSystemCounts[p] > 0);
+  
+  if (!groupName && participants.length > 2) {
     groupName = 'Group Chat';
-  } else {
+  } else if (!groupName) {
     groupName = null;
   }
+
+  const dateRange = {
+    start: realMessages[0].timestamp,
+    end: realMessages[realMessages.length - 1].timestamp,
+  };
 
   // ── Chat span & pace ──
   const uniqueDatesSet = new Set(

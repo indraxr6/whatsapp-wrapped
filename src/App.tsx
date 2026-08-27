@@ -468,7 +468,7 @@ function TypewriterTitle({ title1, title2, title3 }: { title1: string, title2: s
           <span key={`typ-${i}`}>
             {line}
             {i === lines.length - 1 && (
-              <span className="inline-block w-[0.1em] h-[0.75em] bg-black animate-[pulse_0.8s_ease-in-out_infinite] align-baseline ml-1"></span>
+              <span className="inline-block w-[0.1em] h-[0.75em] bg-black animate-cursor-blink align-baseline ml-1"></span>
             )}
             {i < lines.length - 1 && <br />}
           </span>

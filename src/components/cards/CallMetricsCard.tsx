@@ -1,4 +1,4 @@
-import { Phone, PhoneMissed, Clock, Eye, Edit3, Trash2, Video } from 'lucide-react';
+import { Phone, PhoneMissed, Clock, Edit3, Trash2, Video } from 'lucide-react';
 import type { ParsedChatMetrics } from '../../types/chat';
 
 interface Props {
@@ -85,7 +85,7 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
             </p>
           </div>
         )}
-        {totalViewOnce > 0 && (
+        {/* {totalViewOnce > 0 && (
           <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
             <Eye className="mb-2 text-accent-orange" size={24} strokeWidth={2.5} />
             <p className="font-mono text-xs uppercase text-gray-500">{t('calls.viewOnce')}</p>
@@ -93,7 +93,7 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
               {totalViewOnce}
             </p>
           </div>
-        )}
+        )} */}
         {totalEdited > 0 && (
           <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
             <Edit3 className="mb-2 text-accent-yellow" size={24} strokeWidth={2.5} />
