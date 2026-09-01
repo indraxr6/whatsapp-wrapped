@@ -185,7 +185,7 @@ export default function App() {
     setLoadingStep(t('loading.demo') || 'Loading local preview...');
     setView('analyzing');
     await new Promise((r) => setTimeout(r, 600));
-    setInsights(generateDemoInsights(metrics, language, chatMode));
+    setInsights(generateDemoInsights(metrics, language));
     setView('results');
   };
 
@@ -200,7 +200,7 @@ export default function App() {
       setInsightStatus('success');
     } catch (aiErr: any) {
       console.warn('[Gemini] API failed, falling back to demo insights:', aiErr);
-      geminiInsights = generateDemoInsights(metrics, language, chatMode);
+      geminiInsights = generateDemoInsights(metrics, language);
 
       if (aiErr.message?.includes('429')) {
         setInsightStatus('failed_429');

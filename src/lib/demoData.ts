@@ -109,6 +109,7 @@ export function getDemoData(mode: 'dm' | 'group', lang: 'en' | 'id'): { metrics:
         median: { start: new Date(2023, 4, 1), end: new Date(2023, 7, 31) },
         late: { start: new Date(2023, 8, 1), end: new Date(2023, 11, 31) }
       },
+      detectedTopics: [],
       eraMetrics: {
         early: { avgResponseTimeMinutes: 15.2, avgMessageLength: 8.4, topEmoji: '😊' },
         median: { avgResponseTimeMinutes: 8.5, avgMessageLength: 5.2, topEmoji: '😂' },
@@ -125,7 +126,7 @@ export function getDemoData(mode: 'dm' | 'group', lang: 'en' | 'id'): { metrics:
       personality_summary: isId 
         ? `Percakapan ini adalah sebuah masterpiece tarik-ulur digital. Kamu menembakkan 3.2 pesan per burst layaknya senapan mesin, sementara Rizky merespons dengan efisiensi mematikan. Menariknya, Rizky sudah 18 kali nge-ghosting kamu selama lebih dari setengah hari, tapi kalian tetap menghabiskan 18.500 detik di telepon. Kalian jelas sangat dekat, tapi dengan dinamika kekuasaan yang sangat dipegang oleh Rizky.`
         : `This chat is a masterpiece of digital tug-of-war. You fire off 3.2 messages per burst like a machine gun, while Sam responds with lethal efficiency. Interestingly, Sam has ghosted you 18 times for more than half a day, yet you still spent 18,500 seconds on the phone together. You're clearly extremely close, but the power dynamic heavily favors Sam's pacing.`,
-      roast: isId
+      chat_insight: isId
         ? `Kamu memborbardir chat ini dengan antusiasme berlebih, dan Rizky membalas dengan energi 'orang sibuk yang cuma bales pas lagi di toilet'.`
         : `You bombard this chat with golden retriever energy, and Sam responds with the energy of a busy person replying from the toilet.`,
       topics: isId ? ['Rencana Gagal', 'Meme', 'Nongkrong', 'Gibah'] : ['Cancelled Plans', 'Memes', 'Hanging Out', 'Gossiping'],
@@ -270,6 +271,7 @@ export function getDemoData(mode: 'dm' | 'group', lang: 'en' | 'id'): { metrics:
         median: { start: new Date(2023, 4, 1), end: new Date(2023, 7, 31) },
         late: { start: new Date(2023, 8, 1), end: new Date(2023, 11, 31) }
       },
+      detectedTopics: [],
       eraMetrics: {
         early: { avgResponseTimeMinutes: 25.2, avgMessageLength: 12.4, topEmoji: '🙏' },
         median: { avgResponseTimeMinutes: 12.5, avgMessageLength: 8.2, topEmoji: '😂' },
@@ -286,7 +288,7 @@ export function getDemoData(mode: 'dm' | 'group', lang: 'en' | 'id'): { metrics:
       personality_summary: isId 
         ? `Grup ini adalah hierarki yang kejam: Kamu dan Alex sepenuhnya mendominasi 72% percakapan, mengubahnya menjadi panggung kalian berdua. Sementara itu, Kevin pada dasarnya cuma arwah penasaran yang membalas 1.200 pesan dalam setahun dengan rata-rata balas 2.800 menit (hampir dua hari). Fakta bahwa grup ini berganti nama dari "Tempat Kumpul" menjadi "Wacana Liburan" sebelum berakhir sebagai "Grup Ghibah Nasional" menceritakan kisah kegagalan kolektif yang indah.`
         : `This group is a ruthless hierarchy: You and Alex entirely dominate 72% of the conversation, turning it into your personal stage. Meanwhile, Kevin is basically a polite ghost who sent 1,200 messages all year with a response time of 2,800 minutes (almost two days). The fact that this chat renamed itself from "Vacation Planning" to "Cancelled Vacation Planning" tells a beautiful story of collective failure.`,
-      roast: isId
+      chat_insight: isId
         ? `Kamu dan Alex butuh ruangan berdua buat ngobrol. Kevin, kami bahkan tidak yakin kamu tahu grup ini masih ada.`
         : `You and Alex need to just text each other directly. Kevin, blink twice if you remember you're in this group.`,
       topics: isId ? ['Wacana Liburan', 'Ghibah', 'Kerjaan', 'Stiker Random'] : ['Cancelled Vacations', 'Gossiping', 'Work Complaining', 'Random Stickers'],

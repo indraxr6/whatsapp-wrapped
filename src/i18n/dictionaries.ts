@@ -179,6 +179,7 @@ export const dictionaries = {
     "calls.longest": "Longest Call",
     "calls.longestVoice": "Longest Voice",
     "calls.longestVideo": "Longest Video",
+    "calls.lastCall": "Last Call",
     "calls.initiated": "Calls",
     "calls.missed": "Missed/Unanswered",
     "calls.guess": "No data",
@@ -197,6 +198,8 @@ export const dictionaries = {
     "mirrored.title": "_ MIRRORED PHRASES",
     "mirrored.desc": "Phrases you both use a lot.",
     "mirrored.desc.plural": "Phrases everyone uses a lot.",
+    "mirrored.pingTitle": "Ping Counter",
+    "mirrored.pingDesc": "Total times someone typed \"P\" or \"ppp\" to ping the chat.",
 
     "excerpts.title": "_ TIMECODE EXCERPTS",
     "excerpts.early": "Early Days",
@@ -211,13 +214,13 @@ export const dictionaries = {
     "spotify.type.album": "Album",
     "spotify.type.playlist": "Playlist",
 
-    "roast.title": "_ AI ROAST",
+    "roast.title": "_ AI CHAT INSIGHT",
 
     // AI Failure & Group state
     "ai.genericInsight": "Generic Insight",
     "ai.retry": "Retry AI",
     "ai.retry_soft": "Try Real AI again",
-    "ai.retryRoast": "Retry AI for real roast",
+    "ai.retryRoast": "Retry AI for real insight",
 
     "time.morning": "AM",
     "time.afternoon": "PM",
@@ -431,8 +434,9 @@ export const dictionaries = {
     "calls.durationVoice": "Durasi Suara",
     "calls.durationVideo": "Durasi Video",
     "calls.longest": "Panggilan Terlama",
-    "calls.longestVoice": "Suara Terlama",
-    "calls.longestVideo": "Video Terlama",
+    "calls.longestVoice": "Telp Suara Terlama",
+    "calls.longestVideo": "Video Call Terlama",
+    "calls.lastCall": "Panggilan Terakhir",
     "calls.initiated": "Panggilan",
     "calls.missed": "Tak Terjawab/Ditolak",
     "calls.guess": "Tidak ada data",
@@ -451,6 +455,8 @@ export const dictionaries = {
     "mirrored.title": "_ FRASA SAMA",
     "mirrored.desc": "Kata-kata yang sering kalian pakai berdua.",
     "mirrored.desc.plural": "Kata-kata yang sering diucapkan di grup.",
+    "mirrored.pingTitle": "Ping Counter",
+    "mirrored.pingDesc": "Total seseorang ngirim \"P\" atau \"ppp\" buat nge-ping.",
 
     "excerpts.title": "_ CUPLIKAN WAKTU",
     "excerpts.early": "Awal Mula",
@@ -465,13 +471,13 @@ export const dictionaries = {
     "spotify.type.album": "Album",
     "spotify.type.playlist": "Daftar Putar",
 
-    "roast.title": "_ AI ROAST",
+    "roast.title": "_ AI CHAT INSIGHT",
 
     // AI Failure & Group state
     "ai.genericInsight": "Analisis Biasa",
     "ai.retry": "Coba Lagi AI",
     "ai.retry_soft": "Coba AI Asli",
-    "ai.retryRoast": "Coba AI untuk roast asli",
+    "ai.retryRoast": "Coba ulang AI untuk insight asli",
 
     "time.morning": "Pagi",
     "time.afternoon": "Siang",
