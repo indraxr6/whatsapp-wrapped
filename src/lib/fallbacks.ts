@@ -225,14 +225,6 @@ function getPingFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseH
 // Flavor 4: Base/Generic (Fallback of Fallbacks)
 // ──────────────────────────────────────────────
 function getBaseFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseHash: number): string[] {
-  const participants = metrics.participants;
-  const p1 = participants[0];
-  const p2 = participants[1] ?? p1;
-  const p1Pct = Math.round((metrics.messagesPerSender[p1] / metrics.totalMessages) * 100);
-  const p2Pct = 100 - p1Pct;
-  const bigTexter = p1Pct >= p2Pct ? p1 : p2;
-  const quietOne = p1Pct >= p2Pct ? p2 : p1;
-
   if (metrics.participants.length > 2) {
     const id = [
       "Grup ini kayaknya selalu ada bahan, entah sekadar lempar meme atau bahas sesuatu yang serius.",
