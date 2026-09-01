@@ -18,6 +18,7 @@ import {
   Music2Icon,
   RadioIcon,
   Briefcase,
+  Film,
 } from 'lucide-react';
 
 interface Props {
@@ -41,10 +42,17 @@ const ICONS: Record<string, React.ElementType> = {
   'Google Drive': HardDrive,
   'GitHub': Code,
   'Google Meet': Video,
+  'Zoom': Video,
+  'Microsoft Teams': Video,
   'Facebook': Users,
+  'Letterboxd': Film,
   'Tokopedia': ShoppingCart,
   'Shopee': ShoppingCart,
   'TikTok Shop': ShoppingCart,
+  'Lazada': ShoppingCart,
+  'Amazon': ShoppingCart,
+  'Bukalapak': ShoppingCart,
+  'Blibli': ShoppingCart,
   'LinkedIn': Briefcase,
   'Other Links': Link2,
 };

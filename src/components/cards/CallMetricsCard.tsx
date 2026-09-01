@@ -1,4 +1,4 @@
-import { Phone, PhoneMissed, Clock, Edit3, Trash2, Video } from 'lucide-react';
+import { Phone, PhoneMissed, Clock, Edit3, Trash2, Video, Calendar } from 'lucide-react';
 import type { ParsedChatMetrics } from '../../types/chat';
 
 interface Props {
@@ -20,7 +20,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
   const { t } = useLanguage();
-  const { participants, callsInitiated, callsMissed, totalCallDurationSeconds, totalVideoCallDurationSeconds, longestVoiceCallSeconds, longestVideoCallSeconds, viewOnceCount, editedMessageCount, deletedMessageCount } = metrics;
+  const { participants, callsInitiated, callsMissed, totalCallDurationSeconds, totalVideoCallDurationSeconds, longestVoiceCallSeconds, longestVideoCallSeconds, viewOnceCount, editedMessageCount, deletedMessageCount, lastCallTimestamp } = metrics;
 
   const totalCalls = Object.values(callsInitiated).reduce((a, b) => a + b, 0);
   const totalViewOnce = Object.values(viewOnceCount).reduce((a, b) => a + b, 0);
@@ -36,6 +36,10 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
 
   const sumVoiceDuration = Object.values(totalCallDurationSeconds).reduce((a, b) => a + b, 0);
   const sumVideoDuration = Object.values(totalVideoCallDurationSeconds || {}).reduce((a, b) => a + b, 0);
+
+  const formattedLastCall = lastCallTimestamp 
+    ? new Date(lastCallTimestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : null;
 
   return (
     <div className="p-6 h-full flex flex-col bg-accent-blue/10">
@@ -94,6 +98,15 @@ export default function CallMetricsCard({ metrics, chatMode = 'dm' }: Props) {
             </p>
           </div>
         )} */}
+        {formattedLastCall && (
+          <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
+            <Calendar className="mb-2 text-accent-purple" size={24} strokeWidth={2.5} />
+            <p className="font-mono text-xs uppercase text-gray-500">{t('calls.lastCall')}</p>
+            <p className="font-black text-xl flex-grow flex items-center justify-center">
+              {formattedLastCall}
+            </p>
+          </div>
+        )}
         {totalEdited > 0 && (
           <div className="bg-white border-2 border-black shadow-nb p-3 flex flex-col items-center text-center">
             <Edit3 className="mb-2 text-accent-yellow" size={24} strokeWidth={2.5} />
