@@ -54,6 +54,9 @@ export interface ParsedChatMetrics {
   recentSpotifyLinks: string[];
   activeChatDays: number;
   mirroredPhrases: { phrase: string; count: number }[];
+  movieLinksCount: number;
+  workLinksCount: number;
+  pingCount: Record<string, number>;
 
   // Media
   mediaCounts: Record<string, number>;
@@ -62,6 +65,7 @@ export interface ParsedChatMetrics {
   deletedMessageCount: Record<string, number>;
 
   // Calls & Extras
+  lastCallTimestamp?: Date;
   callsInitiated: Record<string, number>;
   callsMissed: Record<string, number>;
   totalCallDurationSeconds: Record<string, number>;
@@ -96,6 +100,7 @@ export interface ParsedChatMetrics {
     late: EraMetrics;
   };
   topKeywords: { word: string; count: number }[];
+  detectedTopics: string[];
 
   // Chat span & pace
   chatDurationDays: number;
@@ -113,7 +118,7 @@ export interface ParsedChatMetrics {
 // V2 Gemini schema - simplified single-paragraph approach
 export interface GeminiInsights {
   personality_summary: string; // 4-5 sentences merged: archetype + vibe + power balance
-  roast: string;               // 1-2 sentences
+  chat_insight: string;        // 1-2 sentences
   topics: string[];            // 3-6 topics detected
   evolution_note: string;      // 1 sentence on how the dynamic changed over time
 }

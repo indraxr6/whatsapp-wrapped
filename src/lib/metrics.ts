@@ -1,11 +1,7 @@
 import type { ChatMessage, EmojiCount, MediaType, MonthlyCount, ParsedChatMetrics, EraMetrics } from '../types/chat';
 
-const STOP_WORDS = new Set([
-  'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at', 'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she', 'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what', 'so', 'up', 'out', 'if', 'about', 'who', 'get', 'which', 'go', 'me', 'when', 'make', 'can', 'like', 'time', 'no', 'just', 'him', 'know', 'take', 'people', 'into', 'year', 'your', 'good', 'some', 'could', 'them', 'see', 'other', 'than', 'then', 'now', 'look', 'only', 'come', 'its', 'over', 'think', 'also', 'back', 'after', 'use', 'two', 'how', 'our', 'work', 'first', 'well', 'way', 'even', 'new', 'want', 'because', 'any', 'these', 'give', 'day', 'most', 'us',
-  'yang', 'di', 'ke', 'dari', 'dan', 'dengan', 'itu', 'ini', 'untuk', 'pada', 'dalam', 'aku', 'saya', 'kamu', 'dia', 'kita', 'kami', 'mereka', 'bisa', 'ada', 'tidak', 'ya', 'gak', 'ga', 'gk', 'aja', 'sih', 'deh', 'udah', 'dah', 'belum', 'lagi', 'kok', 'banget', 'bgt', 'juga', 'jg', 'kalau', 'kalo', 'kl', 'kayak', 'kyk', 'kan', 'dong', 'punya', 'buat', 'sama', 'sm', 'terus', 'trs', 'nanti', 'ntar', 'sekarang', 'skrg', 'tapi', 'tp', 'atau', 'tau', 'tahu', 'mau', 'enggak', 'nggak', 'ngga', 'biar', 'jadi', 'jd', 'pas', 'lah', 'loh', 'lho', 'tuh', 'nih', 'mah',
-  'wae', 'ae', 'iki', 'iku', 'kuwi', 'kui', 'sing', 'wis', 'wes', 'durung', 'ora', 'ra', 'iso', 'isa', 'arep', 'meh', 'neng', 'ning', 'karo', 'lan', 'nang', 'kanggo', 'kang', 'dadi', 'kowe', 'koe', 'awakmu', 'kulo', 'dalem', 'njenengan', 'panjenengan', 'menyang', 'saka', 'saking',
-  'omitted', 'media', 'https'
-]);
+import { detectTopics } from './topics';
+import { ALL_STOPWORDS } from './stopwords';
 
 const OVERNIGHT_GAP_MINUTES = 360; // 6 hours - gaps larger than this are excluded from avg latency
 
@@ -98,12 +94,12 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
 
   // Fallback 1: Find the iOS encryption notice sender (iOS attributes system messages to the group name)
   if (!groupName) {
-    const encryptionMsg = realMessages.find(m => 
-      m.isSystem && 
-      m.sender !== 'System' && 
+    const encryptionMsg = realMessages.find(m =>
+      m.isSystem &&
+      m.sender !== 'System' &&
       (m.content.toLowerCase().includes('end-to-end') || m.content.toLowerCase().includes('dienkripsi'))
     );
-    
+
     // Safety check: ensure it's not a DM by verifying this sender has very few "real" messages.
     // In a DM, Alice sends the encryption message but also thousands of real messages.
     // In a Group, the Group Name sends the encryption message and < 50 real messages (unrecognized system messages).
@@ -114,50 +110,18 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
           realMessageCount++;
         }
       }
-      
+
       if (realMessageCount < 50) {
         groupName = encryptionMsg.sender;
       }
     }
   }
 
-  // Fallback 2: The dominant system sender with low real messages
-  if (!groupName) {
-    const systemCounts: Record<string, number> = {};
-    const realCounts: Record<string, number> = {};
-    
-    for (const m of realMessages) {
-      if (m.isSystem && m.sender !== 'System') {
-        systemCounts[m.sender] = (systemCounts[m.sender] ?? 0) + 1;
-      } else if (!m.isSystem) {
-        realCounts[m.sender] = (realCounts[m.sender] ?? 0) + 1;
-      }
-    }
-    
-    const possibleGroupNames = Object.keys(systemCounts).filter(s => (realCounts[s] ?? 0) < 50);
-    const sorted = possibleGroupNames.sort((a, b) => systemCounts[b] - systemCounts[a]);
-    
-    if (sorted.length > 0) {
-      groupName = sorted[0];
-    }
-  }
-
-  // Fallback 3: Filename
+  // Fallback 2: Removed because it incorrectly identifies users who delete messages as the group name.
   if (!groupName && fileName) {
     const fnMatch = fileName.match(/WhatsApp Chat (?:with|-)?\s*(.+)\.txt/i);
     if (fnMatch && fnMatch[1] && fnMatch[1].trim() !== '') {
       groupName = fnMatch[1].trim();
-    }
-  }
-
-  // ── 2. Purge Group Name from Messages ──
-  // Any message sent by the detected Group Name is forcefully marked as a system message.
-  // This cleans up unrecognized system messages (like "added" or "removed") from polluting participant stats.
-  if (groupName) {
-    for (const m of realMessages) {
-      if (m.sender === groupName) {
-        m.isSystem = true;
-      }
     }
   }
 
@@ -170,7 +134,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   }
 
   const participants = Object.keys(senderNonSystemCounts).filter(p => senderNonSystemCounts[p] > 0);
-  
+
   if (!groupName && participants.length > 2) {
     groupName = 'Group Chat';
   } else if (!groupName) {
@@ -201,11 +165,17 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
 
   // ── Message counts per sender ──
   const messagesPerSender: Record<string, number> = {};
+  const pingCount: Record<string, number> = {};
   const editedMessageCount: Record<string, number> = {};
   const deletedMessageCount: Record<string, number> = {};
   for (const m of realMessages) {
     if (!m.isCall && !m.isSystem) {
       messagesPerSender[m.sender] = (messagesPerSender[m.sender] ?? 0) + 1;
+
+      // Ping Check: Match exactly "p" or "ppp", case insensitive
+      if (/^p+$/i.test(m.content.trim())) {
+        pingCount[m.sender] = (pingCount[m.sender] ?? 0) + 1;
+      }
     }
     // Note: deleted messages are system messages, so they won't count in messagesPerSender.
     // If you want them to count in messagesPerSender, remove the && !m.isSystem above.
@@ -224,10 +194,12 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   const totalVideoCallDurationSeconds: Record<string, number> = {};
   let longestVoiceCallSeconds = 0;
   let longestVideoCallSeconds = 0;
+  let lastCallTimestamp: Date | undefined;
 
   for (const m of realMessages) {
     if (m.isCall) {
       callsInitiated[m.sender] = (callsInitiated[m.sender] ?? 0) + 1;
+      lastCallTimestamp = m.timestamp;
 
       if (m.callOutcome === 'missed' || m.callOutcome === 'no-answer') {
         callsMissed[m.sender] = (callsMissed[m.sender] ?? 0) + 1;
@@ -282,16 +254,25 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     'Google Slides': 0,
     'Google Drive': 0,
     'Google Meet': 0,
+    'Zoom': 0,
+    'Microsoft Teams': 0,
     'GitHub': 0,
     'Facebook': 0,
     'Tokopedia': 0,
     'Shopee': 0,
     'TikTok Shop': 0,
+    'Lazada': 0,
+    'Amazon': 0,
+    'Bukalapak': 0,
+    'Blibli': 0,
     'LinkedIn': 0,
+    'Letterboxd': 0,
     'Other Links': 0,
   };
 
   const spotifyLinks: string[] = [];
+  let movieLinksCount = 0;
+  let workLinksCount = 0;
 
   for (const m of realMessages) {
     const c = m.content.toLowerCase();
@@ -310,7 +291,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
         const url = match[0];
         const isTrackOrAlbum = url.includes('/track/') || url.includes('/album/') || url.includes('/playlist/');
         const isShortLink = url.includes('spotify.link');
-        
+
         if (!spotifyLinks.includes(url) && (isTrackOrAlbum || isShortLink)) {
           spotifyLinks.push(url);
         }
@@ -326,48 +307,91 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
       c.includes("maps.google.com") ||
       c.includes("google.com/maps") ||
       c.includes("maps.app.goo.gl")
-    )
+    ) {
       sharedLinks["Google Maps"]++;
+    }
     else if (c.includes("docs.google.com/forms")) sharedLinks["Google Forms"]++;
     else if (c.includes("docs.google.com/spreadsheets")) sharedLinks["Google Sheets"]++;
     else if (c.includes("docs.google.com/document")) sharedLinks["Google Docs"]++;
     else if (c.includes("docs.google.com/presentation")) sharedLinks["Google Slides"]++;
     else if (c.includes("drive.google.com")) sharedLinks["Google Drive"]++;
     else if (c.includes("meet.google.com")) sharedLinks["Google Meet"]++;
+    else if (c.includes("zoom.us")) sharedLinks["Zoom"]++;
+    else if (c.includes("teams.microsoft.com") || c.includes("teams.live.com")) sharedLinks["Microsoft Teams"]++;
     else if (c.includes("github.com")) sharedLinks["GitHub"]++;
     else if (c.includes("linkedin.com") || c.includes("lnkd.in")) sharedLinks["LinkedIn"]++;
     else if (c.includes("facebook.com")) sharedLinks["Facebook"]++;
-    // --- INDONESIAN E-COMMERCE SEPARATION ---
+    else if (c.includes("letterboxd.com") || c.includes("boxd.it")) sharedLinks["Letterboxd"]++;
+
+    // --- TIKTOK ---
     else if (
-      c.includes("seller-id.tokopedia.com") ||
-      c.includes("affiliate-id.tokopedia.com") ||
-      c.includes("shop.tokopedia.com") ||
-      c.includes("://tiktokshop.com")
+      c.includes("://tiktokshop.com") ||
+      c.includes("shop.tiktok.com") ||
+      c.includes("tiktok.com/t/")
     ) {
       sharedLinks["TikTok Shop"]++;
     }
     else if (c.includes("vt.tiktok.com") || c.includes("tiktok.com/")) {
       sharedLinks["TikTok"]++;
     }
+    // --- E-COMMERCE SEPARATION ---
     else if (
+      c.includes("tokopedia.com") ||
+      c.includes("tokopedia.link") ||
+      c.includes("seller.tokopedia.com") ||
+      c.includes("seller-id.tokopedia.com") ||
+      c.includes("affiliate-id.tokopedia.com") ||
+      c.includes("shop.tokopedia.com")
+    ) {
+      sharedLinks["Tokopedia"]++;
+    } else if (
       c.includes("shopee.co.id") ||
       c.includes("shp.ee") ||
       c.includes("seller.shopee.co.id") ||
       c.includes("affiliate.shopee.co.id")
     ) {
       sharedLinks["Shopee"]++;
-    }
-    else if (
-      c.includes("tokopedia.com") ||
-      c.includes("tokopedia.link") ||
-      c.includes("seller.tokopedia.com")
-    ) {
-      sharedLinks["Tokopedia"]++;
+    } else if (c.includes("lazada.co.id")) {
+      sharedLinks["Lazada"]++;
+    } else if (c.includes("amazon.com")) {
+      sharedLinks["Amazon"]++;
+    } else if (c.includes("bukalapak.com")) {
+      sharedLinks["Bukalapak"]++;
+    } else if (c.includes("blibli.com")) {
+      sharedLinks["Blibli"]++;
     }
     else if (c.includes('http://') || c.includes('https://')) {
       // Only count as "Other Links" if it's explicitly a url scheme 
       // (to avoid false positives on sentences that just happen to end in a dot then word)
       sharedLinks["Other Links"]++;
+    }
+
+    // --- BACKGROUND METRICS (Independent of sharedLinks) ---
+    if (
+      c.includes("netflix.com") ||
+      c.includes("mubi.com") || c.includes("mobi.com") ||
+      c.includes("disneyplus.com") || c.includes("hotstar.com") ||
+      c.includes("primevideo.com") || c.includes("amazon.com/primevideo") ||
+      c.includes("tv.apple.com")
+    ) {
+      movieLinksCount++;
+    }
+
+    if (
+      c.includes("docs.google.com") ||
+      c.includes("drive.google.com") ||
+      c.includes("meet.google.com") ||
+      c.includes("zoom.us") ||
+      c.includes("zoom.com") ||
+      c.includes("teams.microsoft.com") || c.includes("teams.live.com") ||
+      c.includes("figma.com") ||
+      c.includes("trello.com") ||
+      c.includes("github.com") ||
+      c.includes("gitlab.com") ||
+      c.includes("notion.so") ||
+      c.includes("slack.com")
+    ) {
+      workLinksCount++;
     }
   }
 
@@ -550,7 +574,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   for (const m of contentMessages) {
     if (m.isSystem) continue; // Skip system messages - prevents locale-unmapped strings leaking in
     const raw = m.content.trim().toLowerCase();
-    if (raw.length >= 4 && !STOP_WORDS.has(raw)) {
+    if (raw.length >= 4 && !ALL_STOPWORDS.has(raw)) {
       if (!phraseSenders[raw]) phraseSenders[raw] = new Set();
       phraseSenders[raw].add(m.sender);
     }
@@ -582,6 +606,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   };
 
   const topKeywords = computeTopKeywords(contentMessages);
+  const detectedTopics = detectTopics({ topKeywords, hourlyHeatmap, sharedLinks, ghostingInstances }, contentMessages);
 
   // ── Longest streak by day ──
   const longestStreakByDay = calculateLongestStreak(realMessages);
@@ -597,14 +622,21 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     ghostingInstances,
     groupName,
     sharedLinks,
-    recentSpotifyLinks: spotifyLinks.slice(-8),
+    recentSpotifyLinks: spotifyLinks.slice(-10),
+    mirroredPhrases,
+    activeChatDays,
+    movieLinksCount,
+    workLinksCount,
+    pingCount,
     mediaCounts,
     topEmojisPerSender,
     emojiLeaderboardPerSender,
     hourlyHeatmap,
     sampleExcerpts,
+    eraDateRanges,
     eraMetrics,
     topKeywords,
+    detectedTopics,
     longestStreakByDay,
     chatDurationDays,
     avgMessagesPerDay,
@@ -619,13 +651,11 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     totalVideoCallDurationSeconds,
     longestVoiceCallSeconds,
     longestVideoCallSeconds,
+    lastCallTimestamp,
     viewOnceCount,
     editedMessageCount,
     deletedMessageCount,
-    activeChatDays,
     stickerCount,
-    mirroredPhrases,
-    eraDateRanges,
     groupNameHistory,
     iconChangeCount,
   };
@@ -674,7 +704,7 @@ function computeTopKeywords(messages: ChatMessage[]): { word: string; count: num
 
     // Count single words
     for (const w of words) {
-      if (!STOP_WORDS.has(w)) {
+      if (!ALL_STOPWORDS.has(w)) {
         wordCount[w] = (wordCount[w] ?? 0) + 1;
       }
     }
@@ -683,7 +713,7 @@ function computeTopKeywords(messages: ChatMessage[]): { word: string; count: num
     for (let i = 0; i < words.length - 1; i++) {
       const w1 = words[i];
       const w2 = words[i + 1];
-      if (!STOP_WORDS.has(w1) && !STOP_WORDS.has(w2)) {
+      if (!ALL_STOPWORDS.has(w1) && !ALL_STOPWORDS.has(w2)) {
         const bigram = `${w1} ${w2}`;
         bigramCount[bigram] = (bigramCount[bigram] ?? 0) + 1;
       }
