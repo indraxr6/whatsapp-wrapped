@@ -15,7 +15,7 @@ import SharedLinksCard from './cards/SharedLinksCard';
 import SpotifyTrialCard from './cards/SpotifyTrialCard';
 import PersonalityCard from './cards/PersonalityCard';
 import TopicsCard from './cards/TopicsCard';
-import RoastCard from './cards/RoastCard';
+import InsightCard from './cards/InsightCard';
 import MirroredPhrasesCard from './cards/MirroredPhrasesCard';
 import ExcerptsCard from './cards/ExcerptsCard';
 import Footer from './Footer';
@@ -182,11 +182,11 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
         {/* Section: Patterns */}
         <motion.div initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
           <h2 className="font-mono text-sm uppercase tracking-widest mb-4">_ {t('section.patterns')}</h2>
-          <div className={`grid grid-cols-1 ${metrics.mirroredPhrases.length > 0 ? 'lg:grid-cols-3' : ''} gap-0 border-2 border-black`}>
-            <div className={`${metrics.mirroredPhrases.length > 0 ? 'lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2' : ''} border-black`}>
+          <div className={`grid grid-cols-1 ${metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some(v => v > 0) ? 'lg:grid-cols-3' : ''} gap-0 border-2 border-black`}>
+            <div className={`${metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some(v => v > 0) ? 'lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2' : ''} border-black`}>
               <WordCloudCard metrics={metrics} />
             </div>
-            {metrics.mirroredPhrases.length > 0 && (
+            {(metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some(v => v > 0)) && (
               <div>
                 <MirroredPhrasesCard metrics={metrics} />
               </div>
@@ -225,7 +225,7 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
               />
             </div>
             <div>
-              <RoastCard
+              <InsightCard
                 insights={insights}
                 metrics={metrics}
                 insightStatus={insightStatus}
@@ -233,9 +233,9 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
               />
             </div>
           </div>
-          {(insights.topics?.length || insights.evolution_note) ? (
+          {(metrics.detectedTopics?.length || insights.evolution_note) ? (
             <div className="border-2 border-t-0 border-black">
-              <TopicsCard insights={insights} />
+              <TopicsCard metrics={metrics} evolutionNote={insights.evolution_note} />
             </div>
           ) : null}
           <div className="border-2 border-t-0 border-black">

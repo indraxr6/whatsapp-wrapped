@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import type { GeminiInsights, ParsedChatMetrics } from '../../types/chat';
-import { generateNewRoast } from '../../lib/gemini';
+import { generateNewInsight } from '../../lib/gemini';
+import { getOfflineInsightCount } from '../../lib/fallbacks';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 interface Props {
@@ -11,38 +12,54 @@ interface Props {
   onRetry?: () => void;
 }
 
-const MAX_REGENERATIONS = 3; // 3 more after the initial = 4 total roasts
-
-export default function RoastCard({ insights, metrics, insightStatus = 'success', onRetry }: Props) {
-  const { t } = useLanguage();
-  const [roasts, setRoasts] = useState<string[]>([insights.roast]);
+export default function InsightCard({ insights, metrics, insightStatus = 'success', onRetry }: Props) {
+  const { t, language } = useLanguage();
+  const [insightList, setInsightList] = useState<string[]>([insights.chat_insight]);
+  const [exhausted, setExhausted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [regenerationsUsed, setRegenerationsUsed] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canGoBack = currentIndex > 0;
-  const canGoForward = currentIndex < roasts.length - 1;
-  const canRoastMore = regenerationsUsed < MAX_REGENERATIONS && currentIndex === roasts.length - 1;
-  const capReached = regenerationsUsed >= MAX_REGENERATIONS;
+  const isOffline = insightStatus !== 'success';
+  const maxRegenerations = isOffline 
+    ? Math.min(9, Math.max(0, getOfflineInsightCount(metrics, language) - 1)) 
+    : 3;
 
-  const handleRoastMore = async () => {
-    if (!canRoastMore || loading) return;
+  const canGoBack = currentIndex > 0;
+  const canGoForward = currentIndex < insightList.length - 1;
+  const canLoadMore = regenerationsUsed < maxRegenerations && currentIndex === insightList.length - 1 && !exhausted;
+  const capReached = regenerationsUsed >= maxRegenerations || exhausted;
+
+  const handleLoadMore = async () => {
+    if (!canLoadMore || loading) return;
     setError(null);
     setLoading(true);
     try {
-      const apiKey = localStorage.getItem('gemini_api_key') ?? '';
-      if (!apiKey) {
-        setError('No API key set - set your Gemini key to generate more roasts.');
-        setLoading(false);
+      let newInsight: string | null = '';
+      if (!isOffline) {
+        const apiKey = localStorage.getItem('gemini_api_key') ?? '';
+        if (!apiKey) {
+          setError('No API key set - set your Gemini key to generate more insights.');
+          setLoading(false);
+          return;
+        }
+        newInsight = await generateNewInsight(apiKey, metrics, insightList, language);
+      } else {
+        // Offline generation happens instantly
+        newInsight = await generateNewInsight('', metrics, insightList, language, true);
+      }
+      
+      if (!newInsight) {
+        setExhausted(true);
         return;
       }
-      const newRoast = await generateNewRoast(apiKey, metrics, roasts);
-      setRoasts((prev) => [...prev, newRoast]);
+
+      setInsightList((prev) => [...prev, newInsight as string]);
       setCurrentIndex((prev) => prev + 1);
       setRegenerationsUsed((prev) => prev + 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate roast.');
+      setError(err instanceof Error ? err.message : 'Failed to generate insight.');
     } finally {
       setLoading(false);
     }
@@ -52,7 +69,7 @@ export default function RoastCard({ insights, metrics, insightStatus = 'success'
     <div className="p-6 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <p className="font-mono text-xs uppercase tracking-widest text-gray-500">
-          {insightStatus !== 'success' ? 'Roast' : t('roast.title')}
+          {insightStatus !== 'success' ? 'Chat Insight' : t('roast.title')}
         </p>
         {insightStatus.startsWith('failed') && (
           <span className="font-mono text-[10px] uppercase tracking-widest bg-accent-orange text-white px-2 py-0.5 font-bold">
@@ -61,13 +78,13 @@ export default function RoastCard({ insights, metrics, insightStatus = 'success'
         )}
       </div>
 
-      {/* Roast text */}
+      {/* Insight text */}
       <div className="flex-1 border-2 border-black p-4 bg-accent-yellow mb-4 min-h-[120px] flex items-center">
         <p className="text-base font-semibold leading-relaxed">
           {loading ? (
-            <span className="font-mono text-sm text-gray-600">generating next roast...</span>
+            <span className="font-mono text-sm text-gray-600">generating next insight...</span>
           ) : (
-            roasts[currentIndex]
+            insightList[currentIndex]
           )}
         </p>
       </div>
@@ -95,7 +112,7 @@ export default function RoastCard({ insights, metrics, insightStatus = 'success'
             <ChevronRight size={16} strokeWidth={2.5} />
           </button>
           <span className="font-mono text-xs text-gray-500 ml-2">
-            {currentIndex + 1} / {roasts.length}
+            {currentIndex + 1} / {insightList.length}
           </span>
         </div>
 
@@ -108,14 +125,14 @@ export default function RoastCard({ insights, metrics, insightStatus = 'success'
               <RefreshCw size={12} strokeWidth={2.5} />
               {t('ai.retry')}
             </button>
-          ) : !capReached && insightStatus !== 'opt_out' ? (
+          ) : !capReached ? (
             <button
-              onClick={handleRoastMore}
-              disabled={!canRoastMore || loading}
+              onClick={handleLoadMore}
+              disabled={!canLoadMore || loading}
               className={`nb-btn text-xs py-1.5 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:shadow-nb ${loading ? 'opacity-60' : ''}`}
             >
               <RefreshCw size={12} strokeWidth={2.5} className={loading ? 'animate-spin' : ''} />
-              ROAST MORE
+              MORE INSIGHT
             </button>
           ) : (
             <span className="font-mono text-xs text-gray-400">cap reached</span>
