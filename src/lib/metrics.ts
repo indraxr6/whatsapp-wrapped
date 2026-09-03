@@ -166,6 +166,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   // ── Message counts per sender ──
   const messagesPerSender: Record<string, number> = {};
   const pingCount: Record<string, number> = {};
+  const paragraphsPerSender: Record<string, number> = {};
   const editedMessageCount: Record<string, number> = {};
   const deletedMessageCount: Record<string, number> = {};
   for (const m of realMessages) {
@@ -175,6 +176,11 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
       // Ping Check: Match exactly "p" or "ppp", case insensitive
       if (/^p+$/i.test(m.content.trim())) {
         pingCount[m.sender] = (pingCount[m.sender] ?? 0) + 1;
+      }
+      
+      // Monologue / Paragraph Check
+      if (m.content.length > 300 || m.content.split('\n').length >= 4) {
+        paragraphsPerSender[m.sender] = (paragraphsPerSender[m.sender] ?? 0) + 1;
       }
     }
     // Note: deleted messages are system messages, so they won't count in messagesPerSender.
@@ -628,6 +634,7 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     movieLinksCount,
     workLinksCount,
     pingCount,
+    paragraphsPerSender,
     mediaCounts,
     topEmojisPerSender,
     emojiLeaderboardPerSender,

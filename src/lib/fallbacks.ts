@@ -204,7 +204,7 @@ function getPingFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseH
 
   if (topPingCount > 5) {
     const id = [
-      `${topPinger}, kebiasaan kirim 'P' coba bisa dikurangi? Ada yang namanya 'salam' untuk membuka percakapan dengan baik`,
+      `${topPinger}, kebiasaan kirim 'P' coba bisa dikurangi? Ada yang namanya konsep 'salam' untuk membuka percakapan dengan baik`,
       `Tercatat ada ${topPingCount} kali ${topPinger} manggil pakai 'P'. 'Halo & hai dah nggak jaman ya?'`,
       `Budaya nge-ping pakai 'P' di chat ini didominasi oleh ${topPinger}. Sangat klasik, walaupun mulai ngeselin.`,
       `Ketikan 'P' dari ${topPinger} sepertinya udah jadi bel rumah di chat ini. Gak ada 'P' = ga di gubris?`
@@ -260,6 +260,54 @@ function getBaseFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseH
 }
 
 // ──────────────────────────────────────────────
+// Flavor 5: Monologue (Paragraphs)
+// ──────────────────────────────────────────────
+function getMonologueFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseHash: number): string[] {
+  let topMonologuer = '';
+  let maxParagraphs = 0;
+
+  for (const [sender, count] of Object.entries(metrics.paragraphsPerSender || {})) {
+    if (count > maxParagraphs) {
+      maxParagraphs = count;
+      topMonologuer = sender;
+    }
+  }
+
+  if (maxParagraphs > 10) {
+    const id = [
+      `${topMonologuer} suka banget ngetik panjang lebar kayak lagi bikin novel. Tercatat ada ${maxParagraphs} paragraf panjang.`,
+      `Kayaknya ${topMonologuer} cocok jadi penulis atau podcaster, sering banget monolog panjang lebar di chat ini.`
+    ];
+    const en = [
+      `${topMonologuer} loves dropping massive paragraphs like they're writing a novel. Logged ${maxParagraphs} long messages.`,
+      `Looks like ${topMonologuer} should start a podcast or write a book with the amount of long monologues they drop here.`
+    ];
+    const pool = language === 'id' ? id : en;
+    return [pool[baseHash % pool.length]];
+  }
+  return [];
+}
+
+// ──────────────────────────────────────────────
+// Flavor 6: Group Rename
+// ──────────────────────────────────────────────
+function getGroupRenameFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseHash: number): string[] {
+  if (metrics.participants.length > 2 && metrics.groupNameHistory.length > 15) {
+    const id = [
+      `Grup ini krisis identitas parah, udah ganti nama ${metrics.groupNameHistory.length} kali!`,
+      `Tercatat ganti nama ${metrics.groupNameHistory.length} kali. Bener-bener labil atau emang hobinya ganti konsep tiap minggu?`
+    ];
+    const en = [
+      `This group has a severe identity crisis, having been renamed ${metrics.groupNameHistory.length} times!`,
+      `Renamed ${metrics.groupNameHistory.length} times. Is the group just unstable, or do you guys just love rebranding every week?`
+    ];
+    const pool = language === 'id' ? id : en;
+    return [pool[baseHash % pool.length]];
+  }
+  return [];
+}
+
+// ──────────────────────────────────────────────
 // Main Fallback Generator
 // ──────────────────────────────────────────────
 export function getOfflineInsightCount(
@@ -271,7 +319,9 @@ export function getOfflineInsightCount(
     ...getLinkFlavors(metrics, language, baseHash),
     ...getGhostFlavors(metrics, language, baseHash),
     ...getPingFlavors(metrics, language, baseHash),
-    ...getBaseFlavors(metrics, language, baseHash)
+    ...getBaseFlavors(metrics, language, baseHash),
+    ...getMonologueFlavors(metrics, language, baseHash),
+    ...getGroupRenameFlavors(metrics, language, baseHash)
   ].length;
 }
 
@@ -288,7 +338,9 @@ export function generateOfflineInsights(
     ...getLinkFlavors(metrics, language, baseHash),
     ...getGhostFlavors(metrics, language, baseHash),
     ...getPingFlavors(metrics, language, baseHash),
-    ...getBaseFlavors(metrics, language, baseHash)
+    ...getBaseFlavors(metrics, language, baseHash),
+    ...getMonologueFlavors(metrics, language, baseHash),
+    ...getGroupRenameFlavors(metrics, language, baseHash)
   ];
 
   // Remove already seen insights
@@ -311,7 +363,6 @@ export function generateOfflineInsights(
   const quickReplier = (metrics.avgResponseTimeMinutes[p1] ?? 999) <= (metrics.avgResponseTimeMinutes[p2] ?? 999) ? p1 : p2;
   const ghostCount = Object.values(metrics.ghostingInstances).reduce((a, b) => a + b, 0);
   const streak = metrics.longestStreakByDay ?? 0;
-
   let summary_en = '';
   let summary_id = '';
   let evo_en = '';
@@ -334,27 +385,58 @@ export function generateOfflineInsights(
       `Ekosistem keributan: ${p1} menyumbang ${p1Pct}% konten, sisanya cuma bereaksi. Eksperimen sosial yang menarik.`,
       `Dengan ${totalMsg.toLocaleString()} pesan, grup ini punya nyawanya sendiri. ${streak > 10 ? `Kalian bahkan sempat chatting tanpa henti selama ${streak} hari berturut-turut.` : `Grup ini ramai di waktu-waktu tak terduga.`} ${p1} tetap jadi biang kerok utama dengan porsi ${p1Pct}%.`
     ];
-    const evos_en = [
-      `Over time, your group evolved from polite discussions to an unfiltered stream of out-of-context stickers.`,
-      `What started as a normal group chat has degraded into a chaotic echo chamber.`,
-      `The tone shifted from casual updates to a relentless daily newsfeed of your lives.`,
-      `Your communication devolved into pure brain-rot and inside jokes.`,
-      `The group gradually became a safe haven for oversharing and unhinged opinions.`,
-      `It started tame, but quickly escalated into a 24/7 digital circus.`
-    ];
-    const evos_id = [
-      `Seiring waktu, grup kalian berubah dari obrolan formal menjadi kumpulan stiker tanpa konteks.`,
-      `Berawal dari grup biasa, sekarang berubah jadi tempat nongkrong virtual yang super bising.`,
-      `Transisi dari sapaan basa-basi menjadi laporan harian hidup kalian yang nggak diminta.`,
-      `Gaya komunikasi makin ke sini makin dipenuhi meme dan joke internal yang cuma kalian yang paham.`,
-      `Grup ini perlahan jadi tempat aman buat curhat colongan dan opini random.`,
-      `Awalnya kalem, tapi dengan cepat berubah jadi sirkus digital 24 jam.`
-    ];
+    const applicableEvos = [];
+    const stickerCount = metrics.mediaCounts["sticker"] || 0;
+    
+    if (stickerCount > 250) {
+      applicableEvos.push({
+        en: `Over time, your group evolved from polite discussions to an unfiltered stream of out-of-context stickers.`,
+        id: `Seiring waktu, grup kalian berubah dari obrolan formal menjadi kumpulan stiker tanpa konteks.`
+      });
+    }
+    
+    if (metrics.groupNameHistory.length > 15) {
+      applicableEvos.push({
+        en: `This group has an identity crisis, having been renamed ${metrics.groupNameHistory.length} times.`,
+        id: `Grup ini krisis identitas, tercatat sudah ganti nama ${metrics.groupNameHistory.length} kali.`
+      });
+    }
+    
+    if (metrics.mirroredPhrases.length > 5) {
+      applicableEvos.push({
+        en: `What started as a normal group chat has degraded into a chaotic echo chamber.`,
+        id: `Berawal dari grup biasa, sekarang berubah jadi tempat nongkrong virtual yang super bising.`
+      });
+    }
+
+    if (metrics.avgMessagesPerDay > 50) {
+      applicableEvos.push({
+        en: `The tone shifted from casual updates to a relentless daily newsfeed of your lives.`,
+        id: `Transisi dari sapaan basa-basi menjadi laporan harian hidup kalian yang nggak diminta.`
+      });
+    }
+    
+    // Always provide fallbacks
+    applicableEvos.push({
+      en: `Your communication devolved into pure brain-rot and inside jokes.`,
+      id: `Gaya komunikasi makin ke sini makin dipenuhi meme dan joke internal yang cuma kalian yang paham.`
+    });
+    applicableEvos.push({
+      en: `The group gradually became a safe haven for oversharing and unhinged opinions.`,
+      id: `Grup ini perlahan jadi tempat aman buat curhat colongan dan opini random.`
+    });
+    applicableEvos.push({
+      en: `It started tame, but quickly escalated into a 24/7 digital circus.`,
+      id: `Awalnya kalem, tapi dengan cepat berubah jadi sirkus digital 24 jam.`
+    });
+    
+    const pickedEvo = applicableEvos[hash % applicableEvos.length];
+    evo_en = pickedEvo.en;
+    evo_id = pickedEvo.id;
+
     const v_evo = hash % 6;
     summary_en = summaries_en[v_evo];
     summary_id = summaries_id[v_evo];
-    evo_en = evos_en[v_evo];
-    evo_id = evos_id[v_evo];
   } else {
     const summaries_en = [
       `This chat is a study in contrast: ${bigTexter} sends ${p1Pct >= p2Pct ? p1Pct : p2Pct}% of all ${totalMsg.toLocaleString()} messages, while ${quietOne} operates at a more measured pace. ${quickReplier} is the faster responder - always having their phone in hand. ${ghostCount > 0 ? `There were ${ghostCount} instances of someone going radio-silent for hours.` : `Notably, neither person is a serial ghoster.`} Together you've built a reliably chaotic dynamic.`,
@@ -372,27 +454,54 @@ export function generateOfflineInsights(
       `Butuh dua orang untuk ngobrol, tapi ${bigTexter} mengambil alih panggung utama (${p1Pct >= p2Pct ? p1Pct : p2Pct}% pesan). ${quickReplier} selalu sigap membalas.`,
       `${streak > 10 ? `Kalian punya rekor gila: ngobrol ${streak} hari berturut-turut tanpa jeda sehari pun.` : `Kalian ngobrol secara sporadis namun intens.`} ${bigTexter} jadi motor penggerak (${p1Pct >= p2Pct ? p1Pct : p2Pct}% pesan), sedangkan ${quickReplier} jadi seksi sibuk yang selalu fast-response. Bener-bener saling melengkapi.`
     ];
-    const evos_en = [
-      `Over time, your conversation evolved from polite check-ins to an unfiltered stream of consciousness.`,
-      `The dynamic shifted from distant acquaintances to entirely too comfortable with each other.`,
-      `What was once a casual chat became a high-speed daily necessity.`,
-      `Your communication lost all its formal boundaries and descended into comfortable chaos.`,
-      `You went from carefully constructed sentences to rapid-fire single-word texts.`,
-      `The chat evolved into a comfortable silence interspersed with frantic bursts of updates.`
-    ];
-    const evos_id = [
-      `Seiring waktu, percakapan kalian berubah dari sapaan sopan menjadi obrolan ngalor-ngidul tanpa filter.`,
-      `Dinamika bergeser dari sekadar kenalan jauh menjadi terlalu nyaman satu sama lain.`,
-      `Berawal dari chat biasa, sekarang jadi kebutuhan primer yang harus diisi tiap hari.`,
-      `Gaya bahasa kalian kehilangan batas formalnya dan berubah jadi kekacauan yang nyaman.`,
-      `Dari yang awalnya ngetik rapi, sekarang jadi balasan sepotong-sepotong super cepat.`,
-      `Chat ini berevolusi jadi tempat curhat dadakan yang diselingi masa-masa tenang panjang.`
-    ];
+    const applicableEvos = [];
+    const stickerCount = metrics.mediaCounts["sticker"] || 0;
+    
+    if (stickerCount > 250) {
+      applicableEvos.push({
+        en: `Over time, your conversation evolved from polite check-ins to an unfiltered stream of stickers.`,
+        id: `Seiring waktu, percakapan kalian berubah dari sapaan sopan menjadi kumpulan stiker tanpa konteks.`
+      });
+    }
+
+    if (metrics.avgMessagesPerDay > 50) {
+      applicableEvos.push({
+        en: `What was once a casual chat became a high-speed daily necessity.`,
+        id: `Berawal dari chat biasa, sekarang jadi kebutuhan primer yang harus diisi tiap hari.`
+      });
+      applicableEvos.push({
+        en: `You went from carefully constructed sentences to rapid-fire single-word texts.`,
+        id: `Dari yang awalnya ngetik rapi, sekarang jadi balasan sepotong-sepotong super cepat.`
+      });
+    }
+
+    if (ghostCount > 5) {
+      applicableEvos.push({
+        en: `The chat evolved into a comfortable silence interspersed with frantic bursts of updates.`,
+        id: `Chat ini berevolusi jadi tempat curhat dadakan yang diselingi masa-masa tenang panjang.`
+      });
+    }
+    
+    applicableEvos.push({
+      en: `The dynamic shifted from distant acquaintances to entirely too comfortable with each other.`,
+      id: `Dinamika bergeser dari sekadar kenalan jauh menjadi terlalu nyaman satu sama lain.`
+    });
+    applicableEvos.push({
+      en: `Your communication lost all its formal boundaries and descended into comfortable chaos.`,
+      id: `Gaya bahasa kalian kehilangan batas formalnya dan berubah jadi kekacauan yang terstruktur.`
+    });
+    applicableEvos.push({
+      en: `Over time, your conversation evolved from polite check-ins to an unfiltered stream of consciousness.`,
+      id: `Seiring waktu, percakapan kalian berubah dari sapaan sopan menjadi obrolan ngalor-ngidul tanpa filter.`
+    });
+
+    const pickedEvo = applicableEvos[hash % applicableEvos.length];
+    evo_en = pickedEvo.en;
+    evo_id = pickedEvo.id;
+
     const v_evo = hash % 6;
     summary_en = summaries_en[v_evo];
     summary_id = summaries_id[v_evo];
-    evo_en = evos_en[v_evo];
-    evo_id = evos_id[v_evo];
   }
 
   const summary = language === 'id' ? summary_id : summary_en;

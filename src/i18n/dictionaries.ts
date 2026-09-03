@@ -177,8 +177,8 @@ export const dictionaries = {
     "calls.durationVoice": "Voice Duration",
     "calls.durationVideo": "Video Duration",
     "calls.longest": "Longest Call",
-    "calls.longestVoice": "Longest Voice",
-    "calls.longestVideo": "Longest Video",
+    "calls.longestVoice": "Longest Voice Call",
+    "calls.longestVideo": "Longest Video Call",
     "calls.lastCall": "Last Call",
     "calls.initiated": "Calls",
     "calls.missed": "Missed/Unanswered",
@@ -198,8 +198,8 @@ export const dictionaries = {
     "mirrored.title": "_ MIRRORED PHRASES",
     "mirrored.desc": "Phrases you both use a lot.",
     "mirrored.desc.plural": "Phrases everyone uses a lot.",
-    "mirrored.pingTitle": "Ping Counter",
-    "mirrored.pingDesc": "Total times someone typed \"P\" or \"ppp\" to ping the chat.",
+    "mirrored.pingTitle": "_ PING COUNTER",
+    "mirrored.pingDesc": "Total times someone typed something like \"P\" or \"ppp\" to ping the chat.",
 
     "excerpts.title": "_ TIMECODE EXCERPTS",
     "excerpts.early": "Early Days",
@@ -214,7 +214,7 @@ export const dictionaries = {
     "spotify.type.album": "Album",
     "spotify.type.playlist": "Playlist",
 
-    "roast.title": "_ AI CHAT INSIGHT",
+    "roast.title": "_ CHAT INSIGHT",
 
     // AI Failure & Group state
     "ai.genericInsight": "Generic Insight",
@@ -455,7 +455,7 @@ export const dictionaries = {
     "mirrored.title": "_ FRASA SAMA",
     "mirrored.desc": "Kata-kata yang sering kalian pakai berdua.",
     "mirrored.desc.plural": "Kata-kata yang sering diucapkan di grup.",
-    "mirrored.pingTitle": "Ping Counter",
+    "mirrored.pingTitle": "_ PING COUNTER",
     "mirrored.pingDesc": "Total seseorang ngirim \"P\" atau \"ppp\" buat nge-ping.",
 
     "excerpts.title": "_ CUPLIKAN WAKTU",
@@ -471,7 +471,7 @@ export const dictionaries = {
     "spotify.type.album": "Album",
     "spotify.type.playlist": "Daftar Putar",
 
-    "roast.title": "_ AI CHAT INSIGHT",
+    "roast.title": "_ CHAT INSIGHT",
 
     // AI Failure & Group state
     "ai.genericInsight": "Analisis Biasa",

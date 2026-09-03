@@ -57,6 +57,7 @@ export interface ParsedChatMetrics {
   movieLinksCount: number;
   workLinksCount: number;
   pingCount: Record<string, number>;
+  paragraphsPerSender: Record<string, number>;
 
   // Media
   mediaCounts: Record<string, number>;
