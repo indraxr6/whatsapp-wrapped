@@ -61,12 +61,14 @@ export function getDemoData(mode: 'dm' | 'group', lang: 'en' | 'id'): { metrics:
       movieLinksCount: 15,
       workLinksCount: 42,
       pingCount: { [p1]: 85, [p2]: 22 },
+      paragraphsPerSender: { [p1]: 150, [p2]: 20 },
       callsInitiated: { [p1]: 35, [p2]: 22 },
       callsMissed: { [p1]: 5, [p2]: 12 },
       totalCallDurationSeconds: { [p1]: 18500, [p2]: 12400 },
       totalVideoCallDurationSeconds: { [p1]: 4500, [p2]: 1200 },
       longestVoiceCallSeconds: 4800,
       longestVideoCallSeconds: 2400,
+      lastCallTimestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
 
       stickerCount: { [p1]: 450, [p2]: 820 },
       topEmojisPerSender: {
@@ -218,6 +220,7 @@ export function getDemoData(mode: 'dm' | 'group', lang: 'en' | 'id'): { metrics:
       movieLinksCount: 120,
       workLinksCount: 340,
       pingCount: { [p1]: 420, [p2]: 150, [p3]: 80, [p4]: 5, [p5]: 0 },
+      paragraphsPerSender: { [p1]: 320, [p2]: 50, [p3]: 10, [p4]: 2, [p5]: 0 },
       callsInitiated: { [p1]: 85, [p2]: 50, [p3]: 25, [p4]: 5, [p5]: 0 },
       callsMissed: { [p1]: 10, [p2]: 15, [p3]: 20, [p4]: 50, [p5]: 120 },
       totalCallDurationSeconds: { [p1]: 185000, [p2]: 142000, [p3]: 85000, [p4]: 12000, [p5]: 0 },
