@@ -1,46 +1,63 @@
-import { useEffect } from 'react';
-import type { GeminiInsights, ParsedChatMetrics } from '../types/chat';
-import { useLanguage } from '../i18n/LanguageContext';
-import OverviewCard from './cards/OverviewCard';
-import MessageShareCard from './cards/MessageShareCard';
-import MediaCard from './cards/MediaCard';
-import CallMetricsCard from './cards/CallMetricsCard';
-import HeatmapCard from './cards/HeatmapCard';
-import WordCloudCard from './cards/WordCloudCard';
-import LatencyCard from './cards/LatencyCard';
-import GhostingCard from './cards/GhostingCard';
-import EmojiCard from './cards/EmojiCard';
-import MonthlyCard from './cards/MonthlyCard';
-import SharedLinksCard from './cards/SharedLinksCard';
-import SpotifyTrialCard from './cards/SpotifyTrialCard';
-import PersonalityCard from './cards/PersonalityCard';
-import TopicsCard from './cards/TopicsCard';
-import InsightCard from './cards/InsightCard';
-import MirroredPhrasesCard from './cards/MirroredPhrasesCard';
-import ExcerptsCard from './cards/ExcerptsCard';
-import Footer from './Footer';
-import LanguageToggle from './LanguageToggle';
-import GroupHistory from './GroupHistory';
-import { motion, useReducedMotion } from 'framer-motion';
-import type { Variants } from 'framer-motion';
+import { useEffect } from "react";
+import type { GeminiInsights, ParsedChatMetrics } from "../types/chat";
+import { useLanguage } from "../i18n/LanguageContext";
+import OverviewCard from "./cards/OverviewCard";
+import MessageShareCard from "./cards/MessageShareCard";
+import MediaCard from "./cards/MediaCard";
+import CallMetricsCard from "./cards/CallMetricsCard";
+import HeatmapCard from "./cards/HeatmapCard";
+import WordCloudCard from "./cards/WordCloudCard";
+import LatencyCard from "./cards/LatencyCard";
+import GhostingCard from "./cards/GhostingCard";
+import EmojiCard from "./cards/EmojiCard";
+import MonthlyCard from "./cards/MonthlyCard";
+import SharedLinksCard from "./cards/SharedLinksCard";
+import SpotifyTrialCard from "./cards/SpotifyTrialCard";
+import PersonalityCard from "./cards/PersonalityCard";
+import TopicsCard from "./cards/TopicsCard";
+import InsightCard from "./cards/InsightCard";
+import MirroredPhrasesCard from "./cards/MirroredPhrasesCard";
+import ExcerptsCard from "./cards/ExcerptsCard";
+import Footer from "./Footer";
+import LanguageToggle from "./LanguageToggle";
+import GroupHistory from "./GroupHistory";
+import { motion, useReducedMotion } from "framer-motion";
+import type { Variants } from "framer-motion";
+
+import { ExportProvider, useExportContext } from "../contexts/ExportContext";
+import ExportMenu from "./export/ExportMenu";
+import ExportToolbar from "./export/ExportToolbar";
+import AnimatedSection from "./export/AnimatedSection";
+import ExportableSection from "./export/ExportableSection";
+import ExportWatermark from "./export/ExportWatermark";
+import { exportDashboardToPng } from "../utils/exportUtils";
 
 interface Props {
   metrics: ParsedChatMetrics;
   insights: GeminiInsights;
-  chatMode: 'dm' | 'group';
-  insightStatus: 'success' | 'opt_out' | 'failed' | 'failed_429' | 'failed_503';
+  chatMode: "dm" | "group";
+  insightStatus: "success" | "opt_out" | "failed" | "failed_429" | "failed_503";
   onRetryAI: () => void;
   onReset: () => void;
   isDemoMode?: boolean;
 }
 
-export default function ResultsDashboard({ metrics, insights, chatMode, insightStatus, onRetryAI, onReset, isDemoMode = false }: Props) {
+function ResultsDashboardInner({
+  metrics,
+  insights,
+  chatMode,
+  insightStatus,
+  onRetryAI,
+  onReset,
+  isDemoMode = false,
+}: Props) {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const { t, language } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
+  const { isExporting, setIsExporting, setIsSelecting, clearSelection } = useExportContext();
 
   const totalLinks = Object.values(metrics.sharedLinks).reduce((a, b) => a + b, 0);
 
@@ -49,8 +66,8 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
-    }
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
   };
 
   const scrollVariants: Variants = {
@@ -58,205 +75,327 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
     onscreen: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
-    }
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
   };
 
   const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.2 }
-    }
+      transition: { staggerChildren: 0.2 },
+    },
+  };
+
+  const handleExportSelected = async () => {
+    setIsExporting(true);
+    setTimeout(async () => {
+      const dashboardNode = document.getElementById("dashboard-export-root");
+      if (dashboardNode) {
+        await exportDashboardToPng(dashboardNode, "whatsapp-wrapped-selection.png");
+      }
+      setIsExporting(false);
+      setIsSelecting(false);
+      clearSelection();
+    }, 300);
   };
 
   return (
-    <motion.div className="min-h-screen bg-canvas font-sans text-black" variants={staggerContainer} initial="hidden" animate="visible">
+    <motion.div
+      className="min-h-screen bg-canvas font-sans text-black"
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+    >
       {isDemoMode && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-canvas text-black p-3 sm:p-4 border-2 sm:border-4 border-black shadow-nb-md sm:shadow-nb-lg max-w-[200px] sm:max-w-sm flex flex-col gap-2 sm:gap-3">
+        <div
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-canvas text-black p-3 sm:p-4 border-2 sm:border-4 border-black shadow-nb-md sm:shadow-nb-lg max-w-[200px] sm:max-w-sm flex flex-col gap-2 sm:gap-3"
+          data-export-exclude="true"
+        >
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[8px] sm:text-[10px] uppercase tracking-widest bg-accent-lime text-black px-1.5 py-0.5 font-bold border-2 border-black">Demo Mode</span>
+            <span className="font-mono text-[8px] sm:text-[10px] uppercase tracking-widest bg-accent-lime text-black px-1.5 py-0.5 font-bold border-2 border-black">
+              Demo Mode
+            </span>
           </div>
           <p className="text-[9px] sm:text-sm font-semibold leading-tight">
-            {t('demo.banner_text') || 'This is a complete, fabricated dataset showcasing every possible card.'}
+            {t("demo.banner_text") ||
+              "This is a complete, fabricated dataset showcasing every possible card."}
           </p>
-          <button 
+          <button
             onClick={onReset}
             className="nb-btn w-full bg-black text-white hover:bg-accent-orange hover:text-black hover:border-black text-[10px] sm:text-sm px-2 py-1.5 sm:px-4 sm:py-2 mt-0 sm:mt-1"
           >
-            {t('demo.exit_btn') || 'Exit Demo & Upload Your Chat'}
+            {t("demo.exit_btn") || "Exit Demo & Upload Your Chat"}
           </button>
         </div>
       )}
 
       {/* Sticky header */}
-      <motion.header variants={sectionVariants} className="fixed top-0 left-0 right-0 z-50 bg-canvas border-b-2 border-black px-3 min-[415px]:px-6 py-3 min-[415px]:py-4 flex items-center justify-between">
+      <motion.header
+        variants={sectionVariants}
+        className="fixed top-0 left-0 right-0 z-50 bg-canvas border-b-2 border-black px-3 min-[415px]:px-6 py-3 min-[415px]:py-4 flex items-center justify-between"
+        data-export-exclude="true"
+      >
         <div className="flex items-center gap-2 min-[415px]:gap-3 min-w-0">
           <div className="w-7 h-7 min-[415px]:w-8 min-[415px]:h-8 border-2 border-black bg-black flex items-center justify-center shrink-0">
-            <span className="font-mono text-white text-[10px] min-[415px]:text-xs font-bold">_WA</span>
+            <span className="font-mono text-white text-[10px] min-[415px]:text-xs font-bold">
+              _WA
+            </span>
           </div>
-          <span className="font-sans font-extrabold text-sm min-[415px]:text-lg tracking-tight truncate whitespace-nowrap">{t('header.title')}</span>
+          <span className="font-sans font-extrabold text-sm min-[415px]:text-lg tracking-tight truncate whitespace-nowrap">
+            {t("header.title")}
+          </span>
         </div>
-        <div className="flex items-center gap-1 min-[415px]:gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <LanguageToggle />
-          <button onClick={onReset} className="nb-btn text-[10px] min-[415px]:text-xs py-1 min-[415px]:py-1.5 px-2 min-[415px]:px-3 ml-1 min-[415px]:ml-2 whitespace-nowrap">
-            {t('header.start_over')}
+          <button
+            onClick={onReset}
+            className="nb-btn text-[10px] min-[415px]:text-xs py-1 min-[415px]:py-1.5 px-2 min-[415px]:px-3 whitespace-nowrap hidden min-[415px]:block"
+          >
+            {t("header.start_over")}
           </button>
         </div>
       </motion.header>
 
-      {/* Hero */}
-      <motion.div variants={sectionVariants} className="border-b-2 border-black px-6 py-12 bg-white pt-24">
-        <div className="content-wrapper">
-          <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-3">{t('dashboard.hero.kicker', { count: metrics.totalMessages.toLocaleString() })}</p>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 gap-6">
-            <h1 className="text-5xl sm:text-6xl font-extrabold leading-none tracking-tight">
-              {t('dashboard.hero.title1')}<br />{t('dashboard.hero.title2')}
-            </h1>
-            <div className="text-left sm:text-right">
-              <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">
-                {chatMode === 'group' ? t('dashboard.hero.group_name') : t('dashboard.hero.chat_with')}
+      {/* Export Toolbar */}
+      <ExportToolbar onExport={handleExportSelected} />
+
+      {/* Main Export Root */}
+      <div
+        id="dashboard-export-root"
+        className={`relative bg-canvas ${isExporting ? "exporting-active pb-16" : ""}`}
+      >
+        {isExporting && <ExportWatermark />}
+
+        {/* Hero - Always exported, cannot be selected independently */}
+        <div className="border-b-2 border-black bg-white">
+          <motion.div variants={sectionVariants} className="px-6 py-12 pt-24">
+            <div className="content-wrapper">
+              <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-3">
+                {t("dashboard.hero.kicker", { count: metrics.totalMessages.toLocaleString() })}
               </p>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                {chatMode === 'group' ? (metrics.groupName ?? metrics.participants.join(', ')) : metrics.participants.join(' & ')}
-              </h2>
-              {chatMode === 'group' && (
-                <GroupHistory history={metrics.groupNameHistory} iconChangeCount={metrics.iconChangeCount} />
-              )}
-            </div>
-          </div>
-          <p className="text-sm text-gray-600 font-mono">
-            {metrics.dateRange.start.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')} → {metrics.dateRange.end.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')} · {metrics.chatDurationDays} {t('dashboard.hero.days')}
-          </p>
-        </div>
-      </motion.div>
-
-      {/* Dashboard grid */}
-      <div className="content-wrapper py-8 space-y-12">
-        {/* Section: The Numbers */}
-        <motion.div variants={sectionVariants}>
-          <h2 className="font-mono text-sm uppercase tracking-widest mb-4">_ {t('section.numbers')}</h2>
-          <div className={`grid grid-cols-1 md:grid-cols-2 ${totalLinks > 0 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-0 border-2 border-black`}>
-            <div className="border-b-2 lg:border-b-0 md:border-r-2 lg:border-r-2 border-black">
-              <OverviewCard metrics={metrics} />
-            </div>
-            <div className="border-b-2 lg:border-b-0 md:border-r-0 lg:border-r-2 border-black">
-              <MessageShareCard metrics={metrics} chatMode={chatMode} />
-            </div>
-            <div className={`${totalLinks > 0 ? 'border-b-2 md:border-b-0 md:border-r-2 lg:border-r-2' : 'md:col-span-2 lg:col-span-1 lg:border-r-0'} border-black`}>
-              <MediaCard metrics={metrics} chatMode={chatMode} />
-            </div>
-            {totalLinks > 0 && (
-              <div className="flex flex-col">
-                <SharedLinksCard metrics={metrics} />
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 gap-6">
+                <h1 className="text-5xl sm:text-6xl font-extrabold leading-none tracking-tight">
+                  {t("dashboard.hero.title1")}
+                  <br />
+                  {t("dashboard.hero.title2")}
+                </h1>
+                <div className="text-left sm:text-right">
+                  <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">
+                    {chatMode === "group"
+                      ? t("dashboard.hero.group_name")
+                      : t("dashboard.hero.chat_with")}
+                  </p>
+                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                    {chatMode === "group"
+                      ? (metrics.groupName ?? metrics.participants.join(", "))
+                      : metrics.participants.join(" & ")}
+                  </h2>
+                  {chatMode === "group" && (
+                    <GroupHistory
+                      history={metrics.groupNameHistory}
+                      iconChangeCount={metrics.iconChangeCount}
+                    />
+                  )}
+                </div>
               </div>
-            )}
-            
-            {/* Spotify Trial Card */}
-            {(isDemoMode || (metrics.recentSpotifyLinks && metrics.recentSpotifyLinks.length > 0)) && (
-              <div className="col-span-1 md:col-span-2 lg:col-span-4 border-t-2 border-black">
-                <SpotifyTrialCard metrics={metrics} isDemoMode={isDemoMode} chatMode={chatMode} />
-              </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Section: Calls (Conditional) */}
-        {Object.values(metrics.callsInitiated).some(v => v > 0) && (
-          <motion.div initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
-            <h2 className="font-mono text-sm uppercase tracking-widest mb-4">{t('calls.title')}</h2>
-            <div className="border-2 border-black">
-              <CallMetricsCard metrics={metrics} chatMode={chatMode} />
+              <p className="text-sm text-gray-600 font-mono">
+                {metrics.dateRange.start.toLocaleDateString(
+                  language === "id" ? "id-ID" : "en-US",
+                )}{" "}
+                →{" "}
+                {metrics.dateRange.end.toLocaleDateString(
+                  language === "id" ? "id-ID" : "en-US",
+                )}{" "}
+                · {metrics.chatDurationDays} {t("dashboard.hero.days")}
+              </p>
             </div>
           </motion.div>
-        )}
+        </div>
 
-        {/* Section: Monthly Trend */}
-        <motion.section initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
-          <SectionLabel label={t('section.monthly')} />
-          <div className="border-2 border-black">
-            <MonthlyCard metrics={metrics} />
-          </div>
-        </motion.section>
+        {/* Dashboard grid */}
+        <div className="content-wrapper py-8 space-y-12">
+          {/* Section: The Numbers */}
+          <ExportableSection id="numbers">
+            <motion.div variants={sectionVariants}>
+              <h2 className="font-mono text-sm uppercase tracking-widest mb-4">
+                _ {t("section.numbers")}
+              </h2>
+              <div
+                className={`grid grid-cols-1 md:grid-cols-2 ${totalLinks > 0 ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-0 border-2 border-black`}
+              >
+                <div className="border-b-2 lg:border-b-0 md:border-r-2 lg:border-r-2 border-black">
+                  <OverviewCard metrics={metrics} />
+                </div>
+                <div className="border-b-2 lg:border-b-0 md:border-r-0 lg:border-r-2 border-black">
+                  <MessageShareCard metrics={metrics} chatMode={chatMode} />
+                </div>
+                <div
+                  className={`${totalLinks > 0 ? "border-b-2 md:border-b-0 md:border-r-2 lg:border-r-2" : "md:col-span-2 lg:col-span-1 lg:border-r-0"} border-black`}
+                >
+                  <MediaCard metrics={metrics} chatMode={chatMode} />
+                </div>
+                {totalLinks > 0 && (
+                  <div className="flex flex-col">
+                    <SharedLinksCard metrics={metrics} />
+                  </div>
+                )}
 
-        {/* Section: Patterns */}
-        <motion.div initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
-          <h2 className="font-mono text-sm uppercase tracking-widest mb-4">_ {t('section.patterns')}</h2>
-          <div className={`grid grid-cols-1 ${metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some(v => v > 0) ? 'lg:grid-cols-3' : ''} gap-0 border-2 border-black`}>
-            <div className={`${metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some(v => v > 0) ? 'lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2' : ''} border-black`}>
-              <WordCloudCard metrics={metrics} />
-            </div>
-            {(metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some(v => v > 0)) && (
-              <div>
-                <MirroredPhrasesCard metrics={metrics} />
+                {/* Spotify Trial Card */}
+                {(isDemoMode ||
+                  (metrics.recentSpotifyLinks && metrics.recentSpotifyLinks.length > 0)) && (
+                    <div className="col-span-1 md:col-span-2 lg:col-span-4 border-t-2 border-black">
+                      <SpotifyTrialCard
+                        metrics={metrics}
+                        isDemoMode={isDemoMode}
+                        chatMode={chatMode}
+                      />
+                    </div>
+                  )}
               </div>
+            </motion.div>
+          </ExportableSection>
+
+          {/* Section: Calls (Conditional) */}
+          {Object.values(metrics.callsInitiated).some((v) => v > 0) && (
+            <ExportableSection id="calls">
+              <AnimatedSection variants={scrollVariants} as="div">
+                <h2 className="font-mono text-sm uppercase tracking-widest mb-4">
+                  {t("calls.title")}
+                </h2>
+                <div className="border-2 border-black">
+                  <CallMetricsCard metrics={metrics} chatMode={chatMode} />
+                </div>
+              </AnimatedSection>
+            </ExportableSection>
+          )}
+
+          {/* Section: Monthly Trend */}
+          <ExportableSection id="monthly">
+            <AnimatedSection variants={scrollVariants} as="section">
+              <SectionLabel label={t("section.monthly")} />
+              <div className="border-2 border-black">
+                <MonthlyCard metrics={metrics} />
+              </div>
+            </AnimatedSection>
+          </ExportableSection>
+
+          {/* Section: Patterns */}
+          <ExportableSection id="patterns">
+            <AnimatedSection variants={scrollVariants} as="div">
+              <h2 className="font-mono text-sm uppercase tracking-widest mb-4">
+                _ {t("section.patterns")}
+              </h2>
+              <div
+                className={`grid grid-cols-1 ${metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some((v) => v > 0) ? "lg:grid-cols-3" : ""} gap-0 border-2 border-black`}
+              >
+                <div
+                  className={`${metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some((v) => v > 0) ? "lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2" : ""} border-black`}
+                >
+                  <WordCloudCard metrics={metrics} />
+                </div>
+                {(metrics.mirroredPhrases.length > 0 ||
+                  Object.values(metrics.pingCount || {}).some((v) => v > 0)) && (
+                    <div>
+                      <MirroredPhrasesCard metrics={metrics} />
+                    </div>
+                  )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-2 border-black border-t-0">
+                <div className="border-b-2 md:border-b-0 md:border-r-2 border-black">
+                  <HeatmapCard metrics={metrics} />
+                </div>
+                <div className="border-b-2 md:border-b-0 md:border-r-2 border-black">
+                  <LatencyCard metrics={metrics} chatMode={chatMode} />
+                </div>
+                <div>
+                  <GhostingCard metrics={metrics} chatMode={chatMode} />
+                </div>
+              </div>
+            </AnimatedSection>
+          </ExportableSection>
+
+          {/* Section: Emoji DNA */}
+          <ExportableSection id="emoji">
+            <AnimatedSection variants={scrollVariants} as="section">
+              <SectionLabel label={t("section.emoji")} />
+              <div className="border-2 border-black">
+                <EmojiCard metrics={metrics} chatMode={chatMode} />
+              </div>
+            </AnimatedSection>
+          </ExportableSection>
+
+          {/* Section: The Vibe */}
+          <ExportableSection id="vibe">
+            <AnimatedSection variants={scrollVariants} as="section">
+              <SectionLabel label={t("section.vibe")} />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 border-2 border-black">
+                <div className="lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2 border-black">
+                  <PersonalityCard
+                    insights={insights}
+                    insightStatus={insightStatus}
+                    onRetry={onRetryAI}
+                  />
+                </div>
+                <div>
+                  <InsightCard
+                    insights={insights}
+                    metrics={metrics}
+                    insightStatus={insightStatus}
+                    onRetry={onRetryAI}
+                  />
+                </div>
+              </div>
+              {metrics.detectedTopics?.length || insights.evolution_note ? (
+                <div className="border-2 border-t-0 border-black">
+                  <TopicsCard metrics={metrics} evolutionNote={insights.evolution_note} />
+                </div>
+              ) : null}
+            </AnimatedSection>
+          </ExportableSection>
+
+          {/* Section: Excerpts */}
+          <ExportableSection id="excerpts">
+            <AnimatedSection variants={scrollVariants} as="section">
+              <SectionLabel label={t("section.excerpts") || "HIGHLIGHTS"} />
+              <div className="border-2 border-black">
+                <ExcerptsCard metrics={metrics} />
+              </div>
+            </AnimatedSection>
+          </ExportableSection>
+        </div>
+      </div>
+
+      {/* Footer CTA (Excluded from export) */}
+      <AnimatedSection
+        variants={scrollVariants}
+        as="div"
+        data-export-exclude="true"
+        className="content-wrapper"
+      >
+        <div className="border-2 border-black bg-white p-8 text-center mt-0 mb-12">
+          <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">
+            {t("footer.done")}
+          </p>
+          <h2 className="text-2xl font-extrabold mb-3">{t("footer.analyze_another")}</h2>
+          <p className="text-sm text-gray-600 mb-6">{t("footer.upload_different")}</p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              id="analyze-another-btn"
+              onClick={onReset}
+              className="nb-btn-primary px-8 py-3"
+            >
+              {t("footer.cta.btn")}
+            </button>
+            {!isDemoMode && (
+              <>
+                <div className="hidden sm:block border-l-2 border-black h-8 mx-2"></div>
+                <ExportMenu />
+              </>
             )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-2 border-black border-t-0">
-            <div className="border-b-2 md:border-b-0 md:border-r-2 border-black">
-              <HeatmapCard metrics={metrics} />
-            </div>
-            <div className="border-b-2 md:border-b-0 md:border-r-2 border-black">
-              <LatencyCard metrics={metrics} chatMode={chatMode} />
-            </div>
-            <div>
-              <GhostingCard metrics={metrics} chatMode={chatMode} />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Section: Emoji DNA */}
-        <motion.section initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
-          <SectionLabel label={t('section.emoji')} />
-          <div className="border-2 border-black">
-            <EmojiCard metrics={metrics} chatMode={chatMode} />
-          </div>
-        </motion.section>
-
-        {/* Section: The Vibe */}
-        <motion.section initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants}>
-          <SectionLabel label={t('section.vibe')} />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 border-2 border-black">
-            <div className="lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2 border-black">
-              <PersonalityCard
-                insights={insights}
-                insightStatus={insightStatus}
-                onRetry={onRetryAI}
-              />
-            </div>
-            <div>
-              <InsightCard
-                insights={insights}
-                metrics={metrics}
-                insightStatus={insightStatus}
-                onRetry={onRetryAI}
-              />
-            </div>
-          </div>
-          {(metrics.detectedTopics?.length || insights.evolution_note) ? (
-            <div className="border-2 border-t-0 border-black">
-              <TopicsCard metrics={metrics} evolutionNote={insights.evolution_note} />
-            </div>
-          ) : null}
-          <div className="border-2 border-t-0 border-black">
-            <ExcerptsCard metrics={metrics} />
-          </div>
-        </motion.section>
-
-        {/* Footer CTA */}
-        <motion.div initial="offscreen" whileInView="onscreen" viewport={{ once: true, amount: 0.3 }} variants={scrollVariants} className="border-2 border-black bg-white p-8 text-center mt-12 mb-12">
-          <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">{t('footer.done')}</p>
-          <h2 className="text-2xl font-extrabold mb-3">{t('footer.analyze_another')}</h2>
-          <p className="text-sm text-gray-600 mb-6">{t('footer.upload_different')}</p>
-          <button
-            id="analyze-another-btn"
-            onClick={onReset}
-            className="nb-btn-primary px-8 py-3"
-          >
-            {t('footer.cta.btn')}
-          </button>
-        </motion.div>
-      </div>
+        </div>
+      </AnimatedSection>
 
       <Footer />
     </motion.div>
@@ -266,8 +405,18 @@ export default function ResultsDashboard({ metrics, insights, chatMode, insightS
 function SectionLabel({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-3 mb-0 pb-3">
-      <span className="font-mono text-xs uppercase tracking-widest text-gray-500">_ {label}</span>
+      <span className="font-mono text-xs uppercase tracking-widest text-gray-500">
+        _ {label}
+      </span>
       <div className="flex-1 border-t-2 border-black" />
     </div>
+  );
+}
+
+export default function ResultsDashboard(props: Props) {
+  return (
+    <ExportProvider>
+      <ResultsDashboardInner {...props} />
+    </ExportProvider>
   );
 }

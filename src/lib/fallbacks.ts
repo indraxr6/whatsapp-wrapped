@@ -275,8 +275,8 @@ function getMonologueFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', 
 
   if (maxParagraphs > 10) {
     const id = [
-      `${topMonologuer} suka banget ngetik panjang lebar kayak lagi bikin novel. Tercatat ada ${maxParagraphs} paragraf panjang.`,
-      `Kayaknya ${topMonologuer} cocok jadi penulis atau podcaster, sering banget monolog panjang lebar di chat ini.`
+      `${topMonologuer} suka ngetik panjang lebar kyk lagi nulis skrip klarifikasi. Tercatat ada ${maxParagraphs} paragraf panjang.`,
+      `${topMonologuer} adalah tukang spam handal, karena sering monolog panjang lebar di chat ini.`
     ];
     const en = [
       `${topMonologuer} loves dropping massive paragraphs like they're writing a novel. Logged ${maxParagraphs} long messages.`,
@@ -294,8 +294,8 @@ function getMonologueFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', 
 function getGroupRenameFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseHash: number): string[] {
   if (metrics.participants.length > 2 && metrics.groupNameHistory.length > 15) {
     const id = [
-      `Grup ini krisis identitas parah, udah ganti nama ${metrics.groupNameHistory.length} kali!`,
-      `Tercatat ganti nama ${metrics.groupNameHistory.length} kali. Bener-bener labil atau emang hobinya ganti konsep tiap minggu?`
+      `Grup ini krisis identitas, ganti nama ${metrics.groupNameHistory.length} kali.`,
+      `Tercatat ganti nama ${metrics.groupNameHistory.length} kali. Kalian memang labil atau memang ganti konsep tiap minggu?`
     ];
     const en = [
       `This group has a severe identity crisis, having been renamed ${metrics.groupNameHistory.length} times!`,
@@ -391,7 +391,7 @@ export function generateOfflineInsights(
     if (stickerCount > 250) {
       applicableEvos.push({
         en: `Over time, your group evolved from polite discussions to an unfiltered stream of out-of-context stickers.`,
-        id: `Seiring waktu, grup kalian berubah dari obrolan formal menjadi kumpulan stiker tanpa konteks.`
+        id: `Seiring waktu, grup kalian berubah dari obrolan formal menjadi kumpulan stiker tanpa konteks. total stiker terkirim: ${stickerCount}`
       });
     }
     
@@ -423,11 +423,11 @@ export function generateOfflineInsights(
     });
     applicableEvos.push({
       en: `The group gradually became a safe haven for oversharing and unhinged opinions.`,
-      id: `Grup ini perlahan jadi tempat aman buat curhat colongan dan opini random.`
+      id: `Grup ini perlahan jadi tempat aman buat curhat random dan opini ngawurr.`
     });
     applicableEvos.push({
-      en: `It started tame, but quickly escalated into a 24/7 digital circus.`,
-      id: `Awalnya kalem, tapi dengan cepat berubah jadi sirkus digital 24 jam.`
+      en: `It started tame, but quickly escalated into a 24/7 digital circus`,
+      id: `Awalnya kalem, tapi dengan cepat berubah jadi grup kacau 24 jam`
     });
     
     const pickedEvo = applicableEvos[hash % applicableEvos.length];
@@ -484,16 +484,18 @@ export function generateOfflineInsights(
     
     applicableEvos.push({
       en: `The dynamic shifted from distant acquaintances to entirely too comfortable with each other.`,
-      id: `Dinamika bergeser dari sekadar kenalan jauh menjadi terlalu nyaman satu sama lain.`
+      id: `Dinamika berubah dari sekadar teman biasa jadi temen yang kelewat blak-blakan.`
     });
     applicableEvos.push({
       en: `Your communication lost all its formal boundaries and descended into comfortable chaos.`,
       id: `Gaya bahasa kalian kehilangan batas formalnya dan berubah jadi kekacauan yang terstruktur.`
     });
-    applicableEvos.push({
-      en: `Over time, your conversation evolved from polite check-ins to an unfiltered stream of consciousness.`,
-      id: `Seiring waktu, percakapan kalian berubah dari sapaan sopan menjadi obrolan ngalor-ngidul tanpa filter.`
-    });
+    if (metrics.totalMessages > 10000) {
+      applicableEvos.push({
+        en: `Over time, your conversation evolved from polite check-ins to an unfiltered stream of consciousness.`,
+        id: `Seiring waktu, percakapan kalian berubah dari sapaan sopan menjadi obrolan ngalor-ngidul tanpa filter.`
+      });
+    }
 
     const pickedEvo = applicableEvos[hash % applicableEvos.length];
     evo_en = pickedEvo.en;

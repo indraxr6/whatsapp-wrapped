@@ -12,7 +12,7 @@ export const dictionaries = {
     "hero.title1": "_WhatsApp",
     "hero.title2": "Chat",
     "hero.title3": "Wrapped;",
-    "hero.subtitle": "Parses your exported chat log locally. Counts everything. Gets AI to roast you. Keeps your data in your browser.",
+    "hero.subtitle": "Parses your exported chat log locally. Counts everything. Provides chat insights. Keeps your data in your browser.",
 
     // Upload Zone
     "upload.title": "Upload your chat export",
@@ -45,7 +45,7 @@ export const dictionaries = {
     "how.step2.title": "Upload Here",
     "how.step2.desc": "Parsed entirely in your browser - nothing leaves your device",
     "how.step3.title": "Get Wrapped",
-    "how.step3.desc": "Stats, charts, and an AI roast using your own Gemini key",
+    "how.step3.desc": "Stats, charts, and offline insights",
 
 
 
@@ -98,7 +98,15 @@ export const dictionaries = {
     "dashboard.hero.title2": "Wrapped.",
     "dashboard.hero.days": "Days",
     "dashboard.hero.group_name": "Group Name:",
-    "dashboard.hero.chat_with": "Chat With:",
+    "dashboard.hero.chat_with": "Chat with:",
+
+    // Export Feature
+    "export.choose_sections": "Choose Sections",
+    "export.export_all": "Export Everything",
+    "export.selected_sections": "Sections Selected",
+    "export.select_instruction": "Click a section card to include it in your export",
+    "export.cancel": "Cancel",
+    "export.export_btn": "Export",
 
     // Section Labels
     "section.numbers": "THE NUMBERS",
@@ -108,11 +116,12 @@ export const dictionaries = {
     "section.monthly": "ACTIVITY OVER TIME",
     "section.emoji": "EMOJI DNA",
     "section.vibe": "CHAT VIBE",
+    "section.excerpts": "HIGHLIGHTS",
 
     // Cards
     "overview.glance": "_ AT A GLANCE",
     "overview.volume": "TOTAL VOLUME",
-    "overview.messages": "total messages",
+    "overview.messages": "Messages",
     "overview.daysOfChat": "days of chat",
     "overview.activeDays": "active chat days",
     "overview.span": "span: {count} days",
@@ -271,7 +280,7 @@ export const dictionaries = {
     "hero.title1": "WhatsApp",
     "hero.title2": "Chat",
     "hero.title3": "Wrapped;",
-    "hero.subtitle": "Baca data chat secara lokal. Hitung semua metrik. Minta AI untuk meroasting. Data tetap aman di browser Anda.",
+    "hero.subtitle": "Baca data chat secara lokal. Hitung semua metrik. Dapatkan insight chat. Data tetap aman di browser Anda.",
 
     // Upload Zone
     "upload.title": "Unggah export chat Anda",
@@ -304,7 +313,7 @@ export const dictionaries = {
     "how.step2.title": "Unggah Di Sini",
     "how.step2.desc": "Diproses seluruhnya di browser Anda - tidak ada yang dikirim keluar perangkat",
     "how.step3.title": "Lihat Hasilnya",
-    "how.step3.desc": "Statistik, grafik, dan roasting AI menggunakan kunci Gemini Anda sendiri",
+    "how.step3.desc": "Statistik, grafik, dan insight offline (atau opsional roasting AI menggunakan kunci Gemini Anda)",
 
     // Modals
     "error.title": "_ ERROR",
@@ -355,7 +364,15 @@ export const dictionaries = {
     "dashboard.hero.title2": "Wrapped.",
     "dashboard.hero.days": "Hari",
     "dashboard.hero.group_name": "Nama Grup:",
-    "dashboard.hero.chat_with": "Chat Dengan:",
+    "dashboard.hero.chat_with": "Chat dengan:",
+
+    // Export Feature
+    "export.choose_sections": "Pilih Bagian",
+    "export.export_all": "Export Semua",
+    "export.selected_sections": "Bagian Terpilih",
+    "export.select_instruction": "Klik bagian untuk menambahkannya ke gambar export",
+    "export.cancel": "Batal",
+    "export.export_btn": "Export",
 
     // Section Labels
     "section.numbers": "ANGKA-ANGKA",
@@ -365,6 +382,7 @@ export const dictionaries = {
     "section.monthly": "AKTIVITAS BULANAN",
     "section.emoji": "DNA EMOJI",
     "section.vibe": "SUASANA CHAT",
+    "section.excerpts": "HIGHLIGHTS",
 
     // Cards
     "overview.glance": "_ RINGKASAN",

@@ -52,6 +52,15 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+  /* Export State Styles */
+  .exporting-active *::-webkit-scrollbar {
+    display: none !important;
+  }
+  .exporting-active * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
 }
 
 @layer components {
