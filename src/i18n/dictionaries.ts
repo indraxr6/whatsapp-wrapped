@@ -313,7 +313,7 @@ export const dictionaries = {
     "how.step2.title": "Unggah Di Sini",
     "how.step2.desc": "Diproses seluruhnya di browser Anda - tidak ada yang dikirim keluar perangkat",
     "how.step3.title": "Lihat Hasilnya",
-    "how.step3.desc": "Statistik, grafik, dan insight offline (atau opsional roasting AI menggunakan kunci Gemini Anda)",
+    "how.step3.desc": "Statistik, grafik, dan insight offline",
 
     // Modals
     "error.title": "_ ERROR",

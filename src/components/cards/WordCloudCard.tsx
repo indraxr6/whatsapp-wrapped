@@ -57,7 +57,7 @@ export default function WordCloudCard({ metrics }: Props) {
 
     WordCloud(canvasRef.current, {
       list: scaledList,
-      fontFamily: '"Space Grotesk", sans-serif',
+      fontFamily: '"Anthropic Serif", sans-serif',
       fontWeight: 'bold',
       color: () => ACCENT_COLORS[Math.floor(Math.random() * ACCENT_COLORS.length)],
       rotateRatio: 0.5,

@@ -7,7 +7,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Space Grotesk', 'sans-serif'],
+        sans: ['Anthropic Serif', 'serif'],
+        serif: ['Anthropic Serif', 'serif'],
+        space: ['Space Grotesk', 'sans-serif'],
         mono: ['IBM Plex Mono', 'monospace'],
       },
       colors: {

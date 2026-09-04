@@ -3,6 +3,22 @@
 @import '@fontsource/ibm-plex-mono/400.css';
 @import '@fontsource/ibm-plex-mono/600.css';
 
+@font-face {
+  font-family: 'Anthropic Serif';
+  src: url('/fonts/anthropic/AnthropicSerif-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Anthropic Serif';
+  src: url('/fonts/anthropic/AnthropicSerif-Bold.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,7 +32,7 @@
   }
 
   html {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Anthropic Serif', serif;
     background-color: #FAF8F5;
     color: #000000;
     -webkit-font-smoothing: antialiased;
@@ -35,7 +51,7 @@
   h4,
   h5,
   h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Anthropic Serif', serif;
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -0.02em;
@@ -57,6 +73,7 @@
   .exporting-active *::-webkit-scrollbar {
     display: none !important;
   }
+
   .exporting-active * {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;

@@ -13,6 +13,23 @@ function dataURItoBlob(dataURI: string) {
 
 export async function exportDashboardToPng(node: HTMLElement, filename = 'whatsapp-wrapped.png') {
   try {
+    // Safari Workaround: Convert <canvas> to <img> right before export
+    const canvases = node.querySelectorAll('canvas');
+    const placeholders: { canvas: HTMLCanvasElement; img: HTMLImageElement }[] = [];
+    
+    canvases.forEach(canvas => {
+      try {
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        img.className = canvas.className;
+        img.style.cssText = canvas.style.cssText;
+        canvas.parentNode?.insertBefore(img, canvas);
+        canvas.style.display = 'none';
+        placeholders.push({ canvas, img });
+      } catch (e) {
+        console.warn('Could not convert canvas to image', e);
+      }
+    });
     const dataUrl = await htmlToImage.toPng(node, {
       pixelRatio: 2, // HD output
       skipFonts: false,
@@ -24,10 +41,18 @@ export async function exportDashboardToPng(node: HTMLElement, filename = 'whatsa
       },
     });
 
+    // Restore original canvases
+    placeholders.forEach(({ canvas, img }) => {
+      canvas.style.display = '';
+      img.remove();
+    });
+
     const blob = dataURItoBlob(dataUrl);
 
-    // Try Web Share API first (highly reliable on iOS Safari)
-    if (navigator.canShare) {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    // Try Web Share API first (highly reliable on iOS/Android)
+    if (isMobile && navigator.canShare) {
       const file = new File([blob], filename, { type: 'image/png' });
       if (navigator.canShare({ files: [file] })) {
         try {
