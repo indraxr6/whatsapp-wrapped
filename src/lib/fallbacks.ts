@@ -242,21 +242,40 @@ function getBaseFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseH
     return [pool[baseHash % pool.length]];
   }
 
-  const id = [
-    "Dinamika percakapan yang kelihatan udah terbentuk alami. Yang satu emang lebih bacot, yang lain lebih jadi pendengar.",
-    "Chat ini punya ritmenya sendiri. Meski kadang berat sebelah secara volume, kalian sepertinya nemu cara komunikasi yang pas.",
-    "Ada satu pihak yang lebih rajin ngetik panjang lebar, sementara balasannya lebih praktis. Yang penting pesannya nyampe.",
-    "Kombinasi klasik: yang satu suka cerita detail, yang satu ngerespons ringkas aja."
-  ];
-  const en = [
-    "A very naturally settled dynamic. One is clearly the talker, and the other plays the listener.",
-    "This chat has its own distinct rhythm. Even if the volume is a bit lopsided, you've found a communication style that works.",
-    "One person doesn't mind typing out long thoughts, while the other keeps responses practical. It balances out.",
-    "The classic combo: one loves to share the details, the other keeps it short and sweet."
-  ];
+  const counts = Object.values(metrics.messagesPerSender);
+  const total = counts.reduce((a, b) => a + b, 0);
+  const isLopsided = total > 0 && (Math.max(...counts) / total) > 0.55;
 
-  const pool = language === 'id' ? id : en;
-  return [pool[baseHash % pool.length]];
+  if (isLopsided) {
+    const id = [
+      "Dinamika percakapan yang kelihatan sudah terbentuk alami. Satu orang emang lebih sering ngetik, yang lain lebih jadi pendengar.",
+      "Chat ini punya ritmenya sendiri. Meski kadang berat sebelah secara volume pesan, kalian sepertinya nemu cara komunikasi yang pas.",
+      "Ada satu pihak yang lebih rajin ngirim chat, sementara balasannya lebih praktis. Yang penting pesannya nyampe.",
+      "Kombinasi klasik: yang satu suka cerita detail, yang satu ngerespons ringkas aja."
+    ];
+    const en = [
+      "A very naturally settled dynamic. One is clearly the talker, and the other plays the listener.",
+      "This chat has its own distinct rhythm. Even if the message volume is a bit lopsided, you've found a communication style that works.",
+      "One person doesn't mind sending way more messages, while the other keeps responses practical. It balances out.",
+      "The classic combo: one loves to share all the details, the other keeps it short and sweet."
+    ];
+    const pool = language === 'id' ? id : en;
+    return [pool[baseHash % pool.length]];
+  } else {
+    const id = [
+      "Frekuensi chat kalian berdua cukup seimbang. Kelihatan sama-sama effort buat ngejaga percakapan tetep hidup.",
+      "Dinamika chat yang lumayan sehat, komunikasi dua arah dengan jalan mulus",
+      "Kalian sama-sama responsif dan ngisi percakapan dengan porsi yang pas (semoga).",
+    ];
+    const en = [
+      "Your message frequency is quite balanced. Both of you clearly put effort into keeping the conversation alive.",
+      "A healthy chat dynamic. Neither of you dominates, making it a perfectly smooth two-way street.",
+      "The vibe is like a good ping-pong match. You're both responsive and contribute equally to the conversation.",
+      "It's rare to see a chat this balanced. It really shows how you're both on the same wavelength."
+    ];
+    const pool = language === 'id' ? id : en;
+    return [pool[baseHash % pool.length]];
+  }
 }
 
 // ──────────────────────────────────────────────
