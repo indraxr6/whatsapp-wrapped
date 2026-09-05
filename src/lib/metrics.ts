@@ -8,12 +8,12 @@ const OVERNIGHT_GAP_MINUTES = 360; // 6 hours - gaps larger than this are exclud
 const ABUSIVE_TERMS_ID = new Set([
   'kontol', 'memek', 'mmk', 'tai', 'bangsat', 'bajingan', 'jingan', 'keparat', 'anjing', 'anjeng',
   'goblok', 'gblg', 'gblk', 'goblog', 'bego', 'bodo', 'tempek', 'tempik', 'asu', 'jancuk',
-  'pantek', 'peler', 'pler', 'anjg', 'njing', 'persetan'
+  'pantek', 'peler', 'pler', 'anjg', 'njing', 'persetan', 'pepek', 'pepeq', 'ppq', 'koncet', 'ngewe'
 ]);
 
 const ABUSIVE_TERMS_JV = new Set([
   'cok', 'cuk', 'jancok', 'jancuk', 'hancok', 'dancok', 'jembot', 'jembut', 'jmbt', 'taek',
-  'ajg', 'asu', 'ngentod', 'ngentot', 'perek', 'lonte'
+  'ajg', 'asu', 'ngentod', 'ngentot', 'perek', 'lonte',
 ]);
 
 const ABUSIVE_TERMS_EN = new Set([

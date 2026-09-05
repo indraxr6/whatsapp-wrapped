@@ -192,7 +192,7 @@ export const DOMAIN_SEEDS: TopicDomain[] = [
   },
   {
     id: 'housing_boarding',
-    label: 'Housing & Kos Life',
+    label: 'house or kos life',
     seeds: new Set([
       // Boarding House, Renting, Roommates & Household Tasks
       'ac', 'air', 'apart', 'apartemen', 'bapak', 'beres', 'bocor', 'cucian', 'dapur',

@@ -1,13 +1,13 @@
 import { useExportContext } from "../../contexts/ExportContext";
 import { useLanguage } from "../../i18n/LanguageContext";
-import { Download, X } from "lucide-react";
+import { Download, X, Loader2 } from "lucide-react";
 
 interface Props {
   onExport: () => void;
 }
 
 export default function ExportToolbar({ onExport }: Props) {
-  const { isSelecting, setIsSelecting, selectedSectionIds, clearSelection } =
+  const { isSelecting, setIsSelecting, selectedSectionIds, clearSelection, isExporting } =
     useExportContext();
   const { t } = useLanguage();
 
@@ -41,11 +41,11 @@ export default function ExportToolbar({ onExport }: Props) {
 
         <button
           onClick={onExport}
-          disabled={selectedSectionIds.length === 0}
+          disabled={selectedSectionIds.length === 0 || isExporting}
           className="nb-btn-primary px-4 py-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Download size={16} />
-          {t("export.export_btn") || "Export"}
+          {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+          {isExporting ? (t("export.exporting") || "Exporting...") : (t("export.export_btn") || "Export")}
         </button>
       </div>
     </div>

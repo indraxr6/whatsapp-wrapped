@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Anthropic Serif', 'serif'],
-        serif: ['Anthropic Serif', 'serif'],
+        sans: ['Anthropic Serif', 'sans-serif'],
+        serif: ['Anthropic Serif', 'sans-serif'],
         space: ['Space Grotesk', 'sans-serif'],
         mono: ['IBM Plex Mono', 'monospace'],
       },

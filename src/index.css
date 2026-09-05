@@ -32,7 +32,7 @@
   }
 
   html {
-    font-family: 'Anthropic Serif', serif;
+    font-family: 'Anthropic Serif', 'Space Grotesk', sans-serif;
     background-color: #FAF8F5;
     color: #000000;
     -webkit-font-smoothing: antialiased;
@@ -51,7 +51,7 @@
   h4,
   h5,
   h6 {
-    font-family: 'Anthropic Serif', serif;
+    font-family: 'Anthropic Serif', 'Space Grotesk', sans-serif;
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -0.02em;

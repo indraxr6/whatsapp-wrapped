@@ -113,6 +113,7 @@ export const dictionaries = {
     "export.select_instruction": "Click a section card to include it in your export",
     "export.cancel": "Cancel",
     "export.export_btn": "Export",
+    "export.exporting": "Exporting...",
 
     // Section Labels
     "section.numbers": "THE NUMBERS",
@@ -391,6 +392,7 @@ export const dictionaries = {
     "export.select_instruction": "Klik bagian untuk menambahkannya ke gambar export",
     "export.cancel": "Batal",
     "export.export_btn": "Export",
+    "export.exporting": "Mengekspor...",
 
     // Section Labels
     "section.numbers": "ANGKA-ANGKA",
@@ -495,8 +497,8 @@ export const dictionaries = {
     "mirrored.pingDesc": "Total ping (P/ppp) yang dikirim dalam chat.",
 
     "toxic.title": "_ KATA KASAR & UMPATAN",
-    "toxic.desc": "Total kata kasar yang digunakan.",
-    "toxic.desc.plural": "Total kata kasar yang digunakan.",
+    "toxic.desc": "Total kata kasar yang dilontarkan.",
+    "toxic.desc.plural": "Total kata kasar yang dilontarkan.",
     "toxic.reveal": "Sentuh untuk Lihat Kata Teratas",
     "toxic.hidden": "Sentuh untuk sembunyikan",
 
