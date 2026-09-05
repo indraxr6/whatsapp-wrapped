@@ -50,6 +50,12 @@ export const dictionaries = {
 
 
     // Modals
+    "choice.title": "Ready for your Wrapped?",
+    "choice.desc": "Your chat has been crunched and you will be getting your wrapped right away!",
+    "choice.show": "Show my wrapped",
+    "choice.or": "OR",
+    "choice.ai": "Analyze with AI",
+
     "error.title": "_ ERROR",
     "privacy.title": "_ PRIVACY",
     "privacy.close": "Close",
@@ -95,7 +101,7 @@ export const dictionaries = {
     // Dashboard Hero
     "dashboard.hero.kicker": "_ {{count}} MESSAGES PARSED",
     "dashboard.hero.title1": "Chat",
-    "dashboard.hero.title2": "Wrapped.",
+    "dashboard.hero.title2": "Wrapped;",
     "dashboard.hero.days": "Days",
     "dashboard.hero.group_name": "Group Name:",
     "dashboard.hero.chat_with": "Chat with:",
@@ -141,7 +147,7 @@ export const dictionaries = {
     "heatmap.sentence": "You chat most in the {segment}, particularly around {time}.",
 
     "monthly.title": "_ ACTIVITY OVER TIME",
-    "monthly.monthsOfData": "months of data",
+    "monthly.monthsOfData": "{monthsOfData} months of data",
     "monthly.peak": "PEAK MONTH",
     "monthly.messages": "messages",
 
@@ -316,6 +322,12 @@ export const dictionaries = {
     "how.step3.desc": "Statistik, grafik, dan insight offline",
 
     // Modals
+    "choice.title": "Siap untuk Wrapped Anda?",
+    "choice.desc": "Chat Anda telah dianalisis dan Anda akan segera mendapatkan wrapped Anda!",
+    "choice.show": "Lihat wrapped saya",
+    "choice.or": "ATAU",
+    "choice.ai": "Analisis dengan AI",
+
     "error.title": "_ ERROR",
     "privacy.title": "_ PRIVASI",
     "privacy.close": "Tutup",
@@ -361,7 +373,7 @@ export const dictionaries = {
     // Dashboard Hero
     "dashboard.hero.kicker": "_ {{count}} PESAN DIPROSES",
     "dashboard.hero.title1": "Chat",
-    "dashboard.hero.title2": "Wrapped.",
+    "dashboard.hero.title2": "Wrapped;",
     "dashboard.hero.days": "Hari",
     "dashboard.hero.group_name": "Nama Grup:",
     "dashboard.hero.chat_with": "Chat dengan:",
@@ -407,7 +419,7 @@ export const dictionaries = {
     "heatmap.sentence": "Kalian paling sering ngobrol di {segment}, terutama sekitar jam {time}.",
 
     "monthly.title": "_ AKTIVITAS BULANAN",
-    "monthly.monthsOfData": "bulan data",
+    "monthly.monthsOfData": "data {monthsOfData} bulan ",
     "monthly.peak": "BULAN TERAMAI",
     "monthly.messages": "pesan",
 

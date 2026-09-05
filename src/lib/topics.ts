@@ -121,7 +121,7 @@ export const DOMAIN_SEEDS: TopicDomain[] = [
   },
   {
     id: 'travel_commute',
-    label: 'Travel & Commute',
+    label: 'commute & jumping places',
     seeds: new Set([
       // Daily Commute, Transit & Road Travel
       'angkot', 'arah', 'bandara', 'berangkat', 'bis', 'boseh', 'bus', 'busway', 'buswayan',
@@ -167,7 +167,7 @@ export const DOMAIN_SEEDS: TopicDomain[] = [
   },
   {
     id: 'entertainment_popculture',
-    label: 'Movies, Series & Pop Culture',
+    label: 'movies or series',
     seeds: new Set([
       // Movies, Streaming, Anime, K-Pop, Dramas
       'actor', 'aktris', 'anime', 'bioskop', 'bts', 'cast', 'cgv', 'cinema', 'cinemaxx',
@@ -342,7 +342,7 @@ export function detectTopics(
 
   for (const domain of DOMAIN_SEEDS) {
     const data = domainScores[domain.id];
-    if (data.score > 10) { // Minimum threshold
+    if (data.score > 20) { // Minimum threshold
       results.push({
         label: domain.label,
         score: data.score

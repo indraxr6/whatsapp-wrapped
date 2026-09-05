@@ -48,13 +48,13 @@ function getLinkFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseH
   if (musicCount > 10) {
     const id = [
       "Ada beberapa link lagu yang dibagikan. Sedang eksplor taste atau cuma pamer lirik yang relate?",
-      "Lumayan sering tukar link spotify tanpa banyak intro. Melodi memang lebih gampang nyampe daripada kata-kata",
+      "Lumayan sering tukar link spotify tanpa banyak konteks. Mungkin lagu memang lebih gampang nyampe daripada kata-kata",
       "Riwayat chat berisi beberapa rekomendasi playlist. Selera musik mirip atau coba saling nularin taste?",
       "Link lagu jadi beberapa kali jadi pembahasan di sini. Semoga bukan untuk mengenang orang yang sudah 'kemarin'"
     ];
     const en = [
       "You share a several music links. Exploring new sounds or trying to drop a subtle lyric hint?",
-      "Dropping song links with zero context. Sometimes a track explains the mood better than words ever could.",
+      "Dropping song links with not much context. Maybe sometimes a track explains your thoughts better than words ever could.",
       "The chat history is packed with playlist swaps. Do you share the same taste, or are you actively shaping each other's?",
       "Music is clearly a shared language here. Just a good tune, or is there a specific memory attached?"
     ];
@@ -88,7 +88,7 @@ function getLinkFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseH
     ];
 
     const en = [
-      "Docs, Meets, and repo links. Heavy focus on work here—when was the last time you took a break without thinking about deadlines?",
+      "Docs, Meets, and some work links. Heavy focus on work here when was the last time you took a break without thinking about deadlines?",
       "Plenty of document links and task syncs. Hitting targets is fine, but don't forget to actually live.",
       "This chat is purely tactical for getting things done. Solid and efficient rhythm, or is the backlog just overflowing?",
     ];
@@ -169,7 +169,7 @@ function getLinkFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseH
 function getGhostFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseHash: number): string[] {
   const totalGhosts = Object.values(metrics.ghostingInstances).reduce((a, b) => a + b, 0);
 
-  if (totalGhosts > 30) {
+  if (totalGhosts > 40) {
     const id = [
       "Jeda balasnya lumayan lama, baru nyambung lagi. Lagi sibuk di real life atau memang 'sengaja' chat-nya ketimbun?",
       "Obrolan bisa nginep berhari-hari tanpa ada yang canggung. Ya begitulah, real life kadang buat lupa buka chat tapi pertemanan tetap aman aman saja",
@@ -475,7 +475,7 @@ export function generateOfflineInsights(
       });
     }
 
-    if (ghostCount > 5) {
+    if (ghostCount > 40) {
       applicableEvos.push({
         en: `The chat evolved into a comfortable silence interspersed with frantic bursts of updates.`,
         id: `Chat ini berevolusi jadi tempat curhat dadakan yang diselingi masa-masa tenang panjang.`

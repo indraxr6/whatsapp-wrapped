@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface Props {
   onCancel: () => void;
@@ -8,6 +9,8 @@ interface Props {
 }
 
 export default function WrappedChoiceModal({ onCancel, onSelectAI, onSelectStats }: Props) {
+  const { t } = useLanguage();
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -32,9 +35,9 @@ export default function WrappedChoiceModal({ onCancel, onSelectAI, onSelectStats
         </button>
 
         <div className="p-8 sm:p-10 text-center">
-          <h2 className="font-extrabold text-2xl sm:text-3xl tracking-tight mb-2 uppercase">Ready for your Wrapped?</h2>
+          <h2 className="font-extrabold text-2xl sm:text-3xl tracking-tight mb-2 uppercase">{t('choice.title')}</h2>
           <p className="text-gray-600 mb-8 font-mono text-sm max-w-sm mx-auto">
-            Your chat has been crunched and you will be getting your wrapped right away!
+            {t('choice.desc')}
           </p>
 
           <div className="flex flex-col gap-6">
@@ -42,12 +45,12 @@ export default function WrappedChoiceModal({ onCancel, onSelectAI, onSelectStats
               onClick={onSelectStats}
               className="nb-btn-primary w-full py-4 text-lg tracking-wide uppercase shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all"
             >
-              Show my wrapped
+              {t('choice.show')}
             </button>
 
             <div className="flex items-center gap-4">
               <div className="flex-1 border-t-2 border-black"></div>
-              <span className="font-mono text-xs font-bold uppercase text-gray-500">OR</span>
+              <span className="font-mono text-xs font-bold uppercase text-gray-500">{t('choice.or')}</span>
               <div className="flex-1 border-t-2 border-black"></div>
             </div>
 
@@ -55,7 +58,7 @@ export default function WrappedChoiceModal({ onCancel, onSelectAI, onSelectStats
               onClick={onSelectAI}
               className="nb-btn w-full py-3 bg-white text-sm"
             >
-              Analyze with AI
+              {t('choice.ai')}
             </button>
           </div>
         </div>
