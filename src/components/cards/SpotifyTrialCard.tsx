@@ -159,7 +159,7 @@ export default function SpotifyTrialCard({ metrics, isDemoMode }: Props) {
             >
               <div className="w-full aspect-square border-b-2 border-black bg-black overflow-hidden relative">
                 {item.albumArt ? (
-                  <img src={item.albumArt} crossOrigin="anonymous" alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img src={`${item.albumArt}?v=export`} crossOrigin="anonymous" alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white/50 text-xs font-mono p-2 text-center">{t('spotify.noArt')}</div>
                 )}

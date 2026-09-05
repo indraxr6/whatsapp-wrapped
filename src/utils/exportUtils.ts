@@ -23,6 +23,9 @@ export async function exportDashboardToPng(node: HTMLElement, filename = 'whatsa
         img.src = canvas.toDataURL('image/png');
         img.className = canvas.className;
         img.style.cssText = canvas.style.cssText;
+        // Explicitly set width/height to prevent layout collapse
+        img.width = canvas.width;
+        img.height = canvas.height;
         canvas.parentNode?.insertBefore(img, canvas);
         canvas.style.display = 'none';
         placeholders.push({ canvas, img });
@@ -30,6 +33,10 @@ export async function exportDashboardToPng(node: HTMLElement, filename = 'whatsa
         console.warn('Could not convert canvas to image', e);
       }
     });
+
+    // Give Safari a split second to paint the new <img> tags before cloning the DOM
+    await new Promise(resolve => setTimeout(resolve, 150));
+
     const dataUrl = await htmlToImage.toPng(node, {
       pixelRatio: 2, // HD output
       skipFonts: false,
