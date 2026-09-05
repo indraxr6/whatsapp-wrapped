@@ -62,7 +62,8 @@ export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
               <div className="flex items-center justify-between text-xs mb-1">
                 <div className="flex items-center gap-2">
                   <Icon className="w-4 h-4 text-gray-700" />
-                  <span className="font-mono uppercase tracking-wide">{t(`media.${type}` as any)}</span>
+                  <span className="font-mono uppercase font-bold text-gray-900">{t(`media.${type}` as any)}</span>
+
                 </div>
                 <span className="font-bold">{count}</span>
               </div>
@@ -77,9 +78,9 @@ export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
             <div className="flex items-center justify-between text-xs mb-1">
               <div className="flex items-center gap-2 text-gray-500">
                 <Sticker className="w-4 h-4" />
-                <span className="font-mono uppercase tracking-wide">{t('media.sticker')}</span>
+                  <span className="font-mono uppercase font-bold text-gray-500">{t('media.sticker')}</span>
               </div>
-              <span className="font-bold">{totalStickers.toLocaleString()}</span>
+              <span className="font-bold text-gray-500">{totalStickers.toLocaleString()}</span>
             </div>
           </div>
         )}
@@ -89,7 +90,7 @@ export default function MediaCard({ metrics, chatMode = 'dm' }: Props) {
         {displayParticipants.map((p) => (
           <div key={p} className="flex justify-between text-xs">
             <span className="font-medium truncate max-w-[70%]">{p}</span>
-            <span className="font-mono">{mediaCounts[p] ?? 0}</span>
+            <span className="font-medium">{mediaCounts[p] ?? 0}</span>
           </div>
         ))}
         {chatMode === 'group' && sortedParticipants.length > 10 && (

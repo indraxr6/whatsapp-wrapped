@@ -148,7 +148,7 @@ export default function SpotifyTrialCard({ metrics, isDemoMode }: Props) {
           ))}
         </div>
       ) : (
-        <div className="grid grid-rows-2 grid-flow-col gap-4 md:flex overflow-x-auto custom-scrollbar pb-2 snap-x">
+        <div className={`grid ${items.length > 1 ? 'grid-rows-2' : 'grid-rows-1'} grid-flow-col gap-4 md:flex overflow-x-auto custom-scrollbar pb-2 snap-x`}>
           {items.map((item, idx) => (
             <a
               key={idx}
