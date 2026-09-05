@@ -16,7 +16,6 @@ export default function LoadingScreen({ step }: Props) {
     t('loading.reading'),
     t('loading.parsing'),
     t('loading.crunching'),
-    t('loading.ai'),
     t('loading.demo'),
   ];
 

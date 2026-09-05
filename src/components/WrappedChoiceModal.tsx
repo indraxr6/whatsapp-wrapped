@@ -35,7 +35,7 @@ export default function WrappedChoiceModal({ onCancel, onSelectAI, onSelectStats
         </button>
 
         <div className="p-8 sm:p-10 text-center">
-          <h2 className="font-extrabold text-2xl sm:text-3xl tracking-tight mb-2 uppercase">{t('choice.title')}</h2>
+          <h2 className="font-extrabold text-2xl sm:text-3xl tracking-tight mb-2">{t('choice.title')}</h2>
           <p className="text-gray-600 mb-8 font-mono text-sm max-w-sm mx-auto">
             {t('choice.desc')}
           </p>
