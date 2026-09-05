@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Users } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -9,6 +10,16 @@ interface Props {
 
 export default function DemoChoiceModal({ onSelect, onCancel }: Props) {
   const { t } = useLanguage();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && onCancel) {
+        onCancel();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onCancel]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -30,7 +41,7 @@ export default function DemoChoiceModal({ onSelect, onCancel }: Props) {
           >
             <User size={24} className="mb-2" />
             <span>{t('demo.dm_title') || 'Personal Demo'}</span>
-            <span className="font-normal text-[10px] sm:text-xs text-gray-600 mt-1 leading-tight">{t('demo.dm_desc') || 'Preview a 2-person chat'}</span>
+            <span className="font-normal text-[10px] sm:text-xs text-gray-600 mt-1 leading-tight normal-case">{t('demo.dm_desc') || 'Preview a 2-person chat'}</span>
           </button>
           
           <button
@@ -39,13 +50,13 @@ export default function DemoChoiceModal({ onSelect, onCancel }: Props) {
           >
             <Users size={24} className="mb-2" />
             <span>{t('demo.group_title') || 'Group Demo'}</span>
-            <span className="font-normal text-[10px] sm:text-xs text-gray-600 group-hover:text-white/80 mt-1 leading-tight">{t('demo.group_desc') || 'Preview a group chat with history'}</span>
+            <span className="font-normal text-[10px] sm:text-xs text-gray-600 group-hover:text-white/80 mt-1 leading-tight normal-case">{t('demo.group_desc') || 'Preview a group chat with history'}</span>
           </button>
         </div>
 
         <button
           onClick={onCancel}
-          className="mt-4 w-full nb-btn py-2 text-xs border-2 border-black bg-white hover:bg-black hover:text-white"
+          className="mt-4 w-full nb-btn py-2 text-xs border-2 border-black bg-white hover:bg-black hover:text-white normal-case"
         >
           {t('demo.cancel') || 'Cancel'}
         </button>

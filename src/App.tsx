@@ -264,6 +264,7 @@ export default function App() {
     setIsDemoMode(false);
     setShowWrappedChoiceModal(false);
     setView('upload');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDemoSelect = (mode: 'dm' | 'group') => {
@@ -525,7 +526,7 @@ function UploadPage({ onFileUpload, onUploadClickIntent, onOpenPrivacy, onLookAr
                 className="w-full sm:w-auto nb-btn bg-white hover:bg-accent-lime px-8 py-2.5 text-sm font-bold tracking-wide flex items-center justify-center gap-2"
               >
                 <Eye size={18} />
-                <span>{t('demo.look_around')}</span>
+                <div>{t('demo.look_around')}</div>
               </button>
             </div>
           </div>

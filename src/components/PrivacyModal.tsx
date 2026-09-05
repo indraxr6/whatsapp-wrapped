@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Shield, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -12,6 +13,20 @@ interface Props {
 
 export default function PrivacyModal({ onClose, onContinue, onCancel, variant = 'manual' }: Props) {
   const { t } = useLanguage();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (variant === 'auto' && onCancel) {
+          onCancel();
+        } else if (onClose) {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, onCancel, variant]);
 
   return (
     <motion.div
