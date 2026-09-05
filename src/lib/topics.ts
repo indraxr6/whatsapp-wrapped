@@ -38,7 +38,7 @@ export const DOMAIN_SEEDS: TopicDomain[] = [
   },
   {
     id: 'college',
-    label: 'academic panic',
+    label: 'academic or college',
     seeds: new Set([
       // Campus Life & Academics
       'acc', 'akademik', 'almamater', 'alpha', 'asprak', 'bimbingan', 'beasiswa', 'bem',

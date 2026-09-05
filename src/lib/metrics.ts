@@ -5,6 +5,31 @@ import { ALL_STOPWORDS } from './stopwords';
 
 const OVERNIGHT_GAP_MINUTES = 360; // 6 hours - gaps larger than this are excluded from avg latency
 
+const ABUSIVE_TERMS_ID = new Set([
+  'kontol', 'memek', 'mmk', 'tai', 'bangsat', 'bajingan', 'jingan', 'keparat', 'anjing', 'anjeng',
+  'goblok', 'gblg', 'gblk', 'goblog', 'bego', 'bodo', 'tempek', 'tempik', 'asu', 'jancuk',
+  'pantek', 'peler', 'pler', 'anjg', 'njing', 'persetan'
+]);
+
+const ABUSIVE_TERMS_JV = new Set([
+  'cok', 'cuk', 'jancok', 'jancuk', 'hancok', 'dancok', 'jembot', 'jembut', 'jmbt', 'taek',
+  'ajg', 'asu', 'ngentod', 'ngentot', 'perek', 'lonte'
+]);
+
+const ABUSIVE_TERMS_EN = new Set([
+  'fak', 'fuck', 'fucker', 'fucking', 'motherfucker', 'shit', 'shithead', 'bullshit', 'horseshit',
+  'hell', 'crap', 'ass', 'asshole', 'arsehole', 'bastard', 'bitch', 'dick',
+  'dickhead', 'dumbass', 'jackass', 'dipshit', 'piss', 'prick', 'pussy', 'cunt', 'twat',
+  'wanker', 'jerkoff', 'slut', 'whore', 'sonofabitch', 'nigga', 'nigger', 'niqqa', 'niggah',
+  'fag', 'faggot', 'dyke', 'tranny', 'retard', 'retarded'
+]);
+
+const ALL_ABUSIVE_TERMS = new Set([
+  ...ABUSIVE_TERMS_ID,
+  ...ABUSIVE_TERMS_JV,
+  ...ABUSIVE_TERMS_EN
+]);
+
 // ──────────────────────────────────────────────
 // Emoji extraction using Unicode property escapes
 // ──────────────────────────────────────────────
@@ -167,17 +192,29 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   const messagesPerSender: Record<string, number> = {};
   const pingCount: Record<string, number> = {};
   const paragraphsPerSender: Record<string, number> = {};
+  const slurCount: Record<string, number> = {};
+  const slurWordCounts: Record<string, number> = {};
   const editedMessageCount: Record<string, number> = {};
   const deletedMessageCount: Record<string, number> = {};
   for (const m of realMessages) {
     if (!m.isCall && !m.isSystem) {
       messagesPerSender[m.sender] = (messagesPerSender[m.sender] ?? 0) + 1;
 
+      // Slur / Abusive words check
+      const words = m.content.toLowerCase().split(/\s+/);
+      for (const word of words) {
+        const cleanWord = word.replace(/[^\w]/g, '');
+        if (ALL_ABUSIVE_TERMS.has(cleanWord)) {
+          slurCount[m.sender] = (slurCount[m.sender] ?? 0) + 1;
+          slurWordCounts[cleanWord] = (slurWordCounts[cleanWord] ?? 0) + 1;
+        }
+      }
+
       // Ping Check: Match exactly "p" or "ppp", case insensitive
       if (/^p+$/i.test(m.content.trim())) {
         pingCount[m.sender] = (pingCount[m.sender] ?? 0) + 1;
       }
-      
+
       // Monologue / Paragraph Check
       if (m.content.length > 300 || m.content.split('\n').length >= 4) {
         paragraphsPerSender[m.sender] = (paragraphsPerSender[m.sender] ?? 0) + 1;
@@ -617,6 +654,11 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
   // ── Longest streak by day ──
   const longestStreakByDay = calculateLongestStreak(realMessages);
 
+  const topSlurs = Object.entries(slurWordCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([word, count]) => ({ word, count }));
+
   return {
     totalMessages: realMessages.length,
     dateRange,
@@ -635,6 +677,8 @@ export function calculateMetrics(messages: ChatMessage[], fileName?: string): Pa
     workLinksCount,
     pingCount,
     paragraphsPerSender,
+    slurCount,
+    topSlurs,
     mediaCounts,
     topEmojisPerSender,
     emojiLeaderboardPerSender,

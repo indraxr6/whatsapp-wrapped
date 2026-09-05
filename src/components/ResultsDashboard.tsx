@@ -17,6 +17,7 @@ import PersonalityCard from "./cards/PersonalityCard";
 import TopicsCard from "./cards/TopicsCard";
 import InsightCard from "./cards/InsightCard";
 import MirroredPhrasesCard from "./cards/MirroredPhrasesCard";
+import ToxicCard from "./cards/ToxicCard";
 import ExcerptsCard from "./cards/ExcerptsCard";
 import Footer from "./Footer";
 import LanguageToggle from "./LanguageToggle";
@@ -286,21 +287,38 @@ function ResultsDashboardInner({
               <h2 className="font-mono text-sm uppercase tracking-widest mb-4">
                 _ {t("section.patterns")}
               </h2>
-              <div
-                className={`grid grid-cols-1 ${metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some((v) => v > 0) ? "lg:grid-cols-3" : ""} gap-0 border-2 border-black`}
-              >
-                <div
-                  className={`${metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some((v) => v > 0) ? "lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2" : ""} border-black`}
-                >
-                  <WordCloudCard metrics={metrics} />
-                </div>
-                {(metrics.mirroredPhrases.length > 0 ||
-                  Object.values(metrics.pingCount || {}).some((v) => v > 0)) && (
-                    <div>
-                      <MirroredPhrasesCard metrics={metrics} />
+              {(() => {
+                const hasMirrored = metrics.mirroredPhrases.length > 0 || Object.values(metrics.pingCount || {}).some((v) => v > 0);
+                const hasToxic = Object.values(metrics.slurCount || {}).some((v) => v > 0);
+                const hasSidePanel = hasMirrored || hasToxic;
+
+                return (
+                  <div
+                    className={`grid grid-cols-1 ${hasSidePanel ? "lg:grid-cols-3" : ""} gap-0 border-2 border-black`}
+                  >
+                    <div
+                      className={`${hasSidePanel ? "lg:col-span-2 border-b-2 lg:border-b-0 lg:border-r-2" : ""} border-black`}
+                    >
+                      <WordCloudCard metrics={metrics} />
                     </div>
-                  )}
-              </div>
+                    
+                    {hasSidePanel && (
+                      <div className="flex flex-col">
+                        {hasMirrored && (
+                          <div className={`flex-1 ${hasToxic ? 'border-b-2 border-black' : ''}`}>
+                            <MirroredPhrasesCard metrics={metrics} />
+                          </div>
+                        )}
+                        {hasToxic && (
+                          <div className="flex-1">
+                            <ToxicCard metrics={metrics} />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-2 border-black border-t-0">
                 <div className="border-b-2 md:border-b-0 md:border-r-2 border-black">
                   <HeatmapCard metrics={metrics} />

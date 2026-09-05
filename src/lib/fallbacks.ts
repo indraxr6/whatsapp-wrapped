@@ -243,7 +243,7 @@ function getBaseFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseH
   }
 
   const id = [
-    "Dinamika percakapan yang kelihatan udah terbentuk alami. Yang satu emang lebih bawel, yang lain lebih jadi pendengar.",
+    "Dinamika percakapan yang kelihatan udah terbentuk alami. Yang satu emang lebih bacot, yang lain lebih jadi pendengar.",
     "Chat ini punya ritmenya sendiri. Meski kadang berat sebelah secara volume, kalian sepertinya nemu cara komunikasi yang pas.",
     "Ada satu pihak yang lebih rajin ngetik panjang lebar, sementara balasannya lebih praktis. Yang penting pesannya nyampe.",
     "Kombinasi klasik: yang satu suka cerita detail, yang satu ngerespons ringkas aja."
@@ -308,6 +308,37 @@ function getGroupRenameFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id'
 }
 
 // ──────────────────────────────────────────────
+// Flavor 7: Toxic/Slur (Profanity)
+// ──────────────────────────────────────────────
+function getToxicFlavors(metrics: ParsedChatMetrics, language: 'en' | 'id', baseHash: number): string[] {
+  let topToxicSender = '';
+  let maxSlurs = 0;
+
+  for (const [sender, count] of Object.entries(metrics.slurCount || {})) {
+    if (count > maxSlurs) {
+      maxSlurs = count;
+      topToxicSender = sender;
+    }
+  }
+
+  if (maxSlurs >= 45) {
+    const id = [
+      `${topToxicSender}, ada ${maxSlurs} kata kasar yang anda ketik di chat ini. Kapan terakhir kali istighfar?.`,
+      `${topToxicSender}, anda ngetik kata kasar ${maxSlurs} kali. Gpp sih, cuma mau ngingetin aja...`,
+      `Mahkota raja toxic ditujukan ${topToxicSender} dengan ${maxSlurs} ucapan. Anda banyak pikiran atau emang hobi?`
+    ];
+    const en = [
+      `${topToxicSender}, you've dropped ${maxSlurs} abusive words in this chat. You good, bro?`,
+      `${topToxicSender}, there's ${maxSlurs} slurs you typed. Just saying... (no judgement)`,
+      `The toxic crown goes to ${topToxicSender} with ${maxSlurs} swear words. Letting off some steam?`
+    ];
+    const pool = language === 'id' ? id : en;
+    return [pool[baseHash % pool.length]];
+  }
+  return [];
+}
+
+// ──────────────────────────────────────────────
 // Main Fallback Generator
 // ──────────────────────────────────────────────
 export function getOfflineInsightCount(
@@ -321,7 +352,8 @@ export function getOfflineInsightCount(
     ...getPingFlavors(metrics, language, baseHash),
     ...getBaseFlavors(metrics, language, baseHash),
     ...getMonologueFlavors(metrics, language, baseHash),
-    ...getGroupRenameFlavors(metrics, language, baseHash)
+    ...getGroupRenameFlavors(metrics, language, baseHash),
+    ...getToxicFlavors(metrics, language, baseHash)
   ].length;
 }
 
@@ -340,7 +372,8 @@ export function generateOfflineInsights(
     ...getPingFlavors(metrics, language, baseHash),
     ...getBaseFlavors(metrics, language, baseHash),
     ...getMonologueFlavors(metrics, language, baseHash),
-    ...getGroupRenameFlavors(metrics, language, baseHash)
+    ...getGroupRenameFlavors(metrics, language, baseHash),
+    ...getToxicFlavors(metrics, language, baseHash)
   ];
 
   // Remove already seen insights
@@ -387,21 +420,21 @@ export function generateOfflineInsights(
     ];
     const applicableEvos = [];
     const stickerCount = metrics.mediaCounts["sticker"] || 0;
-    
+
     if (stickerCount > 250) {
       applicableEvos.push({
         en: `Over time, your group evolved from polite discussions to an unfiltered stream of out-of-context stickers.`,
         id: `Seiring waktu, grup kalian berubah dari obrolan formal menjadi kumpulan stiker tanpa konteks. total stiker terkirim: ${stickerCount}`
       });
     }
-    
+
     if (metrics.groupNameHistory.length > 15) {
       applicableEvos.push({
         en: `This group has an identity crisis, having been renamed ${metrics.groupNameHistory.length} times.`,
         id: `Grup ini krisis identitas, tercatat sudah ganti nama ${metrics.groupNameHistory.length} kali.`
       });
     }
-    
+
     if (metrics.mirroredPhrases.length > 5) {
       applicableEvos.push({
         en: `What started as a normal group chat has degraded into a chaotic echo chamber.`,
@@ -415,7 +448,7 @@ export function generateOfflineInsights(
         id: `Transisi dari sapaan basa-basi menjadi laporan harian hidup kalian yang nggak diminta.`
       });
     }
-    
+
     // Always provide fallbacks
     applicableEvos.push({
       en: `Your communication devolved into pure brain-rot and inside jokes.`,
@@ -429,7 +462,7 @@ export function generateOfflineInsights(
       en: `It started tame, but quickly escalated into a 24/7 digital circus`,
       id: `Awalnya kalem, tapi dengan cepat berubah jadi grup kacau 24 jam`
     });
-    
+
     const pickedEvo = applicableEvos[hash % applicableEvos.length];
     evo_en = pickedEvo.en;
     evo_id = pickedEvo.id;
@@ -456,7 +489,7 @@ export function generateOfflineInsights(
     ];
     const applicableEvos = [];
     const stickerCount = metrics.mediaCounts["sticker"] || 0;
-    
+
     if (stickerCount > 250) {
       applicableEvos.push({
         en: `Over time, your conversation evolved from polite check-ins to an unfiltered stream of stickers.`,
@@ -481,7 +514,7 @@ export function generateOfflineInsights(
         id: `Chat ini berevolusi jadi tempat curhat dadakan yang diselingi masa-masa tenang panjang.`
       });
     }
-    
+
     applicableEvos.push({
       en: `The dynamic shifted from distant acquaintances to entirely too comfortable with each other.`,
       id: `Dinamika berubah dari sekadar teman biasa jadi temen yang kelewat blak-blakan.`

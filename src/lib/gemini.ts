@@ -57,7 +57,9 @@ function buildPromptPayload(metrics: ParsedChatMetrics): object {
     topEmojis[p] = (topEmojisPerSender[p] ?? []).slice(0, 5).map((e) => e.emoji);
   }
 
-  return {
+  const totalSlurs = Object.values(metrics.slurCount || {}).reduce((a, b) => a + b, 0);
+
+  const payload: any = {
     total_messages: totalMessages,
     participants,
     date_range: {
@@ -83,6 +85,13 @@ function buildPromptPayload(metrics: ParsedChatMetrics): object {
       late: sampleExcerpts.late.slice(0, 10),
     }
   };
+
+  if (totalSlurs > 45) {
+    payload.metrics.total_slurs = totalSlurs;
+    payload.metrics.top_slurs = (metrics.topSlurs || []).map(s => s.word);
+  }
+
+  return payload;
 }
 
 const SYSTEM_PROMPT = `You are a sharp, opinionated analyst writing "Chat Wrapped" personality summaries - think a brutally honest friend who has read all 14,000 messages and is not going to be polite about what they found.

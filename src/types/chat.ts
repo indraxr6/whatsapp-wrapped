@@ -58,6 +58,8 @@ export interface ParsedChatMetrics {
   workLinksCount: number;
   pingCount: Record<string, number>;
   paragraphsPerSender: Record<string, number>;
+  slurCount: Record<string, number>;
+  topSlurs: { word: string; count: number }[];
 
   // Media
   mediaCounts: Record<string, number>;

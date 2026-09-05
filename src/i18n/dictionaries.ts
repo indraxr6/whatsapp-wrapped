@@ -216,6 +216,12 @@ export const dictionaries = {
     "mirrored.pingTitle": "_ PING COUNTER",
     "mirrored.pingDesc": "Total times someone typed something like \"P\" or \"ppp\" to ping the chat.",
 
+    "toxic.title": "_ SLURS & PROFANITY",
+    "toxic.desc": "Total abusive words used.",
+    "toxic.desc.plural": "Total abusive words used.",
+    "toxic.reveal": "Tap to Reveal Top Words",
+    "toxic.hidden": "Tap to hide",
+
     "excerpts.title": "_ TIMECODE EXCERPTS",
     "excerpts.early": "Early Days",
     "excerpts.median": "The Middle",
@@ -486,7 +492,13 @@ export const dictionaries = {
     "mirrored.desc": "Kata-kata yang sering kalian pakai berdua.",
     "mirrored.desc.plural": "Kata-kata yang sering diucapkan di grup.",
     "mirrored.pingTitle": "_ PING COUNTER",
-    "mirrored.pingDesc": "Total seseorang ngirim \"P\" atau \"ppp\" buat nge-ping.",
+    "mirrored.pingDesc": "Total ping (P/ppp) yang dikirim dalam chat.",
+
+    "toxic.title": "_ KATA KASAR & UMPATAN",
+    "toxic.desc": "Total kata kasar yang digunakan.",
+    "toxic.desc.plural": "Total kata kasar yang digunakan.",
+    "toxic.reveal": "Sentuh untuk Lihat Kata Teratas",
+    "toxic.hidden": "Sentuh untuk sembunyikan",
 
     "excerpts.title": "_ CUPLIKAN WAKTU",
     "excerpts.early": "Awal Mula",

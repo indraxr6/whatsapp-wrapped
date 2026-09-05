@@ -32,7 +32,7 @@ export default function WordCloudCard({ metrics }: Props) {
     // Use full width of container, multiplied by devicePixelRatio for HD
     const dpr = window.devicePixelRatio || 1;
     const width = containerRef.current.clientWidth;
-    const height = 400; // Increased height since it's full width now
+    const height = 550; // Increased height since it's full width now
 
     canvasRef.current.width = width * dpr;
     canvasRef.current.height = height * dpr;
@@ -84,7 +84,7 @@ export default function WordCloudCard({ metrics }: Props) {
           <RefreshCw size={14} strokeWidth={2.5} />
         </button>
       </div>
-      <div ref={containerRef} className="flex-1 w-full overflow-hidden relative" style={{ minHeight: '400px' }}>
+      <div ref={containerRef} className="flex-1 w-full overflow-hidden relative" style={{ minHeight: '550px' }}>
         <canvas ref={canvasRef} className="absolute inset-0" />
       </div>
     </div>
