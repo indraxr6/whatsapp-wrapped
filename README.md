@@ -1,32 +1,56 @@
-# React + TypeScript + Vite
+# WhatsApp Chat Wrapped
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A privacy-first, client-side web app that turns an exported WhatsApp chat into a Spotify Wrapped-style recap. It visualizes response habits, emoji and media leaderboards, call stats, a word cloud, topic detection, and dynamic chat insights—all built around a chat's own real numbers.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **100% Client-Side Processing**: The entire chat file is parsed and analyzed entirely in the browser. No chat data is ever uploaded to a server.
+- **Robust Parsing Engine**: Built to handle WhatsApp's actual export chaos, including iOS vs. Android formats, Indonesian/Javanese/English system-message variants, invisible Unicode characters, and irregular multiline messages.
+- **Offline NLP Analytics**: Uses complex regex and offline NLP techniques (custom stopword filtering, slurs tracking, topic detection) to generate natural chat insights and personality profiling entirely offline.
+- **Cross-Platform Export**: Engineered robust workarounds for complex browser rendering bugs (WebKit layout race conditions, CSSOM SecurityErrors, cross-origin restrictions) allowing users to safely export their dashboard to a PNG on both Desktop and Safari iOS.
+- **Optional AI Insights**: Users can provide a free Gemini API key to generate a personalized "AI Roast" based strictly on aggregated stats and random excerpts. The app degrades gracefully to robust offline templates if no key is provided.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework:** React, TypeScript, Vite
+- **Styling:** Tailwind CSS (Custom Neo-Brutalism design system)
+- **Data Visualization:** Recharts, react-d3-cloud
+- **Exporting:** html-to-image (with custom Safari fallbacks and Blob compression)
 
-## Expanding the Oxlint configuration
+## Running Locally
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+**Prerequisites:** This project requires Node v20.
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/whatsapp-wrapped.git
+   cd whatsapp-wrapped
+   ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+2. Use Node 20:
+   ```bash
+   nvm use 20
+   ```
+
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Build for production:
+   ```bash
+   npm run build
+   ```
+
+## Privacy & Security
+
+All chat processing happens locally in the user's browser. The app does not use analytics, tracking cookies, or databases.
+
+- The raw chat file (`_chat.txt`) is never uploaded.
+- If using the AI feature, only non-identifying aggregated metrics and a handful of randomly sampled text excerpts are sent to Google's Gemini API.
+- The Gemini API key is stored locally in `localStorage` and is never transmitted to any third-party servers outside of Google API.
