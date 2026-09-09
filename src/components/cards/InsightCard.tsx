@@ -9,10 +9,11 @@ interface Props {
   insights: GeminiInsights;
   metrics: ParsedChatMetrics;
   insightStatus?: 'success' | 'opt_out' | 'failed' | 'failed_429' | 'failed_503';
+  isDemoMode?: boolean;
   onRetry?: () => void;
 }
 
-export default function InsightCard({ insights, metrics, insightStatus = 'success', onRetry }: Props) {
+export default function InsightCard({ insights, metrics, insightStatus = 'success', isDemoMode = false, onRetry }: Props) {
   const { t, language } = useLanguage();
   const [insightList, setInsightList] = useState<string[]>([insights.chat_insight]);
   const [exhausted, setExhausted] = useState(false);
@@ -21,7 +22,7 @@ export default function InsightCard({ insights, metrics, insightStatus = 'succes
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isOffline = insightStatus !== 'success';
+  const isOffline = insightStatus !== 'success' || isDemoMode;
   const maxRegenerations = isOffline 
     ? Math.min(9, Math.max(0, getOfflineInsightCount(metrics, language) - 1)) 
     : 3;

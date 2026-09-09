@@ -360,6 +360,7 @@ function ResultsDashboardInner({
                     insights={insights}
                     metrics={metrics}
                     insightStatus={insightStatus}
+                    isDemoMode={isDemoMode}
                     onRetry={onRetryAI}
                   />
                 </div>
